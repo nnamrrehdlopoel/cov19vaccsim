@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LoginComponent } from './pages/login/login.component';
+import { PlaygroundPageComponent } from './pages/playground-page/playground-page.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { StartComponent } from './pages/start/start.component';
 import { AuthGuardService } from './services/auth-guard.service';
@@ -20,6 +21,9 @@ const routes: Routes = [
   },
   {
     path: 'Methoden', component: MethodsComponent,
+  },
+  {
+    path: 'playground', component: PlaygroundPageComponent,
   },
   { path: '**', component: StartComponent }
 
