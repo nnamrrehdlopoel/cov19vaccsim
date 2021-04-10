@@ -1,0 +1,73 @@
+{
+	"description": "Daten zum Einsatz aller Impfstoffe in Deutschland",
+	"source": "Verschiedene",
+	"data": {
+		"biontech": {
+			"2020-12-27": {
+				"ages": ">=16",
+				"2nd_dose_weeks": "3-6",
+				"description": "Am 21.12. empfohlen durch die EMA für Personen ab 16 Jahren",
+				"source": ["https://www.ema.europa.eu/en/news/ema-recommends-first-covid-19-vaccine-authorisation-eu", ""]
+			},
+			"2020-12-27": {
+				"2nd_dose_weeks": "6",
+				"description": "Anpassung der STIKO-Empfehlung für die zweite Impfdosis die maximale Verzögerung auszunutzen",
+				"source": "https://www.rki.de/DE/Content/Kommissionen/STIKO/Empfehlungen/Vierte_Empfehlung_01042021_Download.pdf"
+			}
+		},
+		"moderna": {
+			"2021-01-06": {
+				"ages": ">=18",
+				"2nd_dose_weeks": "4-6",
+				"description": "Am 06.01. empfohlen durch die EMA für Personen ab 18 Jahren",
+				"source": ["https://www.ema.europa.eu/en/news/ema-recommends-covid-19-vaccine-moderna-authorisation-eu", ""]
+			},
+			"2020-12-27": {
+				"2nd_dose_weeks": "6",
+				"description": "Anpassung der STIKO-Empfehlung für die zweite Impfdosis die maximale Verzögerung auszunutzen",
+				"source": "https://www.rki.de/DE/Content/Kommissionen/STIKO/Empfehlungen/Vierte_Empfehlung_01042021_Download.pdf"
+			}
+		},
+		"astra-zeneca": {
+			"2021-01-29": {
+				"ages": ">=18,<=64",
+				"2nd_dose_weeks": "9-12",
+				"description": "Am 29.01. empfohlen durch die EMA für Personen ab 18 Jahren; Die STIKO empfiehlt den Impfstoff wegen unzureichender Daten zur Wirksamkeit bei Personen ab 65 Jahren vorerst nur für die Altersgruppen darunter.",
+				"source": ["https://www.ema.europa.eu/en/news/ema-recommends-covid-19-vaccine-astrazeneca-authorisation-eu", "https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2021/05/Art_01.html"]
+			},
+			"2021-03-04": {
+				"ages": ">=18",
+				"description": "Da inzwischen mehr Daten zur guten Wirksamkeit des Impfstoffes bei Personen ab 65 Jahren verfügbar waren, wurde die Impfempfehlung entsprechend ausgedehnt",
+				"source": "https://www.rki.de/DE/Content/Kommissionen/STIKO/Empfehlungen/AstraZeneca-Impfstoff.html"
+			},
+			"2021-03-16": {
+				"ages": "--",
+				"description": "Nach Bekanntwerden möglicher sehr seltener schwerer Impfkomplikationen wurde die Impfung mit Astra-Zeneca vorübergehend eingestellt bis die EMA eine vorläufige Untersuchung dazu abschließen konnte",
+				"source": "https://www.pei.de/DE/newsroom/hp-meldungen/2021/210315-voruebergehende-aussetzung-impfung-covid-19-impfstoff-astra-zeneca.html"
+			},
+			"2021-03-19": {
+				"ages": ">=18",
+				"description": "Nach Ergebnis der vorläufigen Untersuchungen durch die EMA wurde der Impfstoff wieder weiter eingesetzt",
+				"source": "https://www.pei.de/DE/newsroom/hp-meldungen/2021/210319-covid-19-impfstoff-astrazeneca-ergebnis-sicherheitsbewertung-impfstoff-ist-sicher.html"
+			},
+			"2021-03-30": {
+				"ages": ">=60",
+				"description": "Nach weiteren aufgetretenen schwerem Impfkomplikationen wurde der Impfstoff nur noch für über 60 Jährige empfohlen; Erstgeimpften unter 60 wird für die Zweitimpfung ein mrna-Impfstoff empfohlen.",
+				"source": "https://www.rki.de/DE/Content/Kommissionen/STIKO/Empfehlungen/Vierte_Empfehlung_01042021_Download.pdf"
+			},
+			"2021-04-01": {
+				"2nd_dose_weeks": "12",
+				"description": "Anpassung der STIKO-Empfehlung für die zweite Impfdosis die maximale Verzögerung auszunutzen",
+				"source": "https://www.rki.de/DE/Content/Kommissionen/STIKO/Empfehlungen/Vierte_Empfehlung_01042021_Download.pdf"
+			}
+		},
+		"janssen": {
+			"2021-03-11": {
+				"ages": ">=18",
+				"2nd_dose_weeks": "",
+				"description": "Am 11.03. empfohlen durch die EMA für Personen ab 18 Jahren",
+				"source": ["https://www.ema.europa.eu/en/news/ema-recommends-covid-19-vaccine-janssen-authorisation-eu"]
+			}
+		}
+	}
+}

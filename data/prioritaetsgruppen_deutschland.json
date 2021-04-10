@@ -1,0 +1,46 @@
+{
+	"description": "Prioritätsgruppen und Anzahl Personen",
+	"source": "https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2021/Ausgaben/02_21.pdf?__blob=publicationFile",
+	"data": {
+		"rki": {
+			"description": "Prioritätsgruppen der RKI-Empfehlung",
+			"source": "https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2021/Ausgaben/02_21.pdf?__blob=publicationFile",
+			"gruppen": {
+				"1": 8600000,
+				"2": 7000000,
+				"3": 5700000,
+				"4": 6900000,
+				"5": 8400000
+			},
+			"impfbereitschaft": {
+				"description": "Prioritätsgruppen (insb. Personen höhreren Alters) haben eine höhere Impfbereitschaft als die Allgemeinbevölkerung laut COSMO-Studie (Impfbereitschaft gruppiert nach Alter). Grobe Abschätzung auf die Prioritätsgruppen.",
+				"source": ["https://projekte.uni-erfurt.de/cosmo2020/", ""],
+				"gruppen": {
+					"1": 0.98,
+					"2": 0.95,
+					"3": 0.94,
+					"4": 0.93,
+					"5": 0.92
+				}
+			}
+		},
+		"verordnung": {
+			"description": "Prioritätsgruppen der aktuellen Coronavirus-Impfverordnung.\nAnzahl der Personen geschätzt durch Aufsummieren und Aufrunden der Zahlen der RKI-Empfehlung",
+			"source": ["https://de.wikipedia.org/wiki/Priorisierung_der_COVID-19-Impfma%C3%9Fnahmen#Aktuelle_Coronavirus-Impfverordnung", "https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2021/Ausgaben/02_21.pdf?__blob=publicationFile"],
+			"gruppen": {
+				"höchste": 9000000,
+				"hohe": 13000000,
+				"erhöhte": 16000000
+			},
+			"impfbereitschaft": {
+				"description": "Prioritätsgruppen (insb. Personen höhreren Alters) haben eine höhere Impfbereitschaft als die Allgemeinbevölkerung laut COSMO-Studie (Impfbereitschaft gruppiert nach Alter). Grobe Abschätzung auf die Prioritätsgruppen.",
+				"source": ["https://projekte.uni-erfurt.de/cosmo2020/", ""],
+				"gruppen": {
+					"höchste": 0.96,
+					"hohe": 0.94,
+					"erhöhte": 0.92
+				}
+			}
+		}
+	}
+}
