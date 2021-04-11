@@ -1,152 +1,117 @@
 <mat-sidenav-container autosize="true" scrollable="false">
-  <mat-sidenav-content>
-    <mat-toolbar color="accent" style="color:white;">
-      <button (click)="drawer.toggle()" mat-icon-button class="example-icon"
-        aria-label="Example icon-button with menu icon">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>{{this.title}}</span>
-      <span class="example-spacer"></span>
-      <span class="mat-caption userinfo" *ngIf="this.loginstatus">Eingeloggt als {{this.currentuser.username}}</span>
-      <a href="https://www.zi.de">
-        <img src="https://ziwebstorage.blob.core.windows.net/appradar/assets/logo_zi_small_grey_transparent.png"
-          style="height: 1.2rem;filter:brightness(120%);">
-      </a>
+    <mat-sidenav-content>
+        <mat-toolbar color="accent" style="color:white;">
+            <button (click)="drawer.toggle()" mat-icon-button class="example-icon"
+                    aria-label="Example icon-button with menu icon">
+                <mat-icon>menu</mat-icon>
+            </button>
+            <span>{{this.title}}</span>
+            <span class="example-spacer"></span>
 
-    </mat-toolbar>
-    <main>
-      <section class="mat-typography">
-        <mat-drawer-container autosize>
-          <mat-drawer #drawer mode="push" position="start" autoFocus="false">
-            <div class="menucontainer">
+        </mat-toolbar>
+        <main>
+            <section class="mat-typography">
+                <mat-drawer-container autosize>
+                    <mat-drawer #drawer mode="push" position="start" autoFocus="false">
+                        <div class="menucontainer">
 
-              <ng-container>
-                <p style="color:#1d96f3"><strong>Navigation</strong></p>
-              </ng-container>
-           
+                            <ng-container>
+                                <p style="color:#1d96f3"><strong>Navigation</strong></p>
+                            </ng-container>
 
-
-              <div>
-
-                <a mat-icon-button (click)="drawer.toggle()" href="https://www.zidatasciencelab.de/cov19vaccsim">
-                  <mat-icon class="icon">home</mat-icon>
-                  <span>Startseite</span>
-                </a>
-                
-
-              </div>
-              <div><a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                routerLink="/Methoden">
-                <mat-icon class="icon">settings</mat-icon> 
-                Methoden der Simulation 
-                </a>
-              </div>
-             <div><a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
-                    <mat-icon class="icon">corporate_fare</mat-icon> 
-                    Impressum 
-                    </a>
-                  </div>
-                  <div><a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
-                    <mat-icon class="icon">corporate_fare</mat-icon> 
-                    Datenschutzhinweise 
-                    </a>
-                  </div>
-                  <div>
-                  <a  mat-icon-button (click)="drawer.toggle()" href="https://www.zidatasciencelab.de" style="color: black;">
-                    <mat-icon class="icon">people</mat-icon>
-                    <strong>Zi
-                      Data Science Lab</strong></a>
-                    </div>
-              <div *ngIf="this.loginoption && !this.loginstatus">
-
-                <a mat-icon-button (click)="drawer.toggle()" href="/login">
-                  <mat-icon class="icon">login</mat-icon>
-                  <span>Anmelden</span>
-                </a>
-
-              </div>
-              <div *ngIf="this.loginstatus">
-
-                <a mat-icon-button (click)="drawer.toggle();" href="/private">
-                  <mat-icon class="icon">lock_open</mat-icon>
-                  <span>Geschützter Bereich</span>
-                </a>
-
-              </div>
-              <div *ngIf="this.loginstatus">
-
-                <a mat-icon-button (click)="drawer.toggle();" href="/profile">
-                  <mat-icon class="icon">account_box</mat-icon>
-                  <span>Profil</span>
-                </a>
-
-              </div>
-              <div *ngIf="this.loginstatus">
-
-                <a mat-icon-button (click)="drawer.toggle();logout();" href="/">
-                  <mat-icon class="icon">logout</mat-icon>
-                  <span>Ausloggen</span>
-                </a>
-
-              </div>
-
-
-            </div>
-          </mat-drawer>
-          <mat-drawer-content>
-            <!-- Offline message-->
-            <div class="offlinemsg" *ngIf="false"><strong>Keine Internetverbindung</strong><br>Dieses Portal benötigt
-              eine aktive Internetverbindung.</div>
-            <router-outlet></router-outlet>
-          </mat-drawer-content>
-        </mat-drawer-container>
-      </section>
-    </main>
-  </mat-sidenav-content>
+                            <div>
+                                <a mat-icon-button (click)="drawer.toggle()" routerLink="/">
+                                    <mat-icon class="icon">home</mat-icon>
+                                    <span>Startseite</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a mat-icon-button (click)="drawer.toggle()" routerLink="/playground">
+                                    <mat-icon class="icon">science</mat-icon>
+                                    <span>Playground</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
+                                    routerLink="/Methoden">
+                                    <mat-icon class="icon">settings</mat-icon>
+                                    Methoden der Simulation
+                                </a>
+                            </div>
+                            <div>
+                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
+                                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
+                                    <mat-icon class="icon">corporate_fare</mat-icon>
+                                    Impressum
+                                </a>
+                            </div>
+                            <div>
+                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
+                                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
+                                    <mat-icon class="icon">corporate_fare</mat-icon>
+                                    Datenschutzhinweise
+                                </a>
+                            </div>
+                        </div>
+                    </mat-drawer>
+                    <mat-drawer-content>
+                        <!-- Offline message-->
+                        <div class="offlinemsg" *ngIf="false"><strong>Keine Internetverbindung</strong><br>Dieses Portal
+                            benötigt
+                            eine aktive Internetverbindung.
+                        </div>
+                        <router-outlet></router-outlet>
+                    </mat-drawer-content>
+                </mat-drawer-container>
+            </section>
+        </main>
+    </mat-sidenav-content>
 </mat-sidenav-container>
 
 
 <!-- Footer nur für Desktop Screen -->
 <footer>
-  <div style="background: black!important;">
-    <div fxLayout="column" fxLayoutGap="0.5rem">
+    <div style="background: black!important;">
+        <div fxLayout="column" fxLayoutGap="0.5rem">
 
-      <div fxLayout="column wrap" fxLayoutAlign="space-around start">
-        <div fxflex=28>
-          <p>
-            <mat-list style="color:white;">
-              <mat-list-item>
-                <p style="color:white;"><strong>Navigation</strong></p>
-              </mat-list-item>
-              <mat-list-item><a style="color:white;"
-                routerLink="/Methoden">Methoden</a></mat-list-item>
-              <mat-list-item><a style="color:white;"
-                  href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">Impressum und
-                  Datenschutzhinweise</a></mat-list-item>
-              <mat-list-item><a style="color:white;" href="https://www.zidatasciencelab.de">Ein Tool des <strong>Zi Data
-                    Science Lab</strong></a></mat-list-item>
-            </mat-list>
+            <div fxLayout="column wrap" fxLayoutAlign="space-around start">
+                <div fxflex=28>
+                    <p>
+                        <mat-list style="color:white;">
+                            <mat-list-item>
+                                <span style="color:white;"><strong>Navigation</strong></span>
+                            </mat-list-item>
+                            <mat-list-item>
+                                <a style="color:white;"
+                                      routerLink="/Methoden">Methoden</a>
+                            </mat-list-item>
+                            <mat-list-item>
+                                <a style="color:white;"
+                                      href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
+                                    Impressum und Datenschutzhinweise
+                                </a>
+                            </mat-list-item>
+                            <mat-list-item>
+                                <a style="color:white;" href="https://www.zidatasciencelab.de/cov19vaccsim">
+                                    Basierend auf der Impfsimulation des <strong>Zi Data Science Lab</strong>
+                                </a>
+                            </mat-list-item>
+                        </mat-list>
+                    </p>
+                </div>
 
+                <div fxFlex fxLayout="column" fxLayoutAlign="space-between end">
+                    <div fxFlex>
+                        <br>
+                    </div>
+                    <div style="padding:0.5rem;text-align: center;color:white;">
+                        <p>Follow this project on GitHub</p>
+                    </div>
+                </div>
 
-          </p>
-
+            </div>
         </div>
 
-        <div fxFlex fxLayout="column" fxLayoutAlign="space-between end">
-          <div fxFlex>
-            <br>
-          </div>
-          <div style="padding:0.5rem;text-align: center;color:white;" >
-            <p>© {{this.today.getFullYear()}} Zentralinstitut für die kassenärztliche Versorgung in der Bundesrepublik
-              Deutschland</p>
-          </div>
-        </div>
 
-      </div>
     </div>
-
-
-  </div>
 </footer>

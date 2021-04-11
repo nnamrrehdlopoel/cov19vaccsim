@@ -1,4 +1,18 @@
-<app-dummy-chart
-  class="dummy-chart"
-  [data]="data"
-></app-dummy-chart>
+<div class="container" fxLayout="row wrap"
+     fxLayoutGap="1rem" fxLayoutAlign="space-around">
+    <div fxFlex=100 >
+        <mat-card>
+            <mat-card-title><h1>Stand der Impfkampagne</h1>
+            </mat-card-title>
+            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{this.impfstand_rki | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{this.stand_bmg_lieferungen | date:'shortDate'}}), Kapazität lt. GMK (Stand {{this.kapazitaetsstand | date:'shortDate'}})</mat-card-subtitle>
+
+            <mat-card-content class="mat-padding">
+                <app-dummy-chart
+                    class="dummy-chart"
+                    [data]="data"
+                ></app-dummy-chart>
+            </mat-card-content>
+
+        </mat-card>
+    </div>
+</div>
