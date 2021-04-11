@@ -33,7 +33,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
     }
 
     updateChart(): void {
-        const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+        const margin = { top: 20, right: 20, bottom: 20, left: 40 };
         const dataMax = d3.max(this.data);
         const dataMin = d3.min(this.data);
         const x = d3
@@ -62,6 +62,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
             .attr('stroke', 'black')
             .attr('stroke-width', '2')
             .attr('d', (d) => lineGenerator(d));
+
+        this.yAxis
+            .attr('transform', `translate(${margin.left}, 0)`)
+            .call(d3.axisLeft<number>(y));
+
+        this.xAxis
+            .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom})`)
+            .call(d3.axisBottom<number>(x));
     }
 
 }
