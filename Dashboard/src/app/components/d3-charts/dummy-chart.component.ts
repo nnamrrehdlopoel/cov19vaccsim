@@ -7,8 +7,9 @@ export interface DummyChartConfig {
     // nothing so far
 }
 
-export interface DummyChartDataElement {
-    value: number;
+export interface DummyChartData {
+    vacStart: Date;
+    vacData: number[];  // daily vaccination numbers, starting from day vacStart
 }
 
 @Component({
@@ -16,7 +17,7 @@ export interface DummyChartDataElement {
     templateUrl: 'chart-base/chart-base.directive.html',
     styleUrls: ['chart-base/chart-base.directive.scss'],
 })
-export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
+export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartData> {
 
     private xAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -33,12 +34,13 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
     }
 
     updateChart(): void {
-        const margin = { top: 20, right: 20, bottom: 20, left: 40 };
-        const dataMax = d3.max(this.data);
-        const dataMin = d3.min(this.data);
-        const x = d3
+        const margin = {top: 20, right: 40, bottom: 20, left: 40};
+        const vacData = this.data.vacData;
+        const dataMax = d3.max(vacData);
+        const dataMin = d3.min(vacData);
+        const x = d3 // temp linear scale for x axis
             .scaleLinear()
-            .domain([0, this.data.length - 1])
+            .domain([0, vacData.length - 1])
             .range([
                 margin.left,
                 this.chartSize.width - margin.right,
@@ -48,6 +50,19 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
             .domain([dataMin, dataMax])
             .range([this.chartSize.height - margin.bottom, margin.top]);
 
+        const endDate = new Date(this.data.vacStart); // add days
+        endDate.setDate(endDate.getDate() + (this.data.vacData.length - 1));
+
+        const xTime = d3
+            .scaleTime()
+            .domain([
+                this.data.vacStart,
+                endDate,
+            ]).range([
+                margin.left,
+                this.chartSize.width - margin.right,
+            ]).nice();
+
         const lineGenerator: d3.Line<number> = d3
             .line<number>()
             .defined((d) => d != null)
@@ -56,7 +71,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
 
         this.lines
             .selectAll('path')
-            .data([this.data])
+            .data([vacData])
             .join('path')
             .attr('fill', 'none')
             .attr('stroke', 'black')
@@ -65,11 +80,19 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, number[]> {
 
         this.yAxis
             .attr('transform', `translate(${margin.left}, 0)`)
-            .call(d3.axisLeft<number>(y));
+            .call(d3.axisLeft(y));
 
         this.xAxis
             .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom})`)
-            .call(d3.axisBottom<number>(x));
+            .call(
+                d3
+                    .axisBottom<Date>(xTime)
+                    .tickFormat(date => date.toLocaleString('default', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    }))
+            );
     }
 
 }
