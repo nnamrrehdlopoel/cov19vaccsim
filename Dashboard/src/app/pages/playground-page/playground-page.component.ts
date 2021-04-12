@@ -26,38 +26,8 @@ export class PlaygroundPageComponent implements OnInit {
         vacData: [1, 2, 3, 4, 1, 2, 5, 2, 3, 4],
         vacStart: new Date(2021, 0, 1),
     };
-    vaccinations: d3.DSVParsedArray<{
-        date: Date,
-        dosen_kumulativ: number,
-        dosen_astrazeneca_kumulativ: number,
-        dosen_biontech_kumulativ: number,
-        dosen_differenz_zum_vortag: number,
-        dosen_erst_differenz_zum_vortag: number,
-        dosen_moderna_kumulativ: number,
-        dosen_zweit_differenz_zum_vortag: number,
-        impf_quote_erst: number,
-        impf_quote_voll: number,
-        indikation_alter_dosen: number,
-        indikation_alter_erst: number,
-        indikation_alter_voll: number,
-        indikation_beruf_dosen: number,
-        indikation_beruf_erst: number,
-        indikation_beruf_voll: number,
-        indikation_medizinisch_dosen: number,
-        indikation_medizinisch_erst: number,
-        indikation_medizinisch_voll: number,
-        indikation_pflegeheim_dosen: number,
-        indikation_pflegeheim_erst: number,
-        indikation_pflegeheim_voll: number,
-        personen_erst_kumulativ: number,
-        personen_voll_kumulativ: number,
-    }>;
-    deliveries: d3.DSVParsedArray<{
-        date: Date,
-        dosen: number,
-        impfstoff: string,
-        region: string
-    }>;
+    vaccinations: d3.DSVParsedArray<VaccinationsData>;
+    deliveries: d3.DSVParsedArray<DeliveriesData>;
     population: any;
     priorities: any;
     vaccineUsage: any;
@@ -71,8 +41,7 @@ export class PlaygroundPageComponent implements OnInit {
     loaddata(): void {
         this.http.get('https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
-                // @ts-ignore
-                this.vaccinations = d3.tsvParse(data, d3.autoType);
+                this.vaccinations = d3.tsvParse<VaccinationsData, string>(data, d3.autoType);
                 this.data.vacStart = this.vaccinations[0].date;
                 this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
                 this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
@@ -81,8 +50,7 @@ export class PlaygroundPageComponent implements OnInit {
             });
         this.http.get('https://impfdashboard.de/static/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
-                // @ts-ignore
-                this.deliveries = d3.tsvParse(data, d3.autoType);
+                this.deliveries = d3.tsvParse<DeliveriesData, string>(data, d3.autoType);
                 this.lastRefreshDeliveries = this.deliveries[this.deliveries.length - 1].date;
                 console.log(this.deliveries);
             });
@@ -91,5 +59,55 @@ export class PlaygroundPageComponent implements OnInit {
                 this.vaccinationWillingness = data;
                 console.log(this.vaccinationWillingness);
             });
+        this.http.get('data/population_deutschland_2019.json')
+            .subscribe(data => {
+                this.population = data;
+                console.log(this.population);
+            });
+        this.http.get('data/prioritaetsgruppen_deutschland.json')
+            .subscribe(data => {
+                this.priorities = data;
+                console.log(this.priorities);
+            });
+        this.http.get('data/impfstoffeinsatz_deutschland.json')
+            .subscribe(data => {
+                this.vaccineUsage = data;
+                console.log(this.vaccineUsage);
+            });
     }
+}
+
+
+interface VaccinationsData {
+    date: Date;
+    dosen_kumulativ: number;
+    dosen_astrazeneca_kumulativ: number;
+    dosen_biontech_kumulativ: number;
+    dosen_differenz_zum_vortag: number;
+    dosen_erst_differenz_zum_vortag: number;
+    dosen_moderna_kumulativ: number;
+    dosen_zweit_differenz_zum_vortag: number;
+    impf_quote_erst: number;
+    impf_quote_voll: number;
+    indikation_alter_dosen: number;
+    indikation_alter_erst: number;
+    indikation_alter_voll: number;
+    indikation_beruf_dosen: number;
+    indikation_beruf_erst: number;
+    indikation_beruf_voll: number;
+    indikation_medizinisch_dosen: number;
+    indikation_medizinisch_erst: number;
+    indikation_medizinisch_voll: number;
+    indikation_pflegeheim_dosen: number;
+    indikation_pflegeheim_erst: number;
+    indikation_pflegeheim_voll: number;
+    personen_erst_kumulativ: number;
+    personen_voll_kumulativ: number;
+}
+
+interface DeliveriesData {
+    date: Date;
+    dosen: number;
+    impfstoff: string;
+    region: string;
 }
