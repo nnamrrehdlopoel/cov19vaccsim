@@ -58,6 +58,10 @@ export class PlaygroundPageComponent implements OnInit {
         impfstoff: string,
         region: string
     }>;
+    population: any;
+    priorities: any;
+    vaccineUsage: any;
+    vaccinationWillingness: any;
 
     ngOnInit(): void {
         window.scrollTo(0, 0);
@@ -81,6 +85,11 @@ export class PlaygroundPageComponent implements OnInit {
                 this.deliveries = d3.tsvParse(data, d3.autoType);
                 this.lastRefreshDeliveries = this.deliveries[this.deliveries.length - 1].date;
                 console.log(this.deliveries);
+            });
+        this.http.get('data/cosmo-impfbereitschaft.json')
+            .subscribe(data => {
+                this.vaccinationWillingness = data;
+                console.log(this.vaccinationWillingness);
             });
     }
 }

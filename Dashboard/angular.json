@@ -28,9 +28,14 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "node_modules/leaflet/dist/images/", 
+                "input": "./data/",
+                "output": "./data/"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images/",
                 "output": "./assets/"
-             }
+              }
             ],
             "styles": [
               "src/styles.scss"
