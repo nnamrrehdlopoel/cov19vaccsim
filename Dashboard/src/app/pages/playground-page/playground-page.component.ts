@@ -17,6 +17,10 @@ export class PlaygroundPageComponent implements OnInit {
         private route: ActivatedRoute,
         private csv: CsvexportService) { }
 
+    lastRefreshVaccinations: Date;
+    lastRefreshDeliveries: Date;
+    lastRefreshCapacity: Date;
+
 
     data: DummyChartData = {
         vacData: [1, 2, 3, 4, 1, 2, 5, 2, 3, 4],
@@ -61,19 +65,21 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     loaddata(): void {
-        this.http.get('/assets/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
+        this.http.get('https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 // @ts-ignore
                 this.vaccinations = d3.tsvParse(data, d3.autoType);
                 this.data.vacStart = this.vaccinations[0].date;
                 this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
+                this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
                 // TODO: update chart?
                 console.log(this.vaccinations);
             });
-        this.http.get('/assets/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
+        this.http.get('https://impfdashboard.de/static/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 // @ts-ignore
                 this.deliveries = d3.tsvParse(data, d3.autoType);
+                this.lastRefreshDeliveries = this.deliveries[this.deliveries.length - 1].date;
                 console.log(this.deliveries);
             });
     }

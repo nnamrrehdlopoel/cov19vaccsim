@@ -4,7 +4,7 @@
         <mat-card>
             <mat-card-title><h1>Stand der Impfkampagne</h1>
             </mat-card-title>
-            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{this.impfstand_rki | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{this.stand_bmg_lieferungen | date:'shortDate'}}), Kapazität lt. GMK (Stand {{this.kapazitaetsstand | date:'shortDate'}})</mat-card-subtitle>
+            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{this.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{this.lastRefreshDeliveries | date:'shortDate'}}), Kapazität lt. GMK (Stand {{this.lastRefreshCapacity | date:'shortDate'}})</mat-card-subtitle>
 
             <mat-card-content class="mat-padding">
                 <app-dummy-chart
