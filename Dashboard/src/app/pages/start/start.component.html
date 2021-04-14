@@ -223,21 +223,14 @@
                                     <mat-icon class="accentcolor bigicon" [inline]="true">corporate_fare</mat-icon>
                                 </span>
                             </h3>
-                            <p>Anzahl:<span fxHide.lt-md="true"><br></span>
-                                <mat-slider [(ngModel)]="this.params.n_impfzentren" min="0" [max]="500" [step]="1"
-                                    (change)="this.update_kapazitaet();"></mat-slider>
-                                <strong>{{this.params.n_impfzentren | number: '1.0-0'}}</strong>
-                                <br>Patienten pro Tag:<span fxHide.lt-md="true"><br></span>
-                                <mat-slider [(ngModel)]="this.params.n_impfzentren_pat" min="100" max="1500" step="10"
+                            <p> <br>Impfungen pro Tag:<br>
+                                <mat-slider [(ngModel)]="this.params.n_impfzentren_pat" min="100" max="550000" step="10"
                                     (change)="this.update_kapazitaet();"></mat-slider>
                                 <strong>{{this.params.n_impfzentren_pat | number: '1.0-0'}}</strong>
-                                <br>Arbeitstage pro Woche:<span fxHide.lt-md="true"><br></span>
-                                <mat-slider [(ngModel)]="this.params.impfzentren_tage" min="0" max="7" step="1"
-                                    (change)="this.update_kapazitaet();"></mat-slider>
-                                <strong>{{this.params.impfzentren_tage}}</strong>
+                     
                             </p>
                         </div>
-                        <div fxFlex=31 fxFlex.lt-md=100>
+                        <div fxFlex=50 fxFlex.lt-md=100>
                             <h3>
                                 <strong>Praxen</strong><br>
                                 <span fxHide.lt-md="true">
@@ -259,16 +252,20 @@
                                 <strong>{{this.params.varzt_tage}}</strong>
                             </p>
                         </div>
-
-                        <div fxFlex=31 fxFlex.lt-md=100 fxLayout="column wrap" fxLayoutGap=".1rem"
+                        <!-- Einstellungen zu Impfstoffen -->
+                        <div fxFlex=100 fxFlex.lt-md=100 fxLayout="row wrap" fxLayoutGap=".1rem"
                             fxLayoutAllign="space-around">
-                            <div>
-                                <h3><strong>Impfstoff Lieferungen</strong><br>
+                     
+                                <h3><strong>Impfstoffe</strong><br>
                                     <span fxHide.lt-md="true">
                                         <mat-icon class="accentcolor bigicon" [inline]="true">healing</mat-icon>
                                     </span>
                                 </h3>
                             </div>
+                        <div fxFlex=100 fxFlex.lt-md=100 fxLayout="row wrap" fxLayoutGap="1rem"
+                            fxLayoutAllign="space-between">
+                        <div fxFlex=35 fxFlex.lt-md=100 >
+                            <h3><strong>Lieferkette</strong></h3>
                             <div>
                                 <p>Liefermenge:<span fxHide.lt-md="true"><br></span>
                                     <mat-slider [(ngModel)]="this.params.liefermenge" min=".8" max="1.2" step="0.01"
@@ -276,6 +273,17 @@
                                     <strong>{{this.params.liefermenge*100 | number:'1.0-0'}} %</strong>
                                 </p>
                             </div>
+                            <div>
+                                <span>Verteilung der Lieferungen:</span>
+                                <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
+                                    (change)="this.update_kapazitaet();">
+                                    <ng-container *ngFor="let szenario of this.verteilungszenarien">
+                                        <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
+                                        </mat-radio-button>
+                                    </ng-container>
+                                </mat-radio-group>
+                            </div>
+                            <h3><strong>Impforganisation</strong></h3>
                             <div>
                                 <p>Rückstellungen für Zweitimpfungen<span fxHide.lt-md="true"><br></span>
                                     <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
@@ -294,6 +302,9 @@
                                             Wochen länger</strong></span>
                                 </p>
                             </div>
+                        </div>    
+                        <div fxFlex=30 fxFlex.lt-md=100 >
+                            <h3><strong>Zulassung</strong></h3>
                             <div>
                                 <span>Art der Impfstoffe:</span>
                                 <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.impfstoffart"
@@ -303,30 +314,36 @@
                                     <mat-radio-button class="my-radio-button" [value]="'zugelassen'">Nur zugelassene
                                         Impfstoffe</mat-radio-button>
                                 </mat-radio-group>
+                                <p>Ausfall simulieren:</p>
+                                <p
+                                    *ngFor="let hersteller of this.hersteller_zugelassen_details">
+                                    <ng-container *ngIf="!hersteller.checked">
+                                    <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,false);this.update_kapazitaet();" >
+                                    {{hersteller.hersteller}}                                    
+                                    </mat-checkbox>
+                                    </ng-container>
+                                    <ng-container *ngIf="hersteller.checked">
+                                        <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,true);this.update_kapazitaet();" >
+                                        {{hersteller.hersteller}}                                    
+                                        </mat-checkbox>
+                                        </ng-container>
+
+                                </p>
                             </div>
                             <div *ngIf="this.params.impfstoffart=='zugelassen'">
-                                <p>...und zusätzlich:</p>
+                                <p>Zulassungseffekt simulieren:</p>
                                 <p
                                     *ngFor="let hersteller of this.hersteller_nicht_zugelassen">
                                     <mat-checkbox [(ngModel)]="hersteller.checked" 
                                      (change)="this.addremovehst(hersteller.hersteller,hersteller.checked);this.update_kapazitaet();" >
                                     {{hersteller.hersteller}}
                                     </mat-checkbox>
-
-                            </p>
+                                </p>
                                 
                             </div>
-
-                            <div>
-                                <span>Verteilung der Lieferungen:</span>
-                                <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
-                                    (change)="this.update_kapazitaet();">
-                                    <ng-container *ngFor="let szenario of this.verteilungszenarien">
-                                        <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
-                                        </mat-radio-button>
-                                    </ng-container>
-                                </mat-radio-group>
-                            </div>
+                        </div>
+                        <div fxFlex=30 fxFlex.lt-md=100 >
+                            <h3><strong>Sonstiges</strong></h3>                    
                             <div>
                                 <p>Impfbereitschaft:<span fxHide.lt-md="true"><br></span>
                                     <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
@@ -342,6 +359,7 @@
                             </mat-slide-toggle>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
             </mat-card-content>
@@ -428,7 +446,7 @@
                         </p>
                     </div>
                 </div>
-                <div fxFlex=100>
+                <div fxFlex=45>
                     <h2>Gelieferte und verimpfte Dosen</h2>
                     <div>
                         <app-plot [(data)]="this.new_simresult" [custommargins]="{ l: 0, r: 0, b: 45, t: 0 }"
@@ -443,21 +461,37 @@
 
                 </div>
                 <div fxFlex=45 fxFlex.lt-md=100>
-                    <h2>Warteschlange Zweitimpfung</h2>
+                    <h2>Erstimpfungen nach Herstellern</h2>
                     <div>
                         <app-plot [(data)]="this.new_simresult" [custommargins]="{ l: 0, r: 0, b: 45, t: 0 }"
-                            xvalue="date" [colorscheme]="['navy']" [outcomes]="['Wartschlange Zweitimpfung']"
-                            plottype="area">
+                            xvalue="date" [outcomes]="['Erst: BNT/Pfizer','Erst: AZ', 'Erst: Moderna', 'Erst: J&J', 'Erst: Curevac', 'Erst: Sanofi/GSK']"
+                            plottype="stackedarea">
                         </app-plot>
                     </div>
                     <div class="padding lightgreycolor">
                         <p class="mat-caption">
-                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern.
+                            Legende:<br>Projektion auf Basis der zugesagten Lieferungen und der aktuellen Verträge mit den Herstellern.
                         </p>
                     </div>
 
                 </div>
-                <div fxHide.lt-md=true fxFlex></div>
+                <div fxFlex=45 fxFlex.lt-md=100>
+                    <h2>Warteschlange Zweitimpfung</h2>
+                    <div>
+                        <app-plot [(data)]="this.new_simresult" [custommargins]="{ l: 0, r: 0, b: 45, t: 0 }"
+                            xvalue="date" [outcomes]="['Warten: BNT/Pfizer','Warten: AZ', 'Warten: Moderna', 'Warten: Curevac', 'Warten: Sanofi/GSK']"
+                            plottype="stackedarea">
+                        </app-plot>
+                    </div>
+                    <div class="padding lightgreycolor">
+                        <p class="mat-caption">
+                            Legende:<br>Projektion auf Basis der zugesagten Lieferungen und der aktuellen Verträge mit den Herstellern.
+                        </p>
+                    </div>
+
+                </div>
+                
+              
                 <div fxFlex=45 fxFlex.lt-md=100>
                     <h2>Unverimpfte Dosen</h2>
                     <div>
@@ -467,7 +501,7 @@
                     </div>
                     <div class="padding lightgreycolor">
                         <p class="mat-caption">
-                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern.
+                            Legende:<br>Projektion auf Basis der zugesagten Lieferungen und der aktuellen Verträge mit den Herstellern.
                         </p>
                     </div>
 
@@ -483,7 +517,7 @@
                     </div>
                     <div class="padding lightgreycolor">
                         <p class="mat-caption">
-                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern.
+                            Legende:<br>Projektion auf Basis der zugesagten Lieferungen und der aktuellen Verträge mit den Herstellern.
                         </p>
                     </div>
 
@@ -499,7 +533,7 @@
                     </div>
                     <div class="padding lightgreycolor">
                         <p class="mat-caption">
-                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern.
+                            Legende:<br>Projektion auf Basis der zugesagten Lieferungen und der aktuellen Verträge mit den Herstellern.
                         </p>
                     </div>
 

@@ -37,8 +37,10 @@ export class StartComponent implements OnInit {
   stand_impfungen_hersteller: any;
   kapazitaetsstand:string;
   hersteller_zugelassen:any;
+  hersteller_zugelassen_details:any;
   hersteller_nicht_zugelassen:any;
   hersteller_add_nicht_zugelassen:any;
+  
   stand_impfungen_data_aktuell: any;
   geo_lieferungen_bisher:any;
   stand_impfungen_data_aktuell_current: any;
@@ -76,12 +78,10 @@ export class StartComponent implements OnInit {
   // Sim Params
   verteilungszenarien = ["Gleichverteilung", "Linearer Anstieg der Produktion in Q2"];
   params = {
-    n_impfzentren: 433,
-    n_impfzentren_pat: 742.32926426921808 ,
-    impfzentren_tage: 7,
+    n_impfzentren_pat: 321429 ,
     n_varzt: 50000,
-    n_varzt_pat: 20,
-    varzt_tage: 0,
+    n_varzt_pat: 30,
+    varzt_tage: 3,
     kapazitaet_pro_tag: 0,
     kapazitaet_pro_woche: 0,
     warten_dosis_2: 5,
@@ -128,6 +128,7 @@ export class StartComponent implements OnInit {
           this.bl_liste = this.getValues(this.ewz_bl, "Bundesland");
           this.sort_regions();
           this.impfkapazitaet_bund = this.getValues(this.filterArray(this.ewz_bl, "Bundesland", "Gesamt"), "Impfkapazitaet")[0];
+          this.params.n_impfzentren_pat=this.impfkapazitaet_bund;
           this.getexternaldata();
         });
   }
@@ -149,6 +150,8 @@ export class StartComponent implements OnInit {
             this.stand_impfungen_hersteller = data;
             let allhersteller = this.filterArray(this.stand_impfungen_hersteller,"geo","Gesamt");            
             this.hersteller_zugelassen=this.getValues(this.filterArray(allhersteller,"zugelassen",1),"hersteller");
+            this.params.addhersteller= this.getValues(this.filterArray(allhersteller,"zugelassen",1),"hersteller");
+            this.hersteller_zugelassen_details=this.filterArray(allhersteller,"zugelassen",1);
             this.hersteller_nicht_zugelassen=this.filterArray(allhersteller,"zugelassen",0);
             this.stand_bmg_lieferungen = new Date(data[0]['Stand_BMG']);
             
@@ -183,14 +186,13 @@ export class StartComponent implements OnInit {
     this.bev_anteil_land = this.getValues(this.filterArray(this.ewz_bl, "Bundesland", this.current_bl), "Anteil_20plus")[0];
     this.impfkapazitaet_land = this.getValues(this.filterArray(this.ewz_bl, "Bundesland", this.current_bl), "Impfkapazitaet")[0];
     if (this.land_changed) {
-      this.params.n_impfzentren = 433 * this.impfkapazitaet_land / this.impfkapazitaet_bund;
+      this.params.n_impfzentren_pat = this.impfkapazitaet_land ;
       this.params.n_varzt = 50000 * this.bev_anteil_land / 100;
       this.land_changed = false;
     }
     let params = this.params;
     this.params.kapazitaet_pro_tag =
-      (params.impfzentren_tage * params.n_impfzentren * params.n_impfzentren_pat +
-        params.varzt_tage * params.n_varzt * params.n_varzt_pat) * 1 / 7;
+    params.n_impfzentren_pat + (( params.varzt_tage * params.n_varzt * params.n_varzt_pat) * 1 / 7);
     this.params.kapazitaet_pro_woche = this.params.kapazitaet_pro_tag * 7;
     this.new_simresult = this.do_simulation_new(this.dosen_projektion_all_hersteller_filtered, this.params);
     this.risktimes= this.update_risktimes(this.new_simresult,'Anteil Durchimpfung');
@@ -201,7 +203,8 @@ export class StartComponent implements OnInit {
 
   change_simple() {
     if (this.simple_aerzte_impfen) {
-      this.params.varzt_tage = 5;
+      this.params.varzt_tage = 3;
+      this.params.n_varzt_pat= 30;
     }
     else {
       this.params.varzt_tage = 0;
@@ -223,7 +226,7 @@ export class StartComponent implements OnInit {
       this.dosen_projektion_all_hersteller_filtered = alldata;
 
     if (this.params.impfstoffart == 'zugelassen') {
-      this.dosen_projektion_all_hersteller_filtered = this.filterArray(this.dosen_projektion_all_hersteller_filtered, 'zugelassen', 1);
+      this.dosen_projektion_all_hersteller_filtered = [];
       if (this.params.addhersteller.length>0){
         for (const addthehersteller of this.params.addhersteller) {
           let toadd = this.filterArray(alldata, 'hersteller', addthehersteller);
@@ -430,6 +433,8 @@ export class StartComponent implements OnInit {
     for (const thewoche of time) {
       let input_erst  = this.filterArray(result_erstimpfungen, 'kw', thewoche);
       let input_zweit = this.filterArray(result_zweitimpfungen, 'kw', thewoche);
+      let kwall2hersteller = this.getValues(input_zweit,"hersteller");
+      let kwall1hersteller = this.getValues(input_zweit,"hersteller");
 
       if ((input_erst.length+input_zweit.length) > 0) {
         let topush = {};
@@ -448,6 +453,9 @@ export class StartComponent implements OnInit {
           this.sumArray(this.getValues(input_zweit, 'impfungen'));       
         topush['Verimpfte Erst-Dosen'] = 
           this.sumArray(this.getValues(input_erst, 'impfungen_erst_kum'));
+        for (let thehst of kwall1hersteller) {
+            topush['Erst: '+thehst] = this.filterArray(input_erst,'hersteller',thehst)[0]['impfungen'];
+          }
         topush['Auslastung'] = 100 * (topush['Verimpfte Dosen'] / kapazitaet);
         topush['Unverimpfte Dosen'] = this.sumArray(this.getValues(input_erst, 'dosenspeicher'));
         topush['patienten_durchgeimpft'] = 
@@ -455,6 +463,9 @@ export class StartComponent implements OnInit {
           this.sumArray(this.getValues(input_zweit, 'patienten_geimpft'));  
         topush['Wartschlange Zweitimpfung'] = 
           this.sumArray(this.getValues(input_zweit, 'verbleibend_in_warteschlange_zweit_kw'));
+        for (let thehst of kwall2hersteller) {
+          topush['Warten: '+thehst] = this.filterArray(input_zweit,'hersteller',thehst)[0]['verbleibend_in_warteschlange_zweit_kw'];
+        }
 
         // Korrektur Durchimpfung abgeschlossen
         topush['Anteil Durchimpfung'] = 100 * (topush['patienten_durchgeimpft'] / topush['population']);
@@ -466,17 +477,25 @@ export class StartComponent implements OnInit {
           topush['Unverimpfte Dosen'] = 0;
           topush['Verimpfte Dosen'] = 0;
           topush['Wartschlange Zweitimpfung'] = 0;
+          for (let thehst of kwall2hersteller) {
+            topush['Warten: '+thehst] = 0;
+          }
+        
         }
 
         if (topush['Anteil Erst-Dosis'] > 100) {
           topush['Anteil Erst-Dosis'] = 100;
           topush['Verimpfte Erst-Dosen'] = topush['population'];
+          for (let thehst of kwall1hersteller) {
+            topush['Erst: '+thehst] = 0;
+          }
         }
 
         finalresult.push(topush)
       }
     }
     return finalresult;
+    
   }
 
 
