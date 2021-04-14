@@ -35,10 +35,10 @@ export class PlaygroundPageComponent implements OnInit {
 
     ngOnInit(): void {
         window.scrollTo(0, 0);
-        this.loaddata();
+        this.loadData();
     }
 
-    loaddata(): void {
+    loadData(): void {
         this.http.get('https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 this.vaccinations = d3.tsvParse<VaccinationsData, string>(data, d3.autoType);
