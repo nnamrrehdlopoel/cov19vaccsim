@@ -11,19 +11,40 @@ p {
     margin: 8px 0 0;
 }
 
-.settings_row {
-    margin: 8px 0 0;
 
-    > mat-slider:last-child {
-        width: 94%;
-        margin-left: 3%;
-        margin-top: -8px;
-        margin-bottom: -3px;
+.settings_card {
+    /* Make lines between the setting areas space nicely */
+    > div {
+        margin: 20px 0 8px 0;
+    }
+
+    /* Individual settings per row with some margin */
+    .settings_row {
+        margin: 8px 0 0;
+
+        /* Sliders full-width and with less margin so they are visually grouped to the text above nicely */
+        > mat-slider:last-child {
+            width: 94%;
+            margin-left: 3%;
+            margin-top: -8px;
+            margin-bottom: -3px;
+        }
     }
 }
 
-.settings_card {
-    > div {
-        margin: 20px 0 8px 0;
+/* Need some deep styling here to make Slide-Toggles & Checkboxes full-width with their active element nicely aligned on the right */
+:host ::ng-deep .settings_card {
+
+    mat-slide-toggle.mat-slide-toggle-label-before, mat-checkbox.mat-checkbox-label-before {
+        width: 100%;
+
+        > label {
+            display: flex;
+            place-content: space-between;
+
+            .mat-checkbox-inner-container {
+                margin-right: 8px;
+            }
+        }
     }
 }

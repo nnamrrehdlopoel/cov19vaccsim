@@ -29,13 +29,11 @@
             <mat-card-content class="settings_card">
                 <div>
                     <h2><strong>Zulassung</strong></h2>
-                    <div fxLayout="row" fxLayoutAlign="space-between center">
-                        <div fxFlex ><mat-label class="mat-slide-toggle-content">Kontraindizierte beachten (vor allem Alter)</mat-label></div>
-                        <div fxFlex="0 0 auto" >
-                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                              (change)="this.restartModel();">
-                            </mat-slide-toggle>
-                        </div>
+                    <div class="settings_row">
+                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                          (change)="this.restartModel();" labelPosition="before">
+                            Kontraindizierte beachten (vor allem Alter)
+                        </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
                         <p>Ausfall / Zulassung simulieren:</p>
@@ -90,13 +88,11 @@
                 <div>
                     <h2><strong>Impforganisation</strong></h2>
 
-                    <div class="settings_row" fxLayout="row" fxLayoutAlign="space-between center">
-                        <div fxFlex >Rückstellungen für Zweitimpfungen</div>
-                        <div fxFlex="0 0 auto" >
-                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                              (change)="this.restartModel();">
-                            </mat-slide-toggle>
-                        </div>
+                    <div class="settings_row" >
+                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                          (change)="this.restartModel();" labelPosition="before">
+                            Rückstellungen für Zweitimpfungen
+                        </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
                         <div fxLayout="row" fxLayoutAlign="space-between center">
@@ -115,13 +111,11 @@
                 <div>
                     <h2><strong>Impfbereitschaft</strong></h2>
 
-                    <div class="settings_row" fxLayout="row" fxLayoutAlign="space-between center">
-                        <div fxFlex >Nicht Impfwillige beachten</div>
-                        <div fxFlex="0 0 auto" >
-                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                              (change)="this.restartModel();">
-                            </mat-slide-toggle>
-                        </div>
+                    <div class="settings_row">
+                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                          (change)="this.restartModel();" labelPosition="before">
+                            Nicht Impfwillige beachten
+                        </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
                         <p>Impfbereitschaft:
