@@ -31,7 +31,7 @@
                     <h2><strong>Zulassung</strong></h2>
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartModel();" labelPosition="before">
+                                          (change)="this.restartSimulation();" labelPosition="before">
                             Kontraindizierte beachten (vor allem Alter)
                         </mat-slide-toggle>
                     </div>
@@ -71,17 +71,19 @@
                             </div>
                         </div>
                         <mat-slider [(ngModel)]="this.params.liefermenge" min=".8" max="1.2" step="0.01"
-                                    (change)="this.restartModel();"></mat-slider>
+                                    (change)="this.restartSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
                         <p>Verteilung der Lieferungen:</p>
-                        <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
-                                         (change)="this.restartModel();">
-                            <ng-container *ngFor="let szenario of this.verteilungszenarien">
-                                <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
-                                </mat-radio-button>
-                            </ng-container>
-                        </mat-radio-group>
+                        <div style="margin-left: 1.5rem;">
+                            <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
+                                             (change)="this.extractDeliveriesInfo();">
+                                <ng-container *ngFor="let szenario of this.zislabImpfsimVerteilungszenarien">
+                                    <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
+                                    </mat-radio-button><br/>
+                                </ng-container>
+                            </mat-radio-group>
+                        </div>
                     </div>
                 </div>
                 <mat-divider></mat-divider>
@@ -90,7 +92,7 @@
 
                     <div class="settings_row" >
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartModel();" labelPosition="before">
+                                          (change)="this.restartSimulation();" labelPosition="before">
                             Rückstellungen für Zweitimpfungen
                         </mat-slide-toggle>
                     </div>
@@ -104,7 +106,7 @@
                             </div>
                         </div>
                         <mat-slider [(ngModel)]="this.params.addweekstoabstand" min="0" max="12" step="1"
-                                    (change)="this.restartModel();"></mat-slider>
+                                    (change)="this.restartSimulation();"></mat-slider>
                     </div>
                 </div>
                 <mat-divider></mat-divider>
@@ -113,14 +115,14 @@
 
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartModel();" labelPosition="before">
+                                          (change)="this.restartSimulation();" labelPosition="before">
                             Nicht Impfwillige beachten
                         </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
                         <p>Impfbereitschaft:
                             <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
-                                        (change)="this.restartModel();"></mat-slider>
+                                        (change)="this.restartSimulation();"></mat-slider>
                             <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
                         </p>
                     </div>
