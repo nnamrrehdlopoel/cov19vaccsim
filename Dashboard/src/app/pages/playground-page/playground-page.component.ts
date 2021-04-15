@@ -18,9 +18,9 @@ export class PlaygroundPageComponent implements OnInit {
         private csv: CsvexportService) {
 
         for (const v of Object.keys(this.vaccineNames)) {
-            this.vaccineNameTranslationTable[v] = v;
+            this.vaccineNameTranslationTable.set(v, v);
             for (const name of this.vaccineNames[v]) {
-                this.vaccineNameTranslationTable[name] = v;
+                this.vaccineNameTranslationTable.set(name, v);
             }
         }
     }
@@ -52,7 +52,7 @@ export class PlaygroundPageComponent implements OnInit {
             'Sanofi/GSK'
         ]
     };
-    vaccineNameTranslationTable = {};
+    vaccineNameTranslationTable: Map<string, string> = new Map([]);
 
 
     zislabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
@@ -64,8 +64,8 @@ export class PlaygroundPageComponent implements OnInit {
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
     zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[];
-    plannedDeliveries: WeeklyDeliveryData = {};
-    weeklyDeliveriesScenario: WeeklyDeliveryData = {};
+    plannedDeliveries: WeeklyDeliveryData = new Map();
+    weeklyDeliveriesScenario: WeeklyDeliveryData = new Map();
     population: any;
     priorities: any;
     vaccineUsage: any;
@@ -134,20 +134,16 @@ export class PlaygroundPageComponent implements OnInit {
 
 
     extractDeliveriesInfo(): void {
-        const transformedData: WeeklyDeliveryData = {};
+        const transformedData: WeeklyDeliveryData = new Map();
         for (const row of this.zislabImpfsimLieferungenData){
             if (row.Verteilungsszenario === this.params.verteilungszenario) {
                 const vName = this.normalizeVaccineName(row.hersteller);
-                const week = '2021/' + row.kw;
+                const yWeek: YearWeek = [2021, row.kw];
 
-                if (! transformedData.hasOwnProperty(week)) {
-                    transformedData[week] = {};
-                }
-                if (! transformedData[week].hasOwnProperty(vName)) {
-                    transformedData[week][vName] = 0;
-                }
-
-                transformedData[week][vName] += row.dosen_kw;
+                // tslint:disable-next-line:no-unused-expression
+                transformedData.has(yWeek) || transformedData.set(yWeek, new Map());
+                const r = transformedData.get(yWeek);
+                r.set(vName, (r.get(vName) || 0) + row.dosen_kw);
             }
         }
 
@@ -157,30 +153,25 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     calculateWeeklyDeliveries(): void {
-        const deliveries: WeeklyDeliveryData = {};
+        const deliveries: WeeklyDeliveryData = new Map();
 
         // accumulate historical deliveries
         if (this.deliveries) {
             for (const delivery of this.deliveries) {
-                const [year, weekn] = this.getWeekNumber(delivery.date);
-                const week = year + '/' + weekn;
+                const yWeek = this.getWeekNumber(delivery.date);
                 const vName = this.normalizeVaccineName(delivery.impfstoff);
 
-                if (!deliveries.hasOwnProperty(week)) {
-                    deliveries[week] = {};
-                }
-                if (!deliveries[week].hasOwnProperty(vName)) {
-                    deliveries[week][vName] = 0;
-                }
-
-                deliveries[week][vName] += delivery.dosen;
+                // tslint:disable-next-line:no-unused-expression
+                deliveries.has(yWeek) || deliveries.set(yWeek, new Map());
+                const r = deliveries.get(yWeek);
+                r.set(vName, (r.get(vName) || 0) + delivery.dosen);
             }
         }
 
         // merge planned deliveries into array without overwriting
-        for (const week of Object.keys(this.plannedDeliveries)){
-            if (!deliveries.hasOwnProperty(week)){
-                deliveries[week] = this.plannedDeliveries[week];
+        for (const [yWeek, data] of this.plannedDeliveries.entries()){
+            if (!deliveries.has(yWeek)){
+                deliveries.set(yWeek, data);
             }
         }
 
@@ -190,8 +181,8 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     normalizeVaccineName(name: string): string {
-        if (name in this.vaccineNameTranslationTable){
-            return this.vaccineNameTranslationTable[name];
+        if (this.vaccineNameTranslationTable.has(name)){
+            return this.vaccineNameTranslationTable.get(name);
         }
         console.warn('Unknown Vaccine Name!', name);
         return name;
@@ -205,7 +196,7 @@ export class PlaygroundPageComponent implements OnInit {
      * Returns Year and Week in Year for a given date
      * Source: https://stackoverflow.com/a/6117889
      */
-    getWeekNumber(d: Date): [number, number] {
+    getWeekNumber(d: Date): YearWeek {
         // Copy date so don't modify original
         d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         // Set to nearest Thursday: current date + 4 - current day number
@@ -275,8 +266,9 @@ interface DeliveriesData {
     region: string;
 }
 
-interface WeeklyDeliveryData {
-    [index: string]: {
-        [index: string]: number
-    };
-}
+type YearWeek = [
+    year: number,
+    week: number
+];
+
+type WeeklyDeliveryData = Map<YearWeek, Map<string, number>>;
