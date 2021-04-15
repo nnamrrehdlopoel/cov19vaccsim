@@ -26,104 +26,120 @@
     <div fxFlex="0.3 0 350px" fxFlex.lt-md="0.5 0 0">
         <mat-card>
             <mat-card-title>Simulationsparameter</mat-card-title>
-            <mat-card-content>
-                <div fxLayout="column">
-                    <div fxFlex=100 fxLayout="row wrap" fxLayoutGap="2rem"
-                         fxLayoutAlign="space-around">
-                        <!-- Einstellungen zu Impfstoffen -->
-                        <div fxFlex=100 fxFlex.lt-md=100 fxLayout="row wrap" fxLayoutGap="1rem"
-                             fxLayoutAlign="space-between">
-                            <!--
-                            <div fxFlex=35 fxFlex.lt-md=100 >
-                                <h3><strong>Lieferkette</strong></h3>
-                                <div>
-                                    <p>Liefermenge:<span fxHide.lt-md="true"><br></span>
-                                        <mat-slider [(ngModel)]="this.params.liefermenge" min=".8" max="1.2" step="0.01"
-                                                    (change)="this.update_kapazitaet();"></mat-slider>
-                                        <strong>{{this.params.liefermenge*100 | number:'1.0-0'}} %</strong>
-                                    </p>
-                                </div>
-                                <div>
-                                    <span>Verteilung der Lieferungen:</span>
-                                    <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
-                                                     (change)="this.update_kapazitaet();">
-                                        <ng-container *ngFor="let szenario of this.verteilungszenarien">
-                                            <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
-                                            </mat-radio-button>
-                                        </ng-container>
-                                    </mat-radio-group>
-                                </div>
-                                <h3><strong>Impforganisation</strong></h3>
-                                <div>
-                                    <p>Rückstellungen für Zweitimpfungen<span fxHide.lt-md="true"><br></span>
-                                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                                          (change)="this.update_kapazitaet();">
-                                            <span *ngIf="this.params.ruecklage">Ja</span>
-                                            <span *ngIf="!this.params.ruecklage">Nein</span>
-                                        </mat-slide-toggle>
-                                    </p>
-                                </div>
-                                <div>
-                                    <p>Abstand Erst- zu Zweitimpfung:<span fxHide.lt-md="true"><br></span>
-                                        <mat-slider [(ngModel)]="this.params.addweekstoabstand" min="0" max="12" step="1"
-                                                    (change)="this.update_kapazitaet();"></mat-slider>
-                                        <span *ngIf="this.params.addweekstoabstand==0"> laut STIKO</span>
-                                        <span *ngIf="this.params.addweekstoabstand>0"><strong>{{this.params.addweekstoabstand}}
-                                            Wochen länger</strong></span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div fxFlex=30 fxFlex.lt-md=100 >
-                                <h3><strong>Zulassung</strong></h3>
-                                <div>
-                                    <span>Art der Impfstoffe:</span>
-                                    <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.impfstoffart"
-                                                     (change)="this.update_kapazitaet();">
-                                        <mat-radio-button class="my-radio-button" [value]="'alle'">Alle bestellten
-                                        </mat-radio-button>
-                                        <mat-radio-button class="my-radio-button" [value]="'zugelassen'">Nur zugelassene
-                                            Impfstoffe</mat-radio-button>
-                                    </mat-radio-group>
-                                    <p>Ausfall simulieren:</p>
-                                    <p
-                                        *ngFor="let hersteller of this.hersteller_zugelassen_details">
-                                        <ng-container *ngIf="!hersteller.checked">
-                                            <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,false);this.update_kapazitaet();" >
-                                                {{hersteller.hersteller}}
-                                            </mat-checkbox>
-                                        </ng-container>
-                                        <ng-container *ngIf="hersteller.checked">
-                                            <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,true);this.update_kapazitaet();" >
-                                                {{hersteller.hersteller}}
-                                            </mat-checkbox>
-                                        </ng-container>
-
-                                    </p>
-                                </div>
-                                <div *ngIf="this.params.impfstoffart=='zugelassen'">
-                                    <p>Zulassungseffekt simulieren:</p>
-                                    <p
-                                        *ngFor="let hersteller of this.hersteller_nicht_zugelassen">
-                                        <mat-checkbox [(ngModel)]="hersteller.checked"
-                                                      (change)="this.addremovehst(hersteller.hersteller,hersteller.checked);this.update_kapazitaet();" >
-                                            {{hersteller.hersteller}}
-                                        </mat-checkbox>
-                                    </p>
-
-                                </div>
-                            </div>
-                            <div fxFlex=30 fxFlex.lt-md=100 >
-                                <h3><strong>Sonstiges</strong></h3>
-                                <div>
-                                    <p>Impfbereitschaft:<span fxHide.lt-md="true"><br></span>
-                                        <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
-                                                    (change)="this.update_kapazitaet();"></mat-slider>
-                                        <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
-                                    </p>
-                                </div>
-                            </div>
-                            -->
+            <mat-card-content class="settings_card">
+                <div>
+                    <h2><strong>Zulassung</strong></h2>
+                    <div fxLayout="row" fxLayoutAlign="space-between center">
+                        <div fxFlex ><mat-label class="mat-slide-toggle-content">Kontraindizierte beachten (vor allem Alter)</mat-label></div>
+                        <div fxFlex="0 0 auto" >
+                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                              (change)="this.restartModel();">
+                            </mat-slide-toggle>
                         </div>
+                    </div>
+                    <div class="settings_row">
+                        <p>Ausfall / Zulassung simulieren:</p>
+                        <!--<p
+                            *ngFor="let hersteller of this.hersteller_zugelassen_details">
+                            <ng-container *ngIf="!hersteller.checked">
+                                <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,false);this.update_kapazitaet();" >
+                                    {{hersteller.hersteller}}
+                                </mat-checkbox>
+                            </ng-container>
+                            <ng-container *ngIf="hersteller.checked">
+                                <mat-checkbox [(ngModel)]="hersteller.checked" (change)="this.addremovehst(hersteller.hersteller,true);this.update_kapazitaet();" >
+                                    {{hersteller.hersteller}}
+                                </mat-checkbox>
+                            </ng-container>
+
+                        </p>-->
+                        <!--<p
+                            *ngFor="let hersteller of this.hersteller_nicht_zugelassen">
+                            <mat-checkbox [(ngModel)]="hersteller.checked"
+                                          (change)="this.addremovehst(hersteller.hersteller,hersteller.checked);this.update_kapazitaet();" >
+                                {{hersteller.hersteller}}
+                            </mat-checkbox>
+                        </p>-->
+                    </div>
+                </div>
+                <mat-divider></mat-divider>
+                <div>
+                    <h2><strong>Lieferung</strong></h2>
+                    <div class="settings_row">
+                        <div fxLayout="row" fxLayoutAlign="space-between center">
+                            <div>Liefermenge:</div>
+                            <div fxFlex="0 0 auto" >
+                                <strong>{{this.params.liefermenge*100 | number:'1.0-0'}} %</strong>
+                            </div>
+                        </div>
+                        <mat-slider [(ngModel)]="this.params.liefermenge" min=".8" max="1.2" step="0.01"
+                                    (change)="this.restartModel();"></mat-slider>
+                    </div>
+                    <div class="settings_row">
+                        <p>Verteilung der Lieferungen:</p>
+                        <mat-radio-group class="my-radio-group" [(ngModel)]="this.params.verteilungszenario"
+                                         (change)="this.restartModel();">
+                            <ng-container *ngFor="let szenario of this.verteilungszenarien">
+                                <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
+                                </mat-radio-button>
+                            </ng-container>
+                        </mat-radio-group>
+                    </div>
+                </div>
+                <mat-divider></mat-divider>
+                <div>
+                    <h2><strong>Impforganisation</strong></h2>
+
+                    <div class="settings_row" fxLayout="row" fxLayoutAlign="space-between center">
+                        <div fxFlex >Rückstellungen für Zweitimpfungen</div>
+                        <div fxFlex="0 0 auto" >
+                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                              (change)="this.restartModel();">
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="settings_row">
+                        <div fxLayout="row" fxLayoutAlign="space-between center">
+                            <div>Abstand Erst- zu Zweitimpfung:</div>
+                            <div fxFlex="0 0 auto" >
+                                <span *ngIf="this.params.addweekstoabstand==0"> laut STIKO</span>
+                                <span *ngIf="this.params.addweekstoabstand>0"><strong>{{this.params.addweekstoabstand}}
+                                    Wochen länger</strong></span>
+                            </div>
+                        </div>
+                        <mat-slider [(ngModel)]="this.params.addweekstoabstand" min="0" max="12" step="1"
+                                    (change)="this.restartModel();"></mat-slider>
+                    </div>
+                </div>
+                <mat-divider></mat-divider>
+                <div>
+                    <h2><strong>Impfbereitschaft</strong></h2>
+
+                    <div class="settings_row" fxLayout="row" fxLayoutAlign="space-between center">
+                        <div fxFlex >Nicht Impfwillige beachten</div>
+                        <div fxFlex="0 0 auto" >
+                            <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                                              (change)="this.restartModel();">
+                            </mat-slide-toggle>
+                        </div>
+                    </div>
+                    <div class="settings_row">
+                        <p>Impfbereitschaft:
+                            <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
+                                        (change)="this.restartModel();"></mat-slider>
+                            <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
+                        </p>
+                    </div>
+                    <div class="settings_row">
+                        <mat-slide-toggle labelPosition="before">
+                            A toggle test
+                        </mat-slide-toggle>
+                    </div>
+                    <div class="settings_row">
+                        <mat-checkbox
+                            class="example-margin" labelPosition="before">
+                            I'm a checkbox
+                        </mat-checkbox>
                     </div>
                 </div>
             </mat-card-content>

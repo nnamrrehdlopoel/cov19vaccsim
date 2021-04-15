@@ -21,6 +21,15 @@ export class PlaygroundPageComponent implements OnInit {
     lastRefreshDeliveries: Date;
     lastRefreshCapacity: Date;
 
+    params = {
+        liefermenge: 1,
+        verteilungszenario: '',
+        ruecklage: false,
+        addweekstoabstand: 0,
+        impfstoffart: 'alle',
+        anteil_impfbereit: 0.66,
+    };
+    verteilungszenarien = [];
 
     data: DummyChartData = {
         vacData: [1, 2, 3, 4, 1, 2, 5, 2, 3, 4],
@@ -74,6 +83,10 @@ export class PlaygroundPageComponent implements OnInit {
                 this.vaccineUsage = data;
                 console.log(this.vaccineUsage);
             });
+    }
+
+    restartModel(): void {
+
     }
 }
 
