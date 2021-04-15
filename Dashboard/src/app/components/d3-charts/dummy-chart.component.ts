@@ -22,6 +22,8 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private xAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private lines: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private xGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
         return {};
@@ -31,10 +33,12 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.xAxis = this.svg.append('g').classed('x-axis', true);
         this.yAxis = this.svg.append('g').classed('y-axis', true);
         this.lines = this.svg.append('g').classed('lines', true);
+        this.xGrid = this.svg.append('g').classed('grid', true);
+        this.yGrid = this.svg.append('g').classed('grid', true);
     }
 
     updateChart(): void {
-        const margin = {top: 20, right: 40, bottom: 20, left: 40};
+        const margin = {top: 20, right: 40, bottom: 50, left: 80};
         const vacData = this.data.vacData;
         const dataMax = d3.max(vacData);
         const dataMin = d3.min(vacData);
@@ -82,16 +86,35 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('transform', `translate(${margin.left}, 0)`)
             .call(d3.axisLeft(y));
 
+        this.yGrid
+            .attr('transform', `translate(${margin.left}, 0)`)
+            .call(d3
+                .axisLeft(y)
+                .ticks(5)
+                .tickSize(-this.chartSize.width)
+                .tickFormat(_ => '')
+            );
+
         this.xAxis
             .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom})`)
             .call(
                 d3
                     .axisBottom<Date>(xTime)
+                    .ticks(d3.timeMonday)
                     .tickFormat(date => date.toLocaleString('default', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
+                        day: 'numeric'
                     }))
+            );
+
+        this.xGrid
+            .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom + 30})`)
+            .call(d3
+                .axisBottom<Date>(xTime)
+                .ticks(d3.timeMonth)
+                //.tickSize(-this.chartSize.height)
+                .tickFormat(date => date.toLocaleString('default', {
+                    month: 'long',
+                }))
             );
     }
 
