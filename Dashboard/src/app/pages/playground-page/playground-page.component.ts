@@ -15,21 +15,47 @@ export class PlaygroundPageComponent implements OnInit {
     constructor(
         private http: HttpClient,
         private route: ActivatedRoute,
-        private csv: CsvexportService) { }
+        private csv: CsvexportService) {
+
+        for (const v of Object.keys(this.vaccineNames)) {
+            this.vaccineNameTranslationTable[v] = v;
+            for (const name of this.vaccineNames[v]) {
+                this.vaccineNameTranslationTable[name] = v;
+            }
+        }
+    }
 
     lastRefreshVaccinations: Date;
     lastRefreshDeliveries: Date;
     lastRefreshCapacity: Date;
 
-    params = {
-        liefermenge: 1,
-        verteilungszenario: '',
-        ruecklage: false,
-        addweekstoabstand: 0,
-        impfstoffart: 'alle',
-        anteil_impfbereit: 0.66,
+    vaccineNames = {
+        biontech: [
+            'comirnaty',
+            'BNT/Pfizer'
+        ],
+        moderna: [
+            'Moderna'
+        ],
+        az: [
+            'AZ',
+            'astra'
+        ],
+        'j&j': [
+            'J&J',
+            'janssen'
+        ],
+        curevac: [
+            'Curevac'
+        ],
+        sanofi: [
+            'Sanofi/GSK'
+        ]
     };
-    verteilungszenarien = [];
+    vaccineNameTranslationTable = {};
+
+
+    zislabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
 
     data: DummyChartData = {
         vacData: [1, 2, 3, 4, 1, 2, 5, 2, 3, 4],
@@ -37,10 +63,24 @@ export class PlaygroundPageComponent implements OnInit {
     };
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
+    zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[];
+    plannedDeliveries: WeeklyDeliveryData = {};
+    weeklyDeliveriesScenario: WeeklyDeliveryData = {};
     population: any;
     priorities: any;
     vaccineUsage: any;
     vaccinationWillingness: any;
+
+
+
+    params = {
+        liefermenge: 1,
+        verteilungszenario: this.zislabImpfsimVerteilungszenarien[1],
+        ruecklage: false,
+        addweekstoabstand: 0,
+        impfstoffart: 'alle',
+        anteil_impfbereit: 0.66,
+    };
 
     ngOnInit(): void {
         window.scrollTo(0, 0);
@@ -55,39 +95,149 @@ export class PlaygroundPageComponent implements OnInit {
                 this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
                 this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
                 // TODO: update chart?
-                console.log(this.vaccinations);
+                console.log(this.vaccinations, 'Impfdashboard.de Vaccinations Data');
             });
         this.http.get('https://impfdashboard.de/static/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 this.deliveries = d3.tsvParse<DeliveriesData, string>(data, d3.autoType);
                 this.lastRefreshDeliveries = this.deliveries[this.deliveries.length - 1].date;
-                console.log(this.deliveries);
+                console.log(this.deliveries, 'Impfdashboard.de Deliveries Data');
+                this.calculateWeeklyDeliveries();
             });
         this.http.get('data/cosmo-impfbereitschaft.json')
             .subscribe(data => {
                 this.vaccinationWillingness = data;
-                console.log(this.vaccinationWillingness);
+                console.log(this.vaccinationWillingness, 'Vaccination Willingness Data');
             });
         this.http.get('data/population_deutschland_2019.json')
             .subscribe(data => {
                 this.population = data;
-                console.log(this.population);
+                console.log(this.population, 'Population Data');
             });
         this.http.get('data/prioritaetsgruppen_deutschland.json')
             .subscribe(data => {
                 this.priorities = data;
-                console.log(this.priorities);
+                console.log(this.priorities, 'Priority Data');
             });
         this.http.get('data/impfstoffeinsatz_deutschland.json')
             .subscribe(data => {
                 this.vaccineUsage = data;
-                console.log(this.vaccineUsage);
+                console.log(this.vaccineUsage, 'Vaccine Usage Data');
+            });
+        this.http.get<ZislabImpfsimlieferungenDataRow[]>('https://raw.githubusercontent.com/zidatalab/covid19dashboard/master/data/tabledata/impfsim_lieferungen.json')
+            .subscribe(data => {
+                this.zislabImpfsimLieferungenData = data;
+                console.log(this.zislabImpfsimLieferungenData, 'ZisLab Vaccine Delivery Data');
+                this.extractDeliveriesInfo();
             });
     }
 
-    restartModel(): void {
+
+    extractDeliveriesInfo(): void {
+        const transformedData: WeeklyDeliveryData = {};
+        for (const row of this.zislabImpfsimLieferungenData){
+            if (row.Verteilungsszenario === this.params.verteilungszenario) {
+                const vName = this.normalizeVaccineName(row.hersteller);
+                const week = '2021/' + row.kw;
+
+                if (! transformedData.hasOwnProperty(week)) {
+                    transformedData[week] = {};
+                }
+                if (! transformedData[week].hasOwnProperty(vName)) {
+                    transformedData[week][vName] = 0;
+                }
+
+                transformedData[week][vName] += row.dosen_kw;
+            }
+        }
+
+        this.plannedDeliveries = transformedData;
+        console.log(this.plannedDeliveries, 'Vaccine Delivery Plan Data');
+        this.calculateWeeklyDeliveries();
+    }
+
+    calculateWeeklyDeliveries(): void {
+        const deliveries: WeeklyDeliveryData = {};
+
+        // accumulate historical deliveries
+        if (this.deliveries) {
+            for (const delivery of this.deliveries) {
+                const [year, weekn] = this.getWeekNumber(delivery.date);
+                const week = year + '/' + weekn;
+                const vName = this.normalizeVaccineName(delivery.impfstoff);
+
+                if (!deliveries.hasOwnProperty(week)) {
+                    deliveries[week] = {};
+                }
+                if (!deliveries[week].hasOwnProperty(vName)) {
+                    deliveries[week][vName] = 0;
+                }
+
+                deliveries[week][vName] += delivery.dosen;
+            }
+        }
+
+        // merge planned deliveries into array without overwriting
+        for (const week of Object.keys(this.plannedDeliveries)){
+            if (!deliveries.hasOwnProperty(week)){
+                deliveries[week] = this.plannedDeliveries[week];
+            }
+        }
+
+        this.weeklyDeliveriesScenario = deliveries;
+        console.log(this.weeklyDeliveriesScenario, 'Weekly Vaccine Delivery Data');
+        this.restartSimulation();
+    }
+
+    normalizeVaccineName(name: string): string {
+        if (name in this.vaccineNameTranslationTable){
+            return this.vaccineNameTranslationTable[name];
+        }
+        console.warn('Unknown Vaccine Name!', name);
+        return name;
+    }
+
+    restartSimulation(): void {
 
     }
+
+    /**
+     * Returns Year and Week in Year for a given date
+     * Source: https://stackoverflow.com/a/6117889
+     */
+    getWeekNumber(d: Date): [number, number] {
+        // Copy date so don't modify original
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        // Set to nearest Thursday: current date + 4 - current day number
+        // Make Sunday's day number 7
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        // Get first day of year
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        // Calculate full weeks to nearest Thursday
+        // @ts-ignore
+        const weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1) / 7);
+        // Return array of year and week number
+        return [d.getUTCFullYear(), weekNo];
+    }
+}
+
+
+interface ZislabImpfsimlieferungenDataRow {
+    Bundesland: string;
+    Verteilungsszenario: string;
+    abstand: number;
+    anwendungen: number;
+    dosen_kw: number;
+    dosen_verabreicht_erst: number;
+    dosen_verabreicht_zweit: number;
+    hersteller: string;
+    kw: number;
+    population: number;
+    prioritaet: number;
+    ruecklage: number;
+    ueber18: number;
+    warteschlange_zweit_kw: number;
+    zugelassen: number;
 }
 
 
@@ -123,4 +273,10 @@ interface DeliveriesData {
     dosen: number;
     impfstoff: string;
     region: string;
+}
+
+interface WeeklyDeliveryData {
+    [index: string]: {
+        [index: string]: number
+    };
 }
