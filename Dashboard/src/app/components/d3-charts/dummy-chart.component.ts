@@ -8,8 +8,19 @@ export interface DummyChartConfig {
 }
 
 export interface DummyChartData {
-    vacStart: Date;
-    vacData: number[];  // daily vaccination numbers, starting from day vacStart
+    series: DataSeries[];
+}
+
+export interface DataSeries {
+    data: DataPoint[];
+    strokeColor: string;
+    strokeDasharray?: string;
+    fillColor: string;
+}
+
+export interface DataPoint {
+    value: number;
+    date: Date;
 }
 
 @Component({
@@ -22,6 +33,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private xAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private lines: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private fills: d3.Selection<SVGGElement, unknown, null, undefined>;
     private xGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
 
@@ -32,6 +44,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     initializeChart(): void {
         this.xAxis = this.svg.append('g').classed('x-axis', true);
         this.yAxis = this.svg.append('g').classed('y-axis', true);
+        this.fills = this.svg.append('g').classed('fills', true);
         this.lines = this.svg.append('g').classed('lines', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
@@ -39,57 +52,56 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
     updateChart(): void {
         const margin = {top: 20, right: 40, bottom: 50, left: 80};
-        const vacData = this.data.vacData;
-        const dataMax = d3.max(vacData);
-        const dataMin = d3.min(vacData);
-        const x = d3 // temp linear scale for x axis
-            .scaleLinear()
-            .domain([0, vacData.length - 1])
-            .range([
-                margin.left,
-                this.chartSize.width - margin.right,
-            ]);
-        const y = d3
-            .scaleLinear()
-            .domain([dataMin, dataMax])
-            .range([this.chartSize.height - margin.bottom, margin.top]);
+        const series = this.data.series;
+        const maxValue = d3.max(series.map(s => d3.max(s.data.map(point => point.value))));
+        const minValue = d3.min(series.map(s => d3.min(s.data.map(point => point.value))));
+        const maxDate = d3.max(series.map(s => d3.max(s.data.map(point => point.date))));
+        const minDate = d3.min(series.map(s => d3.min(s.data.map(point => point.date))));
 
-        const endDate = new Date(this.data.vacStart); // add days
-        endDate.setDate(endDate.getDate() + (this.data.vacData.length - 1));
+        const yValue = d3
+            .scaleLinear()
+            .domain([minValue, maxValue])
+            .range([this.chartSize.height - margin.bottom, margin.top]);
 
         const xTime = d3
             .scaleTime()
-            .domain([
-                this.data.vacStart,
-                endDate,
-            ]).range([
-                margin.left,
-                this.chartSize.width - margin.right,
-            ]).nice();
+            .domain([minDate, maxDate])
+            .range([margin.left, this.chartSize.width - margin.right])
+            .nice();
 
-        const lineGenerator: d3.Line<number> = d3
-            .line<number>()
-            .defined((d) => d != null)
-            .x((d, i) => x(i))
-            .y((d) => y(d));
+        const lineGenerator: d3.Line<DataPoint> = d3
+            .line<DataPoint>()
+            .defined((d) => d != null && d.value != null)
+            .x((d) => xTime(d.date))
+            .y((d) => yValue(d.value));
 
         this.lines
             .selectAll('path')
-            .data([vacData])
+            .data(series)
             .join('path')
             .attr('fill', 'none')
-            .attr('stroke', 'black')
+            .attr('stroke', s => s.strokeColor)
             .attr('stroke-width', '2')
-            .attr('d', (d) => lineGenerator(d));
+            .attr('stroke-dasharray', s => s.strokeDasharray || null)
+            .attr('d', (d) => lineGenerator(d.data));
+
+        this.fills
+            .selectAll('path')
+            .data(series.map(s => this.addFirstAndLastMinPoints(s, minValue)))
+            .join('path')
+            .attr('fill', s => s.fillColor)
+            .attr('stroke', 'none')
+            .attr('opacity', 0.5)
+            .attr('d', (d) => lineGenerator(d.data));
 
         this.yAxis
             .attr('transform', `translate(${margin.left}, 0)`)
-            .call(d3.axisLeft(y));
+            .call(d3.axisLeft(yValue));
 
         this.yGrid
             .attr('transform', `translate(${margin.left}, 0)`)
             .call(d3
-                .axisLeft(y)
+                .axisLeft(yValue)
                 .ticks(5)
                 .tickSize(-this.chartSize.width)
                 .tickFormat(_ => '')
@@ -116,6 +128,25 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     month: 'long',
                 }))
             );
+    }
+
+    /**
+     * Pad data series with an additional first and last data point.
+     * The point values are set to minValue.
+     * Useful if you want to create a fill that goes all the way down to the axis.
+     */
+    private addFirstAndLastMinPoints(s: DataSeries, minValue: number): DataSeries {
+        if (!s || !s.data || s.data.length === 0) {
+            return s;
+        }
+        return {
+            ...s,
+            data: [
+                { ...s.data[0], value: minValue },
+                ...s.data,
+                { ...s.data[s.data.length - 1], value: minValue },
+            ]
+        };
     }
 
 }

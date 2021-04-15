@@ -58,8 +58,39 @@ export class PlaygroundPageComponent implements OnInit {
     zislabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
 
     data: DummyChartData = {
-        vacData: [1, 2, 3, 4, 1, 2, 5, 2, 3, 4],
-        vacStart: new Date(2021, 0, 1),
+        series: [
+            // one series = one line + fill below
+            {
+                data: [
+                    {value: 5, date: new Date(2021, 0, 1)},
+                    {value: 6, date: new Date(2021, 0, 2)},
+                    {value: 2, date: new Date(2021, 0, 3)},
+                    {value: 7, date: new Date(2021, 0, 6)},
+                ],
+                fillColor: '#ff4848',
+                strokeColor: '#ff0000',
+            },
+            {
+                data: [
+                    {value: 8, date: new Date(2021, 0, 4)},
+                    {value: 4, date: new Date(2021, 0, 5)},
+                    {value: 3, date: new Date(2021, 0, 6)},
+                    {value: 5, date: new Date(2021, 0, 7)},
+                ],
+                fillColor: '#487cff',
+                strokeColor: '#0000ff',
+            },
+            {
+                data: [
+                    {value: 3, date: new Date(2021, 0, 1)},
+                    {value: 10, date: new Date(2021, 0, 5)},
+                    {value: 3, date: new Date(2021, 0, 9)},
+                ],
+                fillColor: '#46bf3d',
+                strokeColor: '#39a401',
+                strokeDasharray: '5, 5'
+            },
+        ],
     };
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
@@ -91,8 +122,9 @@ export class PlaygroundPageComponent implements OnInit {
         this.http.get('https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 this.vaccinations = d3.tsvParse<VaccinationsData, string>(data, d3.autoType);
-                this.data.vacStart = this.vaccinations[0].date;
-                this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
+                // todo transform data into new format
+                // this.data.vacStart = this.vaccinations[0].date;
+                // this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
                 this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
                 // TODO: update chart?
                 console.log(this.vaccinations, 'Impfdashboard.de Vaccinations Data');
