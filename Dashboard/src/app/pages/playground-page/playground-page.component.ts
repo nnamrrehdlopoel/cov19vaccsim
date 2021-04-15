@@ -39,7 +39,8 @@ export class PlaygroundPageComponent implements OnInit {
         ],
         az: [
             'AZ',
-            'astra'
+            'astra',
+            'astrazeneca'
         ],
         'j&j': [
             'J&J',
@@ -95,6 +96,7 @@ export class PlaygroundPageComponent implements OnInit {
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
     zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[];
+    weeklyVaccinations: WeeklyVaccinationData = new Map();
     plannedDeliveries: WeeklyDeliveryData = new Map();
     weeklyDeliveriesScenario: WeeklyDeliveryData = new Map();
     population: any;
@@ -102,6 +104,8 @@ export class PlaygroundPageComponent implements OnInit {
     vaccineUsage: any;
     vaccinationWillingness: any;
     simulationStartWeek: YearWeek = [2021, 1];
+
+    simulationResults: SimulationResultsI;
 
 
 
@@ -135,6 +139,18 @@ export class PlaygroundPageComponent implements OnInit {
             fillColor: '#2d876a',
             strokeColor: '#265538',
         };
+        const vacAtLeastOnceSim: DataSeries = {
+            data: [],
+            fillColor: '#69b8b4',
+            strokeColor: '#46827f',
+            strokeDasharray: '5, 5'
+        };
+        const vacFullySim: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+            strokeDasharray: '5, 5'
+        };
 
 
         if (this.vaccinations) {
@@ -150,10 +166,18 @@ export class PlaygroundPageComponent implements OnInit {
             }
         }
 
+        if (this.simulationResults) {
+            for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
+                // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
+                const date = this.getWeekdayInYearWeek(yWeek, 8);
+            }
+        }
 
         newData.series = [
             vacFully,
-            vacAtLeastOnce
+            vacAtLeastOnce,
+            vacFullySim,
+            vacAtLeastOnceSim
         ];
 
         this.data = newData;
@@ -167,7 +191,7 @@ export class PlaygroundPageComponent implements OnInit {
                 this.simulationStartWeek = this.getWeekNumber(this.lastRefreshVaccinations);
                 // TODO: update chart?
                 console.log(this.vaccinations, 'Impfdashboard.de Vaccinations Data');
-                this.runSimulation();
+                this.calculateWeeklyVaccinations();
             });
         this.http.get('https://impfdashboard.de/static/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
@@ -256,6 +280,72 @@ export class PlaygroundPageComponent implements OnInit {
         this.runSimulation();
     }
 
+    calculateWeeklyVaccinations(): void {
+        const weeklyVacc: WeeklyVaccinationData = new Map();
+
+        // accumulate historical deliveries
+
+        let lastWeek: VaccinationWeekI;
+        let currWeek: VaccinationWeekI = {
+            vaccineDoses: 0,
+            partiallyImmunized: 0,
+            fullyImmunized: 0,
+            cumVaccineDoses: 0,
+            cumPartiallyImmunized: 0,
+            cumFullyImmunized: 0,
+            dosesByVaccine: new Map(),
+            cumDosesByVaccine: new Map()
+        };
+
+        if (this.vaccinations) {
+            // assumes vaccinations are ordered
+            for (const vaccDay of this.vaccinations) {
+                const yWeek = this.getWeekNumber(vaccDay.date);
+
+                // new week has started => calculate differences
+                if (!weeklyVacc.has(yWeek)){
+                    console.log('new Week', yWeek);
+                    if (lastWeek) {
+                        currWeek.vaccineDoses = currWeek.cumVaccineDoses - lastWeek.cumVaccineDoses;
+                        currWeek.partiallyImmunized = currWeek.cumPartiallyImmunized - lastWeek.cumPartiallyImmunized;
+                        currWeek.fullyImmunized = currWeek.cumFullyImmunized - lastWeek.cumFullyImmunized;
+                        for (const [vacc, doses] of currWeek.cumDosesByVaccine.entries()){
+                            currWeek.dosesByVaccine.set(vacc, doses - (lastWeek.cumDosesByVaccine.get(vacc) || 0));
+                        }
+                    }
+                    const newWeek = {
+                        vaccineDoses: 0,
+                        partiallyImmunized: 0,
+                        fullyImmunized: 0,
+                        cumVaccineDoses: currWeek.cumVaccineDoses,
+                        cumPartiallyImmunized: currWeek.cumPartiallyImmunized,
+                        cumFullyImmunized: currWeek.cumFullyImmunized,
+                        dosesByVaccine: new Map(),
+                        cumDosesByVaccine: new Map(currWeek.cumDosesByVaccine)
+                    };
+                    lastWeek = currWeek;
+                    currWeek = newWeek;
+                    weeklyVacc.set(yWeek, newWeek);
+                }
+
+                // Set values in current week from array
+                const weekData = weeklyVacc.get(yWeek);
+
+                weekData.cumFullyImmunized = Math.max(weekData.cumFullyImmunized, vaccDay.personen_voll_kumulativ);
+                weekData.cumPartiallyImmunized = Math.max(weekData.cumFullyImmunized, vaccDay.personen_erst_kumulativ);
+                weekData.cumVaccineDoses = Math.max(weekData.cumFullyImmunized, vaccDay.dosen_kumulativ);
+
+                weekData.cumDosesByVaccine.set(this.normalizeVaccineName('biontech'), vaccDay.dosen_biontech_kumulativ);
+                weekData.cumDosesByVaccine.set(this.normalizeVaccineName('astrazeneca'), vaccDay.dosen_astrazeneca_kumulativ);
+                weekData.cumDosesByVaccine.set(this.normalizeVaccineName('moderna'), vaccDay.dosen_moderna_kumulativ);
+            }
+        }
+
+        this.weeklyVaccinations = weeklyVacc;
+        console.log(this.weeklyVaccinations, 'Weekly Vaccination Data');
+        this.runSimulation();
+    }
+
     normalizeVaccineName(name: string): string {
         if (this.vaccineNameTranslationTable.has(name)){
             return this.vaccineNameTranslationTable.get(name);
@@ -273,9 +363,30 @@ export class PlaygroundPageComponent implements OnInit {
             this.buildChart1();
             return;
         }
-
         console.log('Running simulation');
 
+        // Anfang: Berechnung der aktuellen Lagerbestände
+        // (Nicht in der ersten banalen Version)
+
+        let curWeek = this.simulationStartWeek;
+
+        const results: SimulationResultsI = {
+            weeklyData: new Map()
+        };
+
+        // Ganz 2021 simulieren
+        while (curWeek[0] <= 2021){
+            const weekData: SimulationResultsWeekI = {
+                vaccineDoses: 100000,
+                partiallyImmunized: 100000,
+                fullyImmunized: 100000
+            };
+            results.weeklyData.set(curWeek, weekData);
+
+            curWeek = this.nextWeek(curWeek);
+        }
+
+        this.simulationResults = results;
         this.buildChart1();
     }
 
@@ -296,6 +407,31 @@ export class PlaygroundPageComponent implements OnInit {
         const weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1) / 7);
         // Return array of year and week number
         return [d.getUTCFullYear(), weekNo];
+    }
+
+    /**
+     * Get the date of a day in the given week
+     * @param yw The Year Week of the day
+     * @param weekday The day in the week; 1 = Monday, 7 = Sunday; 8 = Monday of the following week
+     */
+    getWeekdayInYearWeek(yw: YearWeek, weekday: number): Date {
+        const [year, week] = yw;
+        const d = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
+        const dow = d.getUTCDay();
+        if (dow <= 4) {
+            d.setDate(d.getDate() - d.getUTCDay() + weekday);
+        }
+        else {
+            d.setDate(d.getDate() - d.getUTCDay() + 7 + weekday);
+        }
+        return d;
+    }
+
+    nextWeek(yw: YearWeek): YearWeek {
+        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 8));
+    }
+    lastWeek(yw: YearWeek): YearWeek {
+        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, -1));
     }
 }
 
@@ -353,9 +489,31 @@ interface DeliveriesData {
     region: string;
 }
 
+interface SimulationResultsI {
+    weeklyData: Map<YearWeek, SimulationResultsWeekI>;
+}
+interface SimulationResultsWeekI {
+    vaccineDoses: number;
+    partiallyImmunized: number;
+    fullyImmunized: number;
+}
+
 type YearWeek = [
     year: number,
     week: number
 ];
+
+
+type WeeklyVaccinationData = Map<YearWeek, VaccinationWeekI>;
+interface VaccinationWeekI {
+    vaccineDoses: number;
+    partiallyImmunized: number;
+    fullyImmunized: number;
+    cumVaccineDoses: number;
+    cumPartiallyImmunized: number;
+    cumFullyImmunized: number;
+    dosesByVaccine: Map<string, number>;
+    cumDosesByVaccine: Map<string, number>;
+}
 
 type WeeklyDeliveryData = Map<YearWeek, Map<string, number>>;
