@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import { DummyChartData } from '../../components/d3-charts/dummy-chart.component';
+import {DataPoint, DataSeries, DummyChartData} from '../../components/d3-charts/dummy-chart.component';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {CsvexportService} from '../../services/csvexport.service';
@@ -101,6 +101,7 @@ export class PlaygroundPageComponent implements OnInit {
     priorities: any;
     vaccineUsage: any;
     vaccinationWillingness: any;
+    simulationStartWeek: YearWeek = [2021, 1];
 
 
 
@@ -118,16 +119,55 @@ export class PlaygroundPageComponent implements OnInit {
         this.loadData();
     }
 
+
+    buildChart1(): void {
+        const newData: DummyChartData = {
+            series: []
+        };
+
+        const vacAtLeastOnce: DataSeries = {
+            data: [],
+            fillColor: '#69b8b4',
+            strokeColor: '#46827f',
+        };
+        const vacFully: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+        };
+
+
+        if (this.vaccinations) {
+            for (const vacDay of this.vaccinations) {
+                vacAtLeastOnce.data.push({
+                    date: vacDay.date,
+                    value: vacDay.personen_erst_kumulativ
+                });
+                vacFully.data.push({
+                    date: vacDay.date,
+                    value: vacDay.personen_voll_kumulativ
+                });
+            }
+        }
+
+
+        newData.series = [
+            vacFully,
+            vacAtLeastOnce
+        ];
+
+        this.data = newData;
+    }
+
     loadData(): void {
         this.http.get('https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
                 this.vaccinations = d3.tsvParse<VaccinationsData, string>(data, d3.autoType);
-                // todo transform data into new format
-                // this.data.vacStart = this.vaccinations[0].date;
-                // this.data.vacData = this.vaccinations.map(x => x.dosen_kumulativ);
                 this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
+                this.simulationStartWeek = this.getWeekNumber(this.lastRefreshVaccinations);
                 // TODO: update chart?
                 console.log(this.vaccinations, 'Impfdashboard.de Vaccinations Data');
+                this.runSimulation();
             });
         this.http.get('https://impfdashboard.de/static/data/germany_deliveries_timeseries_v2.tsv', {responseType: 'text'})
             .subscribe(data => {
@@ -140,21 +180,25 @@ export class PlaygroundPageComponent implements OnInit {
             .subscribe(data => {
                 this.vaccinationWillingness = data;
                 console.log(this.vaccinationWillingness, 'Vaccination Willingness Data');
+                this.runSimulation();
             });
         this.http.get('data/population_deutschland_2019.json')
             .subscribe(data => {
                 this.population = data;
                 console.log(this.population, 'Population Data');
+                this.runSimulation();
             });
         this.http.get('data/prioritaetsgruppen_deutschland.json')
             .subscribe(data => {
                 this.priorities = data;
                 console.log(this.priorities, 'Priority Data');
+                this.runSimulation();
             });
         this.http.get('data/impfstoffeinsatz_deutschland.json')
             .subscribe(data => {
                 this.vaccineUsage = data;
                 console.log(this.vaccineUsage, 'Vaccine Usage Data');
+                this.runSimulation();
             });
         this.http.get<ZislabImpfsimlieferungenDataRow[]>('https://raw.githubusercontent.com/zidatalab/covid19dashboard/master/data/tabledata/impfsim_lieferungen.json')
             .subscribe(data => {
@@ -209,7 +253,7 @@ export class PlaygroundPageComponent implements OnInit {
 
         this.weeklyDeliveriesScenario = deliveries;
         console.log(this.weeklyDeliveriesScenario, 'Weekly Vaccine Delivery Data');
-        this.restartSimulation();
+        this.runSimulation();
     }
 
     normalizeVaccineName(name: string): string {
@@ -220,8 +264,19 @@ export class PlaygroundPageComponent implements OnInit {
         return name;
     }
 
-    restartSimulation(): void {
+    runSimulation(): void {
+        if (!this.vaccinations
+            || !this.vaccinationWillingness
+            || !this.vaccineUsage
+            || this.weeklyDeliveriesScenario.size === 0) {
+            console.warn('Cannot run simulation, some data is still missing');
+            this.buildChart1();
+            return;
+        }
 
+        console.log('Running simulation');
+
+        this.buildChart1();
     }
 
     /**

@@ -31,7 +31,7 @@
                     <h2><strong>Zulassung</strong></h2>
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartSimulation();" labelPosition="before">
+                                          (change)="this.runSimulation();" labelPosition="before">
                             Kontraindizierte beachten (vor allem Alter)
                         </mat-slide-toggle>
                     </div>
@@ -71,7 +71,7 @@
                             </div>
                         </div>
                         <mat-slider [(ngModel)]="this.params.liefermenge" min=".8" max="1.2" step="0.01"
-                                    (change)="this.restartSimulation();"></mat-slider>
+                                    (change)="this.runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
                         <p>Verteilung der Lieferungen:</p>
@@ -92,7 +92,7 @@
 
                     <div class="settings_row" >
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartSimulation();" labelPosition="before">
+                                          (change)="this.runSimulation();" labelPosition="before">
                             Rückstellungen für Zweitimpfungen
                         </mat-slide-toggle>
                     </div>
@@ -106,7 +106,7 @@
                             </div>
                         </div>
                         <mat-slider [(ngModel)]="this.params.addweekstoabstand" min="0" max="12" step="1"
-                                    (change)="this.restartSimulation();"></mat-slider>
+                                    (change)="this.runSimulation();"></mat-slider>
                     </div>
                 </div>
                 <mat-divider></mat-divider>
@@ -115,14 +115,14 @@
 
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
-                                          (change)="this.restartSimulation();" labelPosition="before">
+                                          (change)="this.runSimulation();" labelPosition="before">
                             Nicht Impfwillige beachten
                         </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
                         <p>Impfbereitschaft:
                             <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
-                                        (change)="this.restartSimulation();"></mat-slider>
+                                        (change)="this.runSimulation();"></mat-slider>
                             <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
                         </p>
                     </div>
