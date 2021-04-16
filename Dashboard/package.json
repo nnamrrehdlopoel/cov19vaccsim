@@ -33,6 +33,7 @@
     "plotly.js": "^1.58.4",
     "rxjs": "~6.6.0",
     "tslib": "^2.1.0",
+    "wu": "^2.1.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

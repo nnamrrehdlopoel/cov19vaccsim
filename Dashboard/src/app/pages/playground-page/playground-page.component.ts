@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {CsvexportService} from '../../services/csvexport.service';
 import * as d3 from 'd3';
+import * as wu from 'wu';
 
 @Component({
     selector: 'app-playground-page',
@@ -167,9 +168,48 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
         if (this.simulationResults) {
+            // Attach to last known actual data point
+            const dataBeforeSim = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
+            let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
+            let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
+            if (this.simulationStartWeek === this.getWeekNumber(this.lastRefreshVaccinations)){
+                // Attach line directly
+                const date = this.lastRefreshVaccinations;
+                const dataAttach = this.weeklyVaccinations.get(this.simulationStartWeek);
+                vacAtLeastOnceSim.data.push({
+                    date,
+                    value: dataAttach.cumPartiallyImmunized
+                });
+                vacFullySim.data.push({
+                    date,
+                    value: dataAttach.cumFullyImmunized
+                });
+            }
+            else {
+                // Attach line to week before
+                const date = this.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+                vacAtLeastOnceSim.data.push({
+                    date,
+                    value: cumPartiallyImmunized
+                });
+                vacFullySim.data.push({
+                    date,
+                    value: cumFullyImmunized
+                });
+            }
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
                 const date = this.getWeekdayInYearWeek(yWeek, 8);
+                cumPartiallyImmunized += data.partiallyImmunized;
+                cumFullyImmunized += data.fullyImmunized;
+                vacAtLeastOnceSim.data.push({
+                    date,
+                    value: cumPartiallyImmunized
+                });
+                vacFullySim.data.push({
+                    date,
+                    value: cumFullyImmunized
+                });
             }
         }
 
@@ -358,6 +398,8 @@ export class PlaygroundPageComponent implements OnInit {
         if (!this.vaccinations
             || !this.vaccinationWillingness
             || !this.vaccineUsage
+            || !this.deliveries
+            || this.plannedDeliveries.size === 0
             || this.weeklyDeliveriesScenario.size === 0) {
             console.warn('Cannot run simulation, some data is still missing');
             this.buildChart1();
@@ -374,16 +416,39 @@ export class PlaygroundPageComponent implements OnInit {
             weeklyData: new Map()
         };
 
+        const that = this;
+        function getPartiallyImmunizedForWeek(week: YearWeek): number {
+            if (week < that.simulationStartWeek){
+                return that.weeklyVaccinations.get(week).partiallyImmunized;
+            }
+            return results.weeklyData.get(week).partiallyImmunized;
+        }
+
         // Ganz 2021 simulieren
-        while (ywt(curWeek)[0] <= 2021){
+        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 20){
+            const weekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek));
+            const twoWeekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek, 2));
+
+            if (!weekBeforeDeliveryData){
+                console.warn('dafuq', this.weekBefore(curWeek));
+            }
+
+            const avgDeliveredDoses = (
+                wu(weekBeforeDeliveryData.values()).reduce((x, y) => x + y)
+                + wu(twoWeekBeforeDeliveryData.values()).reduce((x, y) => x + y)
+            ) / 2;
+
+            const required2ndShots = getPartiallyImmunizedForWeek(this.weekBefore(curWeek, 6));
+            const available1stShots = avgDeliveredDoses - required2ndShots;
+
             const weekData: SimulationResultsWeekI = {
-                vaccineDoses: 100000,
-                partiallyImmunized: 100000,
-                fullyImmunized: 100000
+                vaccineDoses: required2ndShots + available1stShots,
+                partiallyImmunized: available1stShots,
+                fullyImmunized: required2ndShots
             };
             results.weeklyData.set(curWeek, weekData);
 
-            curWeek = this.nextWeek(curWeek);
+            curWeek = this.weekAfter(curWeek);
         }
 
         this.simulationResults = results;
@@ -427,11 +492,11 @@ export class PlaygroundPageComponent implements OnInit {
         return d;
     }
 
-    nextWeek(yw: YearWeek): YearWeek {
-        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 8));
+    weekAfter(yw: YearWeek, weeks: number = 1): YearWeek {
+        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 1 + 7 * weeks));
     }
-    lastWeek(yw: YearWeek): YearWeek {
-        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, -1));
+    weekBefore(yw: YearWeek, weeks: number = 1): YearWeek {
+        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 1 - 7 * weeks));
     }
 }
 
@@ -506,7 +571,11 @@ type YearWeekTuple = [
 type YearWeek = string;
 function yws(yw: YearWeekTuple): YearWeek {
     const [y, w] = yw;
-    return y + '/' + w;
+    // String with fixed numerals so comparisons work
+    return y + '/' + w.toLocaleString( 'en-US', {
+        minimumIntegerDigits: 2,
+        useGrouping: false
+    });
 }
 function ywt(yw: YearWeek): YearWeekTuple {
     const [y, w] = yw.split('/');
