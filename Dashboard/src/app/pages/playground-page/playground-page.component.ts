@@ -100,7 +100,7 @@ export class PlaygroundPageComponent implements OnInit {
     weeklyVaccinations: WeeklyVaccinationData = new Map();
     plannedDeliveries: WeeklyDeliveryData = new Map();
     weeklyDeliveriesScenario: WeeklyDeliveryData = new Map();
-    population: any;
+    population: PopulationData;
     priorities: any;
     vaccineUsage: any;
     vaccinationWillingness: any;
@@ -246,7 +246,7 @@ export class PlaygroundPageComponent implements OnInit {
                 console.log(this.vaccinationWillingness, 'Vaccination Willingness Data');
                 this.runSimulation();
             });
-        this.http.get('data/population_deutschland_2019.json')
+        this.http.get<PopulationData>('data/population_deutschland_2019.json')
             .subscribe(data => {
                 this.population = data;
                 console.log(this.population, 'Population Data');
@@ -344,7 +344,6 @@ export class PlaygroundPageComponent implements OnInit {
 
                 // new week has started => calculate differences
                 if (!weeklyVacc.has(yWeek)){
-                    console.log('new Week', yWeek);
                     if (lastWeek) {
                         currWeek.vaccineDoses = currWeek.cumVaccineDoses - lastWeek.cumVaccineDoses;
                         currWeek.partiallyImmunized = currWeek.cumPartiallyImmunized - lastWeek.cumPartiallyImmunized;
@@ -419,13 +418,28 @@ export class PlaygroundPageComponent implements OnInit {
         const that = this;
         function getPartiallyImmunizedForWeek(week: YearWeek): number {
             if (week < that.simulationStartWeek){
-                return that.weeklyVaccinations.get(week).partiallyImmunized;
+                const data = that.weeklyVaccinations.get(week);
+                return data ? data.partiallyImmunized : 0;
             }
             return results.weeklyData.get(week).partiallyImmunized;
         }
 
-        // Ganz 2021 simulieren
-        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 20){
+        const dataBeforeSim = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
+        let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
+
+        const sum = (x: number, y: number): number => x + y;
+        const vaccineDeliveryDelayWeeks = 1;
+
+        const cumulativeDeliveredVaccines = wu(this.weeklyDeliveriesScenario.entries())
+            .filter(x => x[0] < this.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks))
+            .map(x => wu(x[1].values()).reduce(sum))
+            .reduce(sum);
+        let vaccineStockPile = cumulativeDeliveredVaccines
+            - this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks)).cumVaccineDoses;
+
+        console.log('Vaccine Stockpile at beginning of sim', vaccineStockPile);
+        // Simulate
+        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 30){
             const weekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek));
             const twoWeekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek, 2));
 
@@ -433,18 +447,26 @@ export class PlaygroundPageComponent implements OnInit {
                 console.warn('dafuq', this.weekBefore(curWeek));
             }
 
-            const avgDeliveredDoses = (
-                wu(weekBeforeDeliveryData.values()).reduce((x, y) => x + y)
-                + wu(twoWeekBeforeDeliveryData.values()).reduce((x, y) => x + y)
-            ) / 2;
+            vaccineStockPile += wu(weekBeforeDeliveryData.values()).reduce(sum);
 
-            const required2ndShots = getPartiallyImmunizedForWeek(this.weekBefore(curWeek, 6));
-            const available1stShots = avgDeliveredDoses - required2ndShots;
+            const required2ndShots = getPartiallyImmunizedForWeek(this.weekBefore(curWeek, 8 + this.params.addweekstoabstand));
+            const given2ndShots = Math.min(required2ndShots, vaccineStockPile);
+            vaccineStockPile -= given2ndShots;
+            console.log(this.population.data.total, this.params.anteil_impfbereit, cumPartiallyImmunized,
+                (this.population.data.total * this.params.anteil_impfbereit),
+                (this.population.data.total * this.params.anteil_impfbereit) - cumPartiallyImmunized,
+                vaccineStockPile);
+            const given1stShots = Math.min(
+                vaccineStockPile,
+                (this.population.data.total * this.params.anteil_impfbereit) - cumPartiallyImmunized);
+            vaccineStockPile -= given1stShots;
+
+            cumPartiallyImmunized += given1stShots;
 
             const weekData: SimulationResultsWeekI = {
-                vaccineDoses: required2ndShots + available1stShots,
-                partiallyImmunized: available1stShots,
-                fullyImmunized: required2ndShots
+                vaccineDoses: given2ndShots + given1stShots,
+                partiallyImmunized: given1stShots,
+                fullyImmunized: given2ndShots
             };
             results.weeklyData.set(curWeek, weekData);
 
@@ -452,6 +474,7 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
         this.simulationResults = results;
+        console.log(this.simulationResults, 'Simulation Results');
         this.buildChart1();
     }
 
@@ -552,6 +575,17 @@ interface DeliveriesData {
     dosen: number;
     impfstoff: string;
     region: string;
+}
+
+interface PopulationData {
+    description: string;
+    source: string;
+    data: {
+        total: number;
+        by_age: {
+            [index: string]: number
+        }
+    };
 }
 
 interface SimulationResultsI {
