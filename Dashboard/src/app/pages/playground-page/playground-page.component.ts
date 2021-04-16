@@ -103,7 +103,7 @@ export class PlaygroundPageComponent implements OnInit {
     priorities: any;
     vaccineUsage: any;
     vaccinationWillingness: any;
-    simulationStartWeek: YearWeek = [2021, 1];
+    simulationStartWeek: YearWeek = yws([2021, 1]);
 
     simulationResults: SimulationResultsI;
 
@@ -238,7 +238,7 @@ export class PlaygroundPageComponent implements OnInit {
         for (const row of this.zislabImpfsimLieferungenData){
             if (row.Verteilungsszenario === this.params.verteilungszenario) {
                 const vName = this.normalizeVaccineName(row.hersteller);
-                const yWeek: YearWeek = [2021, row.kw];
+                const yWeek: YearWeek = yws([2021, row.kw]);
 
                 // tslint:disable-next-line:no-unused-expression
                 transformedData.has(yWeek) || transformedData.set(yWeek, new Map());
@@ -375,7 +375,7 @@ export class PlaygroundPageComponent implements OnInit {
         };
 
         // Ganz 2021 simulieren
-        while (curWeek[0] <= 2021){
+        while (ywt(curWeek)[0] <= 2021){
             const weekData: SimulationResultsWeekI = {
                 vaccineDoses: 100000,
                 partiallyImmunized: 100000,
@@ -406,7 +406,7 @@ export class PlaygroundPageComponent implements OnInit {
         // @ts-ignore
         const weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1) / 7);
         // Return array of year and week number
-        return [d.getUTCFullYear(), weekNo];
+        return yws([d.getUTCFullYear(), weekNo]);
     }
 
     /**
@@ -415,7 +415,7 @@ export class PlaygroundPageComponent implements OnInit {
      * @param weekday The day in the week; 1 = Monday, 7 = Sunday; 8 = Monday of the following week
      */
     getWeekdayInYearWeek(yw: YearWeek, weekday: number): Date {
-        const [year, week] = yw;
+        const [year, week] = ywt(yw);
         const d = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
         const dow = d.getUTCDay();
         if (dow <= 4) {
@@ -498,10 +498,20 @@ interface SimulationResultsWeekI {
     fullyImmunized: number;
 }
 
-type YearWeek = [
+// cannot use this directly since Map does not support searching with Tuples...
+type YearWeekTuple = [
     year: number,
     week: number
 ];
+type YearWeek = string;
+function yws(yw: YearWeekTuple): YearWeek {
+    const [y, w] = yw;
+    return y + '/' + w;
+}
+function ywt(yw: YearWeek): YearWeekTuple {
+    const [y, w] = yw.split('/');
+    return [parseInt(y, 10), parseInt(w, 10)];
+}
 
 
 type WeeklyVaccinationData = Map<YearWeek, VaccinationWeekI>;
