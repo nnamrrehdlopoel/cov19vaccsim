@@ -3,6 +3,8 @@ import {DataPoint, DataSeries, DummyChartData} from '../../components/d3-charts/
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {CsvexportService} from '../../services/csvexport.service';
+import {YearWeek} from '../../services/calendarweek.service';
+import * as cw from '../../services/calendarweek.service';
 import * as d3 from 'd3';
 import * as wu from 'wu';
 
@@ -106,7 +108,7 @@ export class PlaygroundPageComponent implements OnInit {
     priorities: any;
     vaccineUsage: any;
     vaccinationWillingness: any;
-    simulationStartWeek: YearWeek = yws([2021, 1]);
+    simulationStartWeek: YearWeek = cw.yws([2021, 1]);
 
     simulationResults: ISimulationResults;
 
@@ -179,10 +181,10 @@ export class PlaygroundPageComponent implements OnInit {
 
         if (this.simulationResults) {
             // Attach line to week before
-            let date = this.getWeekdayInYearWeek(this.simulationStartWeek, 1);
-            let dataAttach = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
+            let date = cw.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+            let dataAttach = this.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
             // If Sim start is the current week, attach line directly to week in progress
-            if (this.simulationStartWeek === this.getWeekNumber(this.lastRefreshVaccinations)){
+            if (this.simulationStartWeek === cw.getYearWeekOfDate(this.lastRefreshVaccinations)){
                 date = this.lastRefreshVaccinations;
                 dataAttach = this.weeklyVaccinations.get(this.simulationStartWeek);
             }
@@ -196,7 +198,7 @@ export class PlaygroundPageComponent implements OnInit {
             });
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
-                date = this.getWeekdayInYearWeek(yWeek, 8);
+                date = cw.getWeekdayInYearWeek(yWeek, 8);
                 vacAtLeastOnceSim.data.push({
                     date,
                     value: data.cumPartiallyImmunized
@@ -223,7 +225,7 @@ export class PlaygroundPageComponent implements OnInit {
             .subscribe(data => {
                 this.vaccinations = d3.tsvParse<VaccinationsData, string>(data, d3.autoType);
                 this.lastRefreshVaccinations = this.vaccinations[this.vaccinations.length - 1].date;
-                this.simulationStartWeek = this.getWeekNumber(this.lastRefreshVaccinations);
+                this.simulationStartWeek = cw.getYearWeekOfDate(this.lastRefreshVaccinations);
                 // TODO: update chart?
                 console.log(this.vaccinations, 'Impfdashboard.de Vaccinations Data');
                 this.calculateWeeklyVaccinations();
@@ -273,7 +275,7 @@ export class PlaygroundPageComponent implements OnInit {
         for (const row of this.zislabImpfsimLieferungenData){
             if (row.Verteilungsszenario === this.params.verteilungszenario && row.Bundesland === 'Gesamt') {
                 const vName = this.normalizeVaccineName(row.hersteller);
-                const yWeek: YearWeek = yws([2021, row.kw]);
+                const yWeek: YearWeek = cw.yws([2021, row.kw]);
 
                 // tslint:disable-next-line:no-unused-expression
                 transformedData.has(yWeek) || transformedData.set(yWeek, new Map());
@@ -293,7 +295,7 @@ export class PlaygroundPageComponent implements OnInit {
         // accumulate historical deliveries
         if (this.deliveries) {
             for (const delivery of this.deliveries) {
-                const yWeek = this.getWeekNumber(delivery.date);
+                const yWeek = cw.getYearWeekOfDate(delivery.date);
                 const vName = this.normalizeVaccineName(delivery.impfstoff);
 
                 // tslint:disable-next-line:no-unused-expression
@@ -335,7 +337,7 @@ export class PlaygroundPageComponent implements OnInit {
         if (this.vaccinations) {
             // assumes vaccinations are ordered
             for (const vaccDay of this.vaccinations) {
-                const yWeek = this.getWeekNumber(vaccDay.date);
+                const yWeek = cw.getYearWeekOfDate(vaccDay.date);
 
                 // new week has started => calculate differences
                 if (!weeklyVacc.has(yWeek)){
@@ -419,7 +421,7 @@ export class PlaygroundPageComponent implements OnInit {
             return results.weeklyData.get(week).partiallyImmunized;
         }
 
-        const dataBeforeSim = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
+        const dataBeforeSim = this.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
         let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
         let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
         let cumVaccineDoses = dataBeforeSim.cumVaccineDoses;
@@ -428,7 +430,7 @@ export class PlaygroundPageComponent implements OnInit {
         const vaccineDeliveryDelayWeeks = 1;
 
         const cumulativeDeliveredVaccines = wu(this.weeklyDeliveriesScenario.entries())
-            .filter(x => x[0] < this.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks))
+            .filter(x => x[0] < cw.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks))
             .map(x => wu(x[1].values()).reduce(sum))
             .reduce(sum);
 
@@ -447,10 +449,10 @@ export class PlaygroundPageComponent implements OnInit {
             let i = 0;
             while (pplNeeding2ndShot > 0 && i < 10) {
                 const ppl6Weeks = i < 6 ?
-                    this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek,
+                    this.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek,
                         6 - i)).partiallyImmunized : 0;
                 const ppl10Weeks = i < 10 ?
-                    this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek,
+                    this.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek,
                         10 - i)).partiallyImmunized : 0;
                 let ppl = ppl6Weeks * 0.6 + ppl10Weeks * 0.4;
                 ppl = Math.min(pplNeeding2ndShot, ppl);
@@ -491,11 +493,11 @@ export class PlaygroundPageComponent implements OnInit {
 
         console.log('Vaccine Stockpile at beginning of sim', vaccineStockPile);
         // Simulate
-        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 40){
-            const delayedDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
+        while (cw.ywt(curWeek)[0] < 2021 || cw.ywt(curWeek)[1] < 40){
+            const delayedDeliveryData = this.weeklyDeliveriesScenario.get(cw.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
 
             if (!delayedDeliveryData){
-                console.warn('dafuq', this.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
+                console.warn('dafuq', cw.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
             }
 
             // Add delayed delivery to available vaccines
@@ -547,56 +549,12 @@ export class PlaygroundPageComponent implements OnInit {
             };
             results.weeklyData.set(curWeek, weekData);
 
-            curWeek = this.weekAfter(curWeek);
+            curWeek = cw.weekAfter(curWeek);
         }
 
         this.simulationResults = results;
         console.log(this.simulationResults, 'Simulation Results');
         this.buildChart1();
-    }
-
-    /**
-     * Returns Year and Week in Year for a given date
-     * Source: https://stackoverflow.com/a/6117889
-     */
-    getWeekNumber(d: Date): YearWeek {
-        // Copy date so don't modify original
-        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        // Set to nearest Thursday: current date + 4 - current day number
-        // Make Sunday's day number 7
-        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-        // Get first day of year
-        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-        // Calculate full weeks to nearest Thursday
-        // @ts-ignore
-        const weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1) / 7);
-        // Return array of year and week number
-        return yws([d.getUTCFullYear(), weekNo]);
-    }
-
-    /**
-     * Get the date of a day in the given week
-     * @param yw The Year Week of the day
-     * @param weekday The day in the week; 1 = Monday, 7 = Sunday; 8 = Monday of the following week
-     */
-    getWeekdayInYearWeek(yw: YearWeek, weekday: number): Date {
-        const [year, week] = ywt(yw);
-        const d = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
-        const dow = d.getUTCDay();
-        if (dow <= 4) {
-            d.setDate(d.getDate() - d.getUTCDay() + weekday);
-        }
-        else {
-            d.setDate(d.getDate() - d.getUTCDay() + 7 + weekday);
-        }
-        return d;
-    }
-
-    weekAfter(yw: YearWeek, weeks: number = 1): YearWeek {
-        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 1 + 7 * weeks));
-    }
-    weekBefore(yw: YearWeek, weeks: number = 1): YearWeek {
-        return this.getWeekNumber(this.getWeekdayInYearWeek(yw, 1 - 7 * weeks));
     }
 }
 
@@ -668,26 +626,6 @@ interface PopulationData {
 interface ISimulationResults {
     weeklyData: Map<YearWeek, IVaccinationWeek>;
 }
-
-// cannot use this directly since Map does not support searching with Tuples...
-type YearWeekTuple = [
-    year: number,
-    week: number
-];
-type YearWeek = string;
-function yws(yw: YearWeekTuple): YearWeek {
-    const [y, w] = yw;
-    // String with fixed numerals so comparisons work
-    return y + '/' + w.toLocaleString( 'en-US', {
-        minimumIntegerDigits: 2,
-        useGrouping: false
-    });
-}
-function ywt(yw: YearWeek): YearWeekTuple {
-    const [y, w] = yw.split('/');
-    return [parseInt(y, 10), parseInt(w, 10)];
-}
-
 
 type WeeklyVaccinationData = Map<YearWeek, IVaccinationWeek>;
 interface IVaccinationWeek {
