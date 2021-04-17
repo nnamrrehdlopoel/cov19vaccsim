@@ -60,6 +60,8 @@ export class PlaygroundPageComponent implements OnInit {
     zislabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
 
     data: DummyChartData = {
+        yMin: 0,
+        yMax: 10,
         series: [
             // one series = one line + fill below
             {
@@ -129,6 +131,8 @@ export class PlaygroundPageComponent implements OnInit {
 
     buildChart1(): void {
         const newData: DummyChartData = {
+            yMin: 0,
+            yMax: 10000000,
             series: []
         };
 

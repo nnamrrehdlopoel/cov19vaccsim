@@ -8,6 +8,8 @@ export interface DummyChartConfig {
 }
 
 export interface DummyChartData {
+    yMin: number;
+    yMax: number;
     series: DataSeries[];
 }
 
@@ -51,7 +53,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     updateChart(): void {
-        const margin = {top: 20, right: 40, bottom: 50, left: 80};
+        const margin = {top: 20, right: 10, bottom: 50, left: 30};
         const series = this.data.series;
         const maxValue = d3.max(series.map(s => d3.max(s.data.map(point => point.value))));
         const minValue = d3.min(series.map(s => d3.min(s.data.map(point => point.value))));
@@ -60,14 +62,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
         const yValue = d3
             .scaleLinear()
-            .domain([minValue, maxValue])
+            .domain([this.data.yMin, this.data.yMax])
             .range([this.chartSize.height - margin.bottom, margin.top]);
 
         const xTime = d3
             .scaleTime()
             .domain([minDate, maxDate])
-            .range([margin.left, this.chartSize.width - margin.right])
-            .nice();
+            .range([margin.left, this.chartSize.width - margin.right]);
+            //.nice();
 
         const lineGenerator: d3.Line<DataPoint> = d3
             .line<DataPoint>()
@@ -96,7 +98,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
         this.yAxis
             .attr('transform', `translate(${margin.left}, 0)`)
-            .call(d3.axisLeft(yValue));
+            .call(d3.axisLeft(yValue).tickFormat(d3.format('.0s'))); // .tickPadding(-30));
 
         this.yGrid
             .attr('transform', `translate(${margin.left}, 0)`)
@@ -123,6 +125,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .call(d3
                 .axisBottom<Date>(xTime)
                 .ticks(d3.timeMonth)
+                .tickSizeOuter(0)
                 //.tickSize(-this.chartSize.height)
                 .tickFormat(date => date.toLocaleString('default', {
                     month: 'long',
