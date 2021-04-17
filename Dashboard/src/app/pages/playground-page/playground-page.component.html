@@ -23,14 +23,14 @@
         </mat-card>
     </div>
 
-    <div fxFlex="0.3 0 350px" fxFlex.lt-md="0.5 0 0">
+    <div fxFlex="0.1 0 350px" fxFlex.lt-md="0.5 0 0">
         <mat-card>
             <mat-card-title>Simulationsparameter</mat-card-title>
             <mat-card-content class="settings_card">
                 <div>
                     <h2><strong>Zulassung</strong></h2>
                     <div class="settings_row">
-                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                        <mat-slide-toggle [(ngModel)]="this.params.considerContraindicated"
                                           (change)="this.runSimulation();" labelPosition="before">
                             Kontraindizierte beachten (vor allem Alter)
                         </mat-slide-toggle>
@@ -114,17 +114,20 @@
                     <h2><strong>Impfbereitschaft</strong></h2>
 
                     <div class="settings_row">
-                        <mat-slide-toggle [(ngModel)]="this.params.ruecklage"
+                        <mat-slide-toggle [(ngModel)]="this.params.considerNotWilling"
                                           (change)="this.runSimulation();" labelPosition="before">
                             Nicht Impfwillige beachten
                         </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
-                        <p>Impfbereitschaft:
-                            <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
-                                        (change)="this.runSimulation();"></mat-slider>
-                            <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
-                        </p>
+                        <div fxLayout="row" fxLayoutAlign="space-between center">
+                            <div>Impfbereitschaft:</div>
+                            <div fxFlex="0 0 auto" >
+                                <strong>{{this.params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
+                            </div>
+                        </div>
+                        <mat-slider [(ngModel)]="this.params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
+                                    (change)="this.runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
                         <mat-slide-toggle labelPosition="before">

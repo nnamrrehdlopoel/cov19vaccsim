@@ -106,17 +106,19 @@ export class PlaygroundPageComponent implements OnInit {
     vaccinationWillingness: any;
     simulationStartWeek: YearWeek = yws([2021, 1]);
 
-    simulationResults: SimulationResultsI;
+    simulationResults: ISimulationResults;
 
 
 
     params = {
+        considerContraindicated: true,
+        considerNotWilling: true,
         liefermenge: 1,
         verteilungszenario: this.zislabImpfsimVerteilungszenarien[1],
         ruecklage: false,
         addweekstoabstand: 0,
         impfstoffart: 'alle',
-        anteil_impfbereit: 0.66,
+        anteil_impfbereit: 0.80,
     };
 
     ngOnInit(): void {
@@ -154,6 +156,10 @@ export class PlaygroundPageComponent implements OnInit {
         };
 
 
+        if (this.population){
+            newData.yMax = this.population.data.total;
+        }
+
         if (this.vaccinations) {
             for (const vacDay of this.vaccinations) {
                 vacAtLeastOnce.data.push({
@@ -168,47 +174,32 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
         if (this.simulationResults) {
-            // Attach to last known actual data point
-            const dataBeforeSim = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
-            let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
-            let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
+            // Attach line to week before
+            let date = this.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+            let dataAttach = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
+            // If Sim start is the current week, attach line directly to week in progress
             if (this.simulationStartWeek === this.getWeekNumber(this.lastRefreshVaccinations)){
-                // Attach line directly
-                const date = this.lastRefreshVaccinations;
-                const dataAttach = this.weeklyVaccinations.get(this.simulationStartWeek);
-                vacAtLeastOnceSim.data.push({
-                    date,
-                    value: dataAttach.cumPartiallyImmunized
-                });
-                vacFullySim.data.push({
-                    date,
-                    value: dataAttach.cumFullyImmunized
-                });
+                date = this.lastRefreshVaccinations;
+                dataAttach = this.weeklyVaccinations.get(this.simulationStartWeek);
             }
-            else {
-                // Attach line to week before
-                const date = this.getWeekdayInYearWeek(this.simulationStartWeek, 1);
-                vacAtLeastOnceSim.data.push({
-                    date,
-                    value: cumPartiallyImmunized
-                });
-                vacFullySim.data.push({
-                    date,
-                    value: cumFullyImmunized
-                });
-            }
+            vacAtLeastOnceSim.data.push({
+                date,
+                value: dataAttach.cumPartiallyImmunized
+            });
+            vacFullySim.data.push({
+                date,
+                value: dataAttach.cumFullyImmunized
+            });
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
-                const date = this.getWeekdayInYearWeek(yWeek, 8);
-                cumPartiallyImmunized += data.partiallyImmunized;
-                cumFullyImmunized += data.fullyImmunized;
+                date = this.getWeekdayInYearWeek(yWeek, 8);
                 vacAtLeastOnceSim.data.push({
                     date,
-                    value: cumPartiallyImmunized
+                    value: data.cumPartiallyImmunized
                 });
                 vacFullySim.data.push({
                     date,
-                    value: cumFullyImmunized
+                    value: data.cumFullyImmunized
                 });
             }
         }
@@ -276,7 +267,7 @@ export class PlaygroundPageComponent implements OnInit {
     extractDeliveriesInfo(): void {
         const transformedData: WeeklyDeliveryData = new Map();
         for (const row of this.zislabImpfsimLieferungenData){
-            if (row.Verteilungsszenario === this.params.verteilungszenario) {
+            if (row.Verteilungsszenario === this.params.verteilungszenario && row.Bundesland === 'Gesamt') {
                 const vName = this.normalizeVaccineName(row.hersteller);
                 const yWeek: YearWeek = yws([2021, row.kw]);
 
@@ -316,7 +307,7 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
         this.weeklyDeliveriesScenario = deliveries;
-        console.log(this.weeklyDeliveriesScenario, 'Weekly Vaccine Delivery Data');
+        console.log(this.weeklyDeliveriesScenario, 'Weekly Vaccine Delivery Scenario Data');
         this.runSimulation();
     }
 
@@ -325,8 +316,8 @@ export class PlaygroundPageComponent implements OnInit {
 
         // accumulate historical deliveries
 
-        let lastWeek: VaccinationWeekI;
-        let currWeek: VaccinationWeekI = {
+        let lastWeek: IVaccinationWeek;
+        let currWeek: IVaccinationWeek = {
             vaccineDoses: 0,
             partiallyImmunized: 0,
             fullyImmunized: 0,
@@ -404,14 +395,14 @@ export class PlaygroundPageComponent implements OnInit {
             this.buildChart1();
             return;
         }
-        console.log('Running simulation');
+        console.log('### Running simulation ###');
 
         // Anfang: Berechnung der aktuellen Lagerbestände
         // (Nicht in der ersten banalen Version)
 
         let curWeek = this.simulationStartWeek;
 
-        const results: SimulationResultsI = {
+        const results: ISimulationResults = {
             weeklyData: new Map()
         };
 
@@ -426,6 +417,8 @@ export class PlaygroundPageComponent implements OnInit {
 
         const dataBeforeSim = this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek));
         let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
+        let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
+        let cumVaccineDoses = dataBeforeSim.cumVaccineDoses;
 
         const sum = (x: number, y: number): number => x + y;
         const vaccineDeliveryDelayWeeks = 1;
@@ -434,39 +427,119 @@ export class PlaygroundPageComponent implements OnInit {
             .filter(x => x[0] < this.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks))
             .map(x => wu(x[1].values()).reduce(sum))
             .reduce(sum);
-        let vaccineStockPile = cumulativeDeliveredVaccines
-            - this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek, vaccineDeliveryDelayWeeks)).cumVaccineDoses;
+
+        let vaccineStockPile = cumulativeDeliveredVaccines - dataBeforeSim.cumVaccineDoses;
+
+        // Should be long enough
+        const waitingFor2ndDose: number[] = new Array(100).fill(0);
+
+        {
+            // Distribute people that didn't get their 2nd shot yet onto the waiting list
+            let pplNeeding2ndShot = dataBeforeSim.cumPartiallyImmunized - dataBeforeSim.cumFullyImmunized;
+            console.log('People still needing 2nd shots', pplNeeding2ndShot);
+
+
+            // Forward distribution approach
+            let i = 0;
+            while (pplNeeding2ndShot > 0 && i < 10) {
+                const ppl6Weeks = i < 6 ?
+                    this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek,
+                        6 - i)).partiallyImmunized : 0;
+                const ppl10Weeks = i < 10 ?
+                    this.weeklyVaccinations.get(this.weekBefore(this.simulationStartWeek,
+                        10 - i)).partiallyImmunized : 0;
+                let ppl = ppl6Weeks * 0.6 + ppl10Weeks * 0.4;
+                ppl = Math.min(pplNeeding2ndShot, ppl);
+                waitingFor2ndDose[i] = ppl;
+                pplNeeding2ndShot -= ppl;
+                i++;
+            }
+            /* */
+
+            /*
+            // Backward distribution approach
+            let wlWeek = this.weekBefore(this.simulationStartWeek);
+            let i = 0;
+            while (pplNeeding2ndShot > 0 && i < 6) {
+                const ppl = Math.min(pplNeeding2ndShot,
+                    this.weeklyVaccinations.get(wlWeek).partiallyImmunized);
+                const pplSplit = Math.floor(ppl * 0.7);
+                waitingFor2ndDose[5 - i] += pplSplit;
+                waitingFor2ndDose[10 - i] += ppl - pplSplit;
+                pplNeeding2ndShot -= ppl;
+                i++;
+                wlWeek = this.weekBefore(wlWeek);
+            }
+            /* */
+
+            if (pplNeeding2ndShot > 0) {
+                console.log('8 weeks not enough...', pplNeeding2ndShot);
+                waitingFor2ndDose[0] += pplNeeding2ndShot;
+            }
+            console.log([...waitingFor2ndDose], 'waiting list at beginning of sim', waitingFor2ndDose.reduce(sum), pplNeeding2ndShot);
+        }
+
+        const numContraindicated = wu(Object.entries(this.population.data.by_age))
+            .filter(x => parseInt(x[0], 10) < 18)
+            .map(x => x[1])
+            .reduce(sum);
+        console.log('Contraindicated', numContraindicated);
 
         console.log('Vaccine Stockpile at beginning of sim', vaccineStockPile);
         // Simulate
-        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 30){
-            const weekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek));
-            const twoWeekBeforeDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek, 2));
+        while (ywt(curWeek)[0] < 2021 || ywt(curWeek)[1] < 40){
+            const delayedDeliveryData = this.weeklyDeliveriesScenario.get(this.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
 
-            if (!weekBeforeDeliveryData){
-                console.warn('dafuq', this.weekBefore(curWeek));
+            if (!delayedDeliveryData){
+                console.warn('dafuq', this.weekBefore(curWeek, vaccineDeliveryDelayWeeks));
             }
 
-            vaccineStockPile += wu(weekBeforeDeliveryData.values()).reduce(sum);
+            // Add delayed delivery to available vaccines
+            vaccineStockPile += wu(delayedDeliveryData.values()).reduce(sum) * this.params.liefermenge;
 
-            const required2ndShots = getPartiallyImmunizedForWeek(this.weekBefore(curWeek, 8 + this.params.addweekstoabstand));
-            const given2ndShots = Math.min(required2ndShots, vaccineStockPile);
+            // Give as many 2nd shots as needed
+            const required2ndShots = waitingFor2ndDose.shift();
+            const given2ndShots = Math.min(vaccineStockPile, required2ndShots);
+            waitingFor2ndDose[0] += required2ndShots - given2ndShots; // push to next week if not enough vaccine available
             vaccineStockPile -= given2ndShots;
-            console.log(this.population.data.total, this.params.anteil_impfbereit, cumPartiallyImmunized,
+
+            /*console.log(this.population.data.total, this.params.anteil_impfbereit, cumPartiallyImmunized,
                 (this.population.data.total * this.params.anteil_impfbereit),
                 (this.population.data.total * this.params.anteil_impfbereit) - cumPartiallyImmunized,
-                vaccineStockPile);
-            const given1stShots = Math.min(
-                vaccineStockPile,
-                (this.population.data.total * this.params.anteil_impfbereit) - cumPartiallyImmunized);
+                vaccineStockPile);*/
+
+            // Give as many 1st shots as people or doses available
+            let availablePeople = this.population.data.total;
+            if (this.params.considerContraindicated) {
+                availablePeople -= numContraindicated;
+            }
+            if (this.params.considerNotWilling) {
+                availablePeople *= this.params.anteil_impfbereit;
+            }
+            availablePeople -= cumPartiallyImmunized;
+            let availableVaccineStockPile = vaccineStockPile;
+            if (this.params.ruecklage){
+                availableVaccineStockPile -= waitingFor2ndDose.reduce(sum);
+            }
+            const given1stShots = Math.max(0, Math.min(availableVaccineStockPile, availablePeople));
             vaccineStockPile -= given1stShots;
 
-            cumPartiallyImmunized += given1stShots;
+            // 2st shots go on waiting list to get their 2nd in a few weeks
+            const pplSplit = Math.floor(given1stShots * 0.7);
+            waitingFor2ndDose[5 + this.params.addweekstoabstand] += pplSplit;
+            waitingFor2ndDose[10 + this.params.addweekstoabstand] += given1stShots - pplSplit;
 
-            const weekData: SimulationResultsWeekI = {
+            cumPartiallyImmunized += given1stShots;
+            cumFullyImmunized += given2ndShots;
+            cumVaccineDoses += given1stShots + given2ndShots;
+
+            const weekData: IVaccinationWeek = {
                 vaccineDoses: given2ndShots + given1stShots,
                 partiallyImmunized: given1stShots,
-                fullyImmunized: given2ndShots
+                fullyImmunized: given2ndShots,
+                cumVaccineDoses,
+                cumPartiallyImmunized,
+                cumFullyImmunized,
             };
             results.weeklyData.set(curWeek, weekData);
 
@@ -588,13 +661,8 @@ interface PopulationData {
     };
 }
 
-interface SimulationResultsI {
-    weeklyData: Map<YearWeek, SimulationResultsWeekI>;
-}
-interface SimulationResultsWeekI {
-    vaccineDoses: number;
-    partiallyImmunized: number;
-    fullyImmunized: number;
+interface ISimulationResults {
+    weeklyData: Map<YearWeek, IVaccinationWeek>;
 }
 
 // cannot use this directly since Map does not support searching with Tuples...
@@ -617,16 +685,16 @@ function ywt(yw: YearWeek): YearWeekTuple {
 }
 
 
-type WeeklyVaccinationData = Map<YearWeek, VaccinationWeekI>;
-interface VaccinationWeekI {
+type WeeklyVaccinationData = Map<YearWeek, IVaccinationWeek>;
+interface IVaccinationWeek {
     vaccineDoses: number;
     partiallyImmunized: number;
     fullyImmunized: number;
     cumVaccineDoses: number;
     cumPartiallyImmunized: number;
     cumFullyImmunized: number;
-    dosesByVaccine: Map<string, number>;
-    cumDosesByVaccine: Map<string, number>;
+    dosesByVaccine?: Map<string, number>;
+    cumDosesByVaccine?: Map<string, number>;
 }
 
 type WeeklyDeliveryData = Map<YearWeek, Map<string, number>>;
