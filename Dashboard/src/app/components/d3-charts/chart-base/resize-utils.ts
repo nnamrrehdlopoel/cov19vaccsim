@@ -29,6 +29,7 @@ export function fromResize(element: HTMLElement, ngZone: NgZone): Observable<Res
         // ngZone.run
         //  - make sure to stay in the angular zone
         //  - fixes following bug: after resizing the window, click events on the D3 graph do not trigger change detection
+        // @ts-ignore
         const resizeObserver = new ResizeObserver(() =>
             ngZone.run(() => {
                 subscriber.next({
