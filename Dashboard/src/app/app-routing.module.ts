@@ -5,20 +5,12 @@ import { PlaygroundPageComponent } from './pages/playground-page/playground-page
 import { ProfileComponent } from './pages/profile/profile.component';
 import { StartComponent } from './pages/start/start.component';
 import { AuthGuardService } from './services/auth-guard.service';
-import { PrivateComponent } from './pages/private/private.component'
-import { MethodsComponent } from "./pages/methods/methods.component";
+import { PrivateComponent } from './pages/private/private.component';
+import { MethodsComponent } from './pages/methods/methods.component';
 
 const routes: Routes = [
-  { path: '', component: StartComponent },
-  { path: 'login', component: LoginComponent },
-  {
-    path: 'profile', component: ProfileComponent,
-    canActivate: [AuthGuardService]
-  },
-  {
-    path: 'private', component: PrivateComponent,
-    canActivate: [AuthGuardService]
-  },
+  { path: '', component: PlaygroundPageComponent },
+  { path: 'zi-sim', component: StartComponent },
   {
     path: 'Methoden', component: MethodsComponent,
   },

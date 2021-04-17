@@ -32,24 +32,21 @@
                                 </a>
                             </div>
                             <div>
-                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                                    routerLink="/Methoden">
-                                    <mat-icon class="icon">settings</mat-icon>
-                                    Methoden der Simulation
+                                <a mat-icon-button (click)="drawer.toggle()" routerLink="/zi-sim">
+                                    <mat-icon class="icon">history</mat-icon>
+                                    <span>Original-Algorithmus vom Zi</span>
                                 </a>
                             </div>
                             <div>
-                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
-                                    <mat-icon class="icon">corporate_fare</mat-icon>
-                                    Impressum
+                                <a mat-icon-button (click)="drawer.toggle()" href="https://www.zidatasciencelab.de/cov19vaccsim/">
+                                    <mat-icon class="icon">link</mat-icon>
+                                    <span>Dashboard vom Zi</span>
                                 </a>
                             </div>
                             <div>
-                                <a mat-icon-button (click)="drawer.toggle()" style="color: black;"
-                                    href="https://www.zidatasciencelab.de/covid19dashboard/Impressum.html">
-                                    <mat-icon class="icon">corporate_fare</mat-icon>
-                                    Datenschutzhinweise
+                                <a mat-icon-button (click)="drawer.toggle()" href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim">
+                                    <mat-icon class="icon" svgIcon="github">GitHub</mat-icon>
+                                    <span>Code auf GitHub</span>
                                 </a>
                             </div>
                         </div>
@@ -105,8 +102,12 @@
                     <div fxFlex>
                         <br>
                     </div>
-                    <div style="padding:0.5rem;text-align: center;color:white;">
-                        <p><a href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim">Follow this project on GitHub</a></p>
+                    <div style="padding: 1rem; text-align: center; color:white;">
+                        <a href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim">
+                            <mat-icon svgIcon="github" style="vertical-align: middle; padding-bottom: 2px; margin-right: .6em;">GitHub</mat-icon>
+                            Follow this project on GitHub
+                        </a>
+
                     </div>
                 </div>
 
