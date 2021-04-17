@@ -153,12 +153,63 @@
      fxLayoutGap="1rem" fxLayoutAlign="space-around">
     <div fxFlex="100" >
         <mat-card >
-            <mat-card-title><h1>Methodische Informationen</h1>
+            <mat-card-title><h1>Informationen</h1>
             </mat-card-title>
             <mat-card-subtitle></mat-card-subtitle>
 
             <mat-card-content class="mat-padding">
-                Bla bla bla
+                <h2>Was wie wo</h2>
+                <p>
+                    Ein kleines Projekt um historische Daten, Simulationen für die Zukunft und Infos zur Impfkampagne gegen Covid-19 in Deutschland in einem Dashboard anzuzeigen.<br>
+                    Wenn ihr etwas beitragen oder selbst mit dem Code rumspielen wollt, findet ihr alles auf <a href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim">GitHub</a>.
+                </p>
+
+                <h2>Methodik der Simulation</h2>
+                <p>
+                    Im groben basiert die Simulation auf dem Algorithmus des <a href="https://www.zidatasciencelab.de/cov19vaccsim">Impfdashboards des Zi Datascience Lab</a>.
+                </p>
+                <p>
+                    In kurz:<br>
+                    Für jede Woche werden mit den verfügbaren Impfdosen erst alle angesetzten Zweitimpfungen durchgeführt, mit dem Rest dann so viele Erstimpfungen wie möglich.
+                </p>
+                <h3>
+                    Einschränkungen:
+                </h3>
+                <ul>
+                    <li>
+                        Keine Simulation der Kapazitäten:<br>
+                        Die Annahme ist dass für jede verfügbare Impfdosis für die sich eine impfwillige Person findet sich auch ein Weg in den Arm auftut.
+                        Hausärzte impfen bereits mit und wenn genug da ist tun das sicher gerne auch Betriebsärzte, Tierärzte, etc; zur Not auch in 24h-Schicht.<br>
+                        Eine Kapazitätssimulation findet sich auf dem <a href="https://www.zidatasciencelab.de/cov19vaccsim">Impfdashboards des Zi Datascience Lab</a>
+                    </li>
+                    <li>
+                        Verzögertes Verfügbarwerden der Impfdosen:<br>
+                        Auch wenn Impfdosen offiziell geliefert wurden so müssen sie immer noch an die Einsatzorte verteilt werden.
+                        Daraus ergibt sich seit Beginn der Kampagne eine 1 - 2-wöchige Verzögerung von Lieferung => Arm.
+                        Dies gilt für ziemlich alle Länder und Staaten und wird hier simuliert indem die gelieferten Dosen einfach erst in der darauffolgenden Woche verfügbar werden.
+                    </li>
+                </ul>
+
+
+                <h2>Datenquellen</h2>
+                <ul>
+                    <li>
+                        Historische Impf- und Lieferdaten stammen vom <a href="https://impfdashboard.de">Offiziellen Impfdashboard (impfdashboard.de)</a> und damit vom RKI & BMG.
+                    </li>
+                    <li>
+                        Zukünftige Lieferpläne stammen vom <a href="https://www.zidatasciencelab.de/cov19vaccsim/">Zi Datascience Lab</a> und damit vom BMG.
+                    </li>
+                    <li>
+                        <a href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim/tree/master/Dashboard/data">Sonstige Datensätze (Bevölkerung etc...) finden sich im GitHub Repo</a> mit ihren jeweiligen Quellen.
+                    </li>
+                </ul>
+
+                <h2>Datenschutz usw...</h2>
+                <p>
+                    Dies ist eine statische GitHub Page, dementsprechend gilt auch die <a href="https://docs.github.com/en/github/site-policy/github-privacy-statement">Privacy Policy von GitHub</a>.
+                    Es werden keine Cookies verwendet und keine Tracker oder so eingebunden.
+                    Allerdings werden die oben genannten Datenquellen dynamisch (also vom Browser aus) eingebunden (dadurch sind sie automatisch immer auf dem neuesten Stand).
+                </p>
             </mat-card-content>
 
         </mat-card>
