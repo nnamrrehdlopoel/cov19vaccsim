@@ -97,6 +97,7 @@ export class PlaygroundPageComponent implements OnInit {
                 strokeDasharray: '5, 5'
             },
         ],
+        partitions: []
     };
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
@@ -135,7 +136,12 @@ export class PlaygroundPageComponent implements OnInit {
         const newData: DummyChartData = {
             yMin: 0,
             yMax: 10000000,
-            series: []
+            series: [],
+            partitions: [
+                { size: 10_000_000, fillColor: 'red' },
+                { size: 20_000_000, fillColor: 'green' },
+                { size: 35_000_000, fillColor: 'blue' },
+            ],
         };
 
         const vacAtLeastOnce: DataSeries = {

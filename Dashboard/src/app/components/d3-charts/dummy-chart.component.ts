@@ -11,6 +11,7 @@ export interface DummyChartData {
     yMin: number;
     yMax: number;
     series: DataSeries[];
+    partitions: DataPartition[];
 }
 
 export interface DataSeries {
@@ -23,6 +24,17 @@ export interface DataSeries {
 export interface DataPoint {
     value: number;
     date: Date;
+}
+
+export interface DataPartition {
+    size: number;
+    fillColor: string;
+}
+
+interface PartitionMinMax {
+    min: number;
+    max: number;
+    fillColor: string;
 }
 
 @Component({
@@ -38,6 +50,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private fills: d3.Selection<SVGGElement, unknown, null, undefined>;
     private xGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
         return {};
@@ -50,10 +63,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.lines = this.svg.append('g').classed('lines', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
+        this.rightBar = this.svg.append('g').classed('right-bar', true);
     }
 
     updateChart(): void {
         const margin = {top: 20, right: 10, bottom: 50, left: 30};
+        const rightBarWidth = 30;
+        const rightBarGap = 10;
+        const rightBarX = this.chartSize.width - margin.right - rightBarWidth;
         const series = this.data.series;
         const maxValue = d3.max(series.map(s => d3.max(s.data.map(point => point.value))));
         const minValue = d3.min(series.map(s => d3.min(s.data.map(point => point.value))));
@@ -68,7 +85,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         const xTime = d3
             .scaleTime()
             .domain([minDate, maxDate])
-            .range([margin.left, this.chartSize.width - margin.right]);
+            .range([margin.left, rightBarX - rightBarGap]);
             //.nice();
 
         const lineGenerator: d3.Line<DataPoint> = d3
@@ -105,7 +122,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .call(d3
                 .axisLeft(yValue)
                 .ticks(5)
-                .tickSize(-this.chartSize.width)
+                .tickSize(-(this.chartSize.width - margin.left - margin.right - rightBarWidth))
                 .tickFormat(_ => '')
             );
 
@@ -131,6 +148,16 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     month: 'long',
                 }))
             );
+
+        this.rightBar
+            .selectAll('rect')
+            .data(this.mapPartitions(this.data.partitions))
+            .join('rect')
+            .attr('x', rightBarX)
+            .attr('y', p => yValue(p.max))
+            .attr('width', rightBarWidth)
+            .attr('height', p => yValue(p.min) - yValue(p.max))
+            .attr('fill', p => p.fillColor);
     }
 
     /**
@@ -150,6 +177,21 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 { ...s.data[s.data.length - 1], value: minValue },
             ]
         };
+    }
+
+    private mapPartitions(partitions: DataPartition[]) {
+        const result: PartitionMinMax[] = [];
+        let min = 0;
+        for (const p of partitions) {
+            const max = min + p.size;
+            result.push({
+                min,
+                max,
+                fillColor: p.fillColor,
+            });
+            min = max;
+        }
+        return result;
     }
 
 }
