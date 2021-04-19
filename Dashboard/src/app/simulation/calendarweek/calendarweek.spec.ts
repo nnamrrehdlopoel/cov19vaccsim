@@ -1,22 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import * as cw from './calendarweek.service';
+import * as cw from './calendarweek';
 
-/*import { CalendarweekService } from './calendarweek.service';
 
-describe('CalendarweekService', () => {
-  let service: CalendarweekService;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(CalendarweekService);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});*/
-
-describe('CalendarweekService', () => {
+describe('Calendarweek', () => {
     const firstWeek2021: cw.YearWeek = cw.getYearWeekOfDate(new Date(Date.UTC(2021, 0, 4)));
     const tenthWeek2021: cw.YearWeek = cw.getYearWeekOfDate(new Date(Date.UTC(2021, 2, 10)));
     const lastWeek2020: cw.YearWeek = cw.getYearWeekOfDate(new Date(Date.UTC(2021, 0, 1)));

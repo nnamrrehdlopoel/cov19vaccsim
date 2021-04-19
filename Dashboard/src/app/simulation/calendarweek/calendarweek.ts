@@ -1,13 +1,4 @@
 
-/*import { Injectable } from '@angular/core';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class CalendarweekService {
-
-  constructor() { }
-}*/
 /** YearWeek Tuple: Tuple of Year and Week number
  * cannot use this directly since Map does not support searching with Tuples... <br>
  * => default type used is the YearWeek string.

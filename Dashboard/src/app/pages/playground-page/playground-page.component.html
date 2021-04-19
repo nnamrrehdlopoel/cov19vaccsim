@@ -9,7 +9,7 @@
         <mat-card>
             <mat-card-title><h1>Stand der Impfkampagne</h1>
             </mat-card-title>
-            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{lastRefreshDeliveries | date:'shortDate'}}), Kapazität lt. GMK (Stand {{lastRefreshCapacity | date:'shortDate'}})</mat-card-subtitle>
+            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>
 
             <mat-card-content class="mat-padding">
 
@@ -30,7 +30,7 @@
                 <div>
                     <h2><strong>Zulassung</strong></h2>
                     <div class="settings_row">
-                        <mat-slide-toggle [(ngModel)]="params.considerContraindicated"
+                        <mat-slide-toggle [(ngModel)]="simulation.params.considerContraindicated"
                                           (change)="runSimulation();" labelPosition="before">
                             Kontraindizierte beachten (vor allem Alter)
                         </mat-slide-toggle>
@@ -67,18 +67,18 @@
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Liefermenge:</div>
                             <div fxFlex="0 0 auto" >
-                                <strong>{{params.liefermenge*100 | number:'1.0-0'}} %</strong>
+                                <strong>{{simulation.params.deliveryAmountFactor*100 | number:'1.0-0'}} %</strong>
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="params.liefermenge" min=".8" max="1.2" step="0.01"
+                        <mat-slider [(ngModel)]="simulation.params.deliveryAmountFactor" min=".8" max="1.2" step="0.01"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
                         <p>Verteilung der Lieferungen:</p>
                         <div style="margin-left: 1.5rem;">
-                            <mat-radio-group class="my-radio-group" [(ngModel)]="params.verteilungszenario"
-                                             (change)="extractDeliveriesInfo();">
-                                <ng-container *ngFor="let szenario of zislabImpfsimVerteilungszenarien">
+                            <mat-radio-group class="my-radio-group" [(ngModel)]="simulation.params.deliveryScenario"
+                                             (change)="runSimulation();">
+                                <ng-container *ngFor="let szenario of availableDeliveryScenarios">
                                     <mat-radio-button class="my-radio-button" [value]="szenario">{{szenario}}
                                     </mat-radio-button><br/>
                                 </ng-container>
@@ -91,7 +91,7 @@
                     <h2><strong>Impforganisation</strong></h2>
 
                     <div class="settings_row" >
-                        <mat-slide-toggle [(ngModel)]="params.ruecklage"
+                        <mat-slide-toggle [(ngModel)]="simulation.params.keep2ndDosesBack"
                                           (change)="runSimulation();" labelPosition="before">
                             Rückstellungen für Zweitimpfungen
                         </mat-slide-toggle>
@@ -100,12 +100,12 @@
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Abstand Erst- zu Zweitimpfung:</div>
                             <div fxFlex="0 0 auto" >
-                                <span *ngIf="params.addweekstoabstand==0"> laut STIKO</span>
-                                <span *ngIf="params.addweekstoabstand>0"><strong>{{params.addweekstoabstand}}
+                                <span *ngIf="simulation.params.extraIntervalWeeks==0"> laut STIKO</span>
+                                <span *ngIf="simulation.params.extraIntervalWeeks>0"><strong>{{simulation.params.extraIntervalWeeks}}
                                     Wochen länger</strong></span>
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="params.addweekstoabstand" min="0" max="12" step="1"
+                        <mat-slider [(ngModel)]="simulation.params.extraIntervalWeeks" min="0" max="12" step="1"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                     <h2><strong>Impfbereitschaft</strong></h2>
 
                     <div class="settings_row">
-                        <mat-slide-toggle [(ngModel)]="params.considerNotWilling"
+                        <mat-slide-toggle [(ngModel)]="simulation.params.considerNotWilling"
                                           (change)="runSimulation();" labelPosition="before">
                             Nicht Impfwillige beachten
                         </mat-slide-toggle>
@@ -123,10 +123,10 @@
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Impfbereitschaft:</div>
                             <div fxFlex="0 0 auto" >
-                                <strong>{{params.anteil_impfbereit*100 | number:'1.0-0'}} % </strong>impfbereit
+                                <strong>{{simulation.params.fractionWilling*100 | number:'1.0-0'}} % </strong>impfbereit
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="params.anteil_impfbereit" min=".5" max="1.0" step="0.05"
+                        <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.05"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
