@@ -1,8 +1,8 @@
 import {ISimulationParameters} from './simulation';
 import {DataloaderService} from '../services/dataloader.service';
+import {sum} from './vaccine-map-helper';
 
 
-export const sum = (x: number, y: number): number => x + y;
 
 export interface PopulationPartition {
     id: string;

@@ -1,6 +1,8 @@
 import {YearWeek} from '../calendarweek/calendarweek';
 
 
+export type VaccineNumbers = Map<string, number>;
+
 export interface ISimulationResults {
     weeklyData: Map<YearWeek, IVaccinationWeek>;
 }
@@ -13,8 +15,18 @@ export interface IVaccinationWeek {
     cumVaccineDoses: number;
     cumPartiallyImmunized: number;
     cumFullyImmunized: number;
-    dosesByVaccine?: Map<string, number>;
-    cumDosesByVaccine?: Map<string, number>;
+    dosesByVaccine?: VaccineNumbers;
+    cumDosesByVaccine?: VaccineNumbers;
 }
 
-export type WeeklyDeliveryData = Map<YearWeek, Map<string, number>>;
+export type WeeklyDeliveryData = Map<YearWeek, IDeliveryWeek>;
+export interface IDeliveryWeek {
+    dosesByVaccine: VaccineNumbers;
+    cumDosesByVaccine: VaccineNumbers;
+}
+export function emptyDeliveryWeek(): IDeliveryWeek {
+    return {
+        dosesByVaccine: new Map(),
+        cumDosesByVaccine: new Map(),
+    };
+}

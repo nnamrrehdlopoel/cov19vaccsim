@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import {DeliveriesData, VaccinationsData, ZislabImpfsimlieferungenDataRow} from './data-interfaces/raw-data.interfaces';
 import {
+    emptyDeliveryWeek,
     IVaccinationWeek,
     WeeklyDeliveryData,
     WeeklyVaccinationData
@@ -9,21 +10,38 @@ import {getYearWeekOfDate, YearWeek, yws} from './calendarweek/calendarweek';
 import {normalizeVaccineName} from './data-interfaces/vaccine-names';
 
 
+/**
+ * Recalculates the cumulative weekly deliveries;
+ * assumes an ascending order of the map.
+ * Modifies the parameter in place
+ */
+export function recalculateCumulativeWeeklyDeliveries(weeklyDeliveries: WeeklyDeliveryData): void {
+    const cumulativeDeliveries = new Map();
+    // assumes increasing order
+    for (const entry of weeklyDeliveries.values()) {
+        for (const [vName, delivery] of entry.dosesByVaccine.entries()){
+            cumulativeDeliveries.set(vName, (cumulativeDeliveries.get(vName) || 0) + delivery);
+        }
+        entry.cumDosesByVaccine = new Map(cumulativeDeliveries); // copy while the cumulative variable gets updated
+    }
+}
+
 export function calculateWeeklyDeliveries(deliveries: d3.DSVParsedArray<DeliveriesData>): WeeklyDeliveryData {
     const weeklyDeliveries: WeeklyDeliveryData = new Map();
 
-    // accumulate historical deliveries
+    // aggregate historical deliveries into weekly data
     for (const delivery of deliveries) {
         const yWeek = getYearWeekOfDate(delivery.date);
         const vName = normalizeVaccineName(delivery.impfstoff);
 
         // tslint:disable-next-line:no-unused-expression
-        weeklyDeliveries.has(yWeek) || weeklyDeliveries.set(yWeek, new Map());
+        weeklyDeliveries.has(yWeek) || weeklyDeliveries.set(yWeek, emptyDeliveryWeek());
         const r = weeklyDeliveries.get(yWeek);
-        r.set(vName, (r.get(vName) || 0) + delivery.dosen);
+        r.dosesByVaccine.set(vName, (r.dosesByVaccine.get(vName) || 0) + delivery.dosen);
     }
 
-    // this.weeklyDeliveriesScenario = weeklyDeliveries;
+    recalculateCumulativeWeeklyDeliveries(weeklyDeliveries);
+
     console.log(weeklyDeliveries, 'Weekly Vaccine Delivery Data');
     return weeklyDeliveries;
 }
@@ -104,12 +122,13 @@ export function extractDeliveriesInfo(
             const yWeek: YearWeek = yws([2021, row.kw]);
 
             // tslint:disable-next-line:no-unused-expression
-            transformedData.has(yWeek) || transformedData.set(yWeek, new Map());
+            transformedData.has(yWeek) || transformedData.set(yWeek, emptyDeliveryWeek());
             const r = transformedData.get(yWeek);
-            r.set(vName, (r.get(vName) || 0) + row.dosen_kw);
+            r.dosesByVaccine.set(vName, (r.dosesByVaccine.get(vName) || 0) + row.dosen_kw);
         }
     }
 
+    recalculateCumulativeWeeklyDeliveries(transformedData);
     // this.plannedDeliveries = transformedData;
     console.log(transformedData, 'Vaccine Delivery Plan Data');
 
@@ -126,6 +145,7 @@ export function mergeWeeklyDeliveryScenario(historical: WeeklyDeliveryData, plan
         }
     }
 
+    recalculateCumulativeWeeklyDeliveries(weeklyDeliveries);
     console.log(weeklyDeliveries, 'Weekly Vaccine Delivery Scenario Data');
     return weeklyDeliveries;
 }

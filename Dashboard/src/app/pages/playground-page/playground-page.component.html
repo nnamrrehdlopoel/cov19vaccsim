@@ -7,12 +7,10 @@
 
     <div fxFlex="1 0 600px" fxFlex.lt-md="1 1 0" >
         <mat-card>
-            <mat-card-title><h1>Stand der Impfkampagne</h1>
+            <mat-card-title>
+                <h1>Impfkampagne in Deutschland</h1>
             </mat-card-title>
-            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>
-
-            <mat-card-content class="mat-padding">
-
+            <mat-card-content>
                 <app-dummy-chart
                     class="dummy-chart"
                     style="width: 100%"
@@ -20,6 +18,7 @@
                 ></app-dummy-chart>
             </mat-card-content>
 
+            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>
         </mat-card>
     </div>
 
@@ -128,17 +127,6 @@
                         </div>
                         <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.05"
                                     (change)="runSimulation();"></mat-slider>
-                    </div>
-                    <div class="settings_row">
-                        <mat-slide-toggle labelPosition="before">
-                            A toggle test
-                        </mat-slide-toggle>
-                    </div>
-                    <div class="settings_row">
-                        <mat-checkbox
-                            class="example-margin" labelPosition="before">
-                            I'm a checkbox
-                        </mat-checkbox>
                     </div>
                 </div>
             </mat-card-content>
