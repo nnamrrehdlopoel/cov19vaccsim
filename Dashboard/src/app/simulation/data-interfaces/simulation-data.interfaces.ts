@@ -17,6 +17,7 @@ export interface IVaccinationWeek {
     cumFullyImmunized: number;
     dosesByVaccine?: VaccineNumbers;
     cumDosesByVaccine?: VaccineNumbers;
+    vaccineStockPile ?: VaccineNumbers;
 }
 
 export type WeeklyDeliveryData = Map<YearWeek, IDeliveryWeek>;

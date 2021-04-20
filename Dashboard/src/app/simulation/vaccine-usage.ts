@@ -1,6 +1,6 @@
 import {YearWeek} from './calendarweek/calendarweek';
 import {DataloaderService} from '../services/dataloader.service';
-import {normalizeVaccineName} from './data-interfaces/vaccine-names';
+import {normalizeVaccineName, vaccineNames} from './data-interfaces/vaccine-names';
 
 
 export class VaccineUsage {
@@ -30,5 +30,9 @@ export class VaccineUsage {
     isVaccineUsed(week: YearWeek, vName: string): boolean {
         // TODO: currently static
         return true;
+    }
+
+    getVaccinesPriorityList(): string[] {
+        return Object.keys(vaccineNames);
     }
 }

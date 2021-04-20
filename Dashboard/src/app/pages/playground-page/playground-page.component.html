@@ -90,10 +90,14 @@
                     <h2><strong>Impforganisation</strong></h2>
 
                     <div class="settings_row" >
-                        <mat-slide-toggle [(ngModel)]="simulation.params.keep2ndDosesBack"
-                                          (change)="runSimulation();" labelPosition="before">
-                            Rückstellungen für Zweitimpfungen
-                        </mat-slide-toggle>
+                        <div fxLayout="row" fxLayoutAlign="space-between center">
+                            <div>Rückstellungen für Zweitimpfungen:</div>
+                            <div fxFlex="0 0 auto" >
+                                <strong>{{simulation.params.keep2ndDosesBack*100 | number:'1.0-0'}} % </strong>
+                            </div>
+                        </div>
+                        <mat-slider [(ngModel)]="simulation.params.keep2ndDosesBack" min="0" max="1.0" step="0.05"
+                                    (change)="runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row">
                         <div fxLayout="row" fxLayoutAlign="space-between center">
@@ -115,7 +119,13 @@
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerNotWilling"
                                           (change)="runSimulation();" labelPosition="before">
-                            Nicht Impfwillige beachten
+                            Impfunwillige beachten
+                        </mat-slide-toggle>
+                    </div>
+                    <div class="settings_row">
+                        <mat-slide-toggle [(ngModel)]="simulation.params.considerHesitating"
+                                          (change)="runSimulation();" labelPosition="before">
+                            Impfzögerliche beachten
                         </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
@@ -125,7 +135,7 @@
                                 <strong>{{simulation.params.fractionWilling*100 | number:'1.0-0'}} % </strong>impfbereit
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.05"
+                        <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.01"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
                 </div>
@@ -177,11 +187,27 @@
                         Dies gilt für ziemlich alle Länder und Staaten und wird hier simuliert indem die gelieferten Dosen einfach erst in der darauffolgenden Woche verfügbar werden.
                     </li>
                     <li>
+                        Zweitimpfungen:<br>
+                        Zweitimpfungen werden entsprechend der RKI-Empfehlung angesetzt, allerdings ist die Warteschlange aus den historischen Daten nicht ganz berechenbar:<br>
+                        Während für jede Woche die insgesamt Erstgeimpften bekannt sind, sind diese Zahlen für die einzelnen Impfstoffe,
+                        die ja unterschiedliche Abstände zur Zweitimpfung haben, nicht verfügbar.
+                        Hier wird einfach das identische Verhältnis für alle Impfstoffe angesetzt was sicher nicht ganz korrekt ist.
+                    </li>
+                    <li>
                         Aufteilung der Bevölkerung:<br>
                         Um den Teil der Bevölkerung zu simulieren, der die Impfung erhalten wird, werden zunächst die Kontraindizierten abgezogen.
                         Dies sind vor allem alle unter 16 jährigen da bisher keiner der Impfstoffe für diese Altersgruppe zugelassen wurde.
                         Anschließend wird vom Rest der Bevölkerung der Anteil Impfunwilliger abgezogen.
-                        Dies ist für die meisten Berechnungen sinnvoll, insbesondere da die Umfragen zur Impfwilligkeit sich meist auf die volljährige Bevölkerung beziehen und dies auch diejenigen sind für die die Impfstoffe aktuell zugelassen sind.
+                        Dies ist für die meisten Berechnungen sinnvoll, insbesondere da die Umfragen zur Impfwilligkeit sich meist
+                        auf die volljährige Bevölkerung beziehen und dies auch diejenigen sind für die die Impfstoffe aktuell zugelassen sind.
+                    </li>
+                    <li>
+                        Impfzögerliche:<br>
+                        Gegen Ende der Impfkampagne wird diese deutlich langsamer, da sich immer weniger impfwillige Leute finden.
+                        Dies wird hier wie folgt simuliert:<br>
+                        Während von den Impfwilligen jede Woche 100% bereit wären und von den Impfunwilligen 0%,
+                        ist dies bei den Impfzögerlichen ein fließender Übergang zwischen 50% und 10%.
+                        Die Zahlen sind komplett aus der Luft gegriffen weil der Plot dann schön aussieht.
                     </li>
                 </ul>
 

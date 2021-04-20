@@ -14,17 +14,18 @@ import {
     extractDeliveriesInfo,
     mergeWeeklyDeliveryScenario, recalculateCumulativeWeeklyDeliveries
 } from './weekly-data-converter';
-import {VaccinationWillingnessPartitioner, PopulationPartition} from './populationPartitionings';
-import {sum, sub, vNM, v} from './vaccine-map-helper';
+import {CosmoVaccinationWillingnessPartitioner, PopulationPartition} from './populationPartitionings';
+import {sum, sub, vNM, v, mul} from './vaccine-map-helper';
 import {VaccineUsage} from './vaccine-usage';
 
 
 export interface ISimulationParameters {
     considerContraindicated: boolean;
     considerNotWilling: boolean;
+    considerHesitating: boolean;
     deliveryAmountFactor: number;
     deliveryScenario: string;
-    keep2ndDosesBack: boolean;
+    keep2ndDosesBack: number;
     extraIntervalWeeks: number;
     fractionWilling: number;
 }
@@ -55,14 +56,15 @@ export class BasicSimulation implements VaccinationSimulation {
     params: ISimulationParameters = {
         considerContraindicated: true,
         considerNotWilling: true,
+        considerHesitating: true,
         deliveryAmountFactor: 1,
         deliveryScenario: zislabImpfsimVerteilungszenarien[1],
-        keep2ndDosesBack: false,
+        keep2ndDosesBack: 0,
         extraIntervalWeeks: 0,
         fractionWilling: 0.80,
     };
 
-    willingness = new VaccinationWillingnessPartitioner(this.dataloader);
+    willingness = new CosmoVaccinationWillingnessPartitioner(this.dataloader);
     vaccineUsage = new VaccineUsage(this.dataloader);
 
     partitionings = {
@@ -229,17 +231,54 @@ export class BasicSimulation implements VaccinationSimulation {
             if (this.params.considerNotWilling) {
                 availablePeople *= this.params.fractionWilling;
             }
-            availablePeople -= cumPartiallyImmunized;
+            if (this.params.considerHesitating) {
+                const fractionHesitating = this.willingness.getHesitatinglyWillingOfWillingFraction();
+                const hesitatingPeople = availablePeople * fractionHesitating;
+                const ppl = availablePeople - cumPartiallyImmunized;
+
+                // People that are definitely willing to be vaccinated
+                availablePeople = Math.max(0, ppl - hesitatingPeople);
+
+                // No more willing people => vaccinations start to slow down
+
+                // Simulation here is that you can at max vaccinate 30% of the hesitating people every week
+                // availablePeople += Math.min(ppl, hesitatingPeople) * 0.3;
+
+                // Simulation here is that the hesitating fraction is smooth from max willingness => min willingness
+                // => average willingness can be calculated via triangle equation
+                const maxWill = 0.5;
+                const minWill = 0.1;
+                const availableHesitatingPeople = Math.min(ppl, hesitatingPeople);
+                const frac = availableHesitatingPeople / hesitatingPeople;
+                availablePeople += availableHesitatingPeople *
+                    ((frac * (maxWill - minWill) / 2) + minWill);
+            }else{
+                availablePeople -= cumPartiallyImmunized;
+            }
             let availableVaccineStockPile = vaccineStockPile;
             if (this.params.keep2ndDosesBack){
+                // subtract people that are still waiting for their 2nd dosis
                 availableVaccineStockPile = v(availableVaccineStockPile, sub,
-                    waitingFor2ndDose.reduce((a, b) => v(a, sum, b))
+                    v(
+                        waitingFor2ndDose.reduce((a, b) => v(a, sum, b)),
+                        mul, this.params.keep2ndDosesBack
+                    )
                 );
+                // to not violate the condition after this current week, we can only give so much
+                availableVaccineStockPile = v(availableVaccineStockPile, mul, 1 - (this.params.keep2ndDosesBack / 2));
             }
             // constrain given shots by available people but not less than 0
-            const given1stShots = v(
+            /*const given1stShots = v(
                 v(availableVaccineStockPile, Math.min, Math.floor(availablePeople / availableVaccineStockPile.size)),
-                Math.max, 0);
+                Math.max, 0);*/
+            const given1stShots = new Map();
+            for (const vName of this.vaccineUsage.getVaccinesPriorityList()){
+                if (availableVaccineStockPile.has(vName)){
+                    const shots = Math.max(0, Math.min(availableVaccineStockPile.get(vName), availablePeople));
+                    given1stShots.set(vName, shots);
+                    availablePeople -= shots;
+                }
+            }
             // Remove given from stock pile
             vaccineStockPile = v(vaccineStockPile, sub, given1stShots);
 
@@ -276,7 +315,8 @@ export class BasicSimulation implements VaccinationSimulation {
                 cumPartiallyImmunized,
                 cumFullyImmunized,
                 dosesByVaccine,
-                cumDosesByVaccine
+                cumDosesByVaccine,
+                vaccineStockPile
             };
             results.weeklyData.set(curWeek, weekData);
 
@@ -303,6 +343,7 @@ export class BasicSimulation implements VaccinationSimulation {
         if (!this.plannedDeliveries || this.params.deliveryScenario !== this.currentDeliveryScenario){
             this.plannedDeliveries = extractDeliveriesInfo(this.dataloader.zislabImpfsimLieferungenData, this.params.deliveryScenario);
             this.weeklyDeliveriesScenario = mergeWeeklyDeliveryScenario(this.weeklyDeliveries, this.plannedDeliveries);
+            this.currentDeliveryScenario = this.params.deliveryScenario;
         }
         return true;
     }

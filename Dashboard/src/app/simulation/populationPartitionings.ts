@@ -13,16 +13,35 @@ export interface PopulationPartition {
 // tslint:disable-next-line:no-empty-interface
 export interface PopulationPartitioner {}
 
+export interface VaccinationWillingnessPartitioner {
+    getUnwillingFraction(): number;
+    getHesitatinglyWillingFraction(): number;
+    getHesitatinglyWillingOfWillingFraction(): number;
+    getUnwillingPartition(): PopulationPartition[];
+    addUnwillingPartition(partitions: PopulationPartition[]): PopulationPartition[];
+    addWillingnessPartitions(partitions: PopulationPartition[], excludingUnwilling): PopulationPartition[];
+}
 
-export class VaccinationWillingnessPartitioner implements PopulationPartitioner {
+export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillingnessPartitioner {
     constructor(
         private dataloader: DataloaderService) {
     }
 
     getUnwillingFraction(): number {
         const cosmoData = this.dataloader.vaccinationWillingness.data['2021-04-06'].prozente;
-
         return cosmoData['2'] + cosmoData['1'];
+    }
+
+    getHesitatinglyWillingFraction(): number {
+        const cosmoData = this.dataloader.vaccinationWillingness.data['2021-04-06'].prozente;
+        return cosmoData['4'] + cosmoData['3'];
+    }
+
+    /** Returns the fraction of the people willing to get vaccinated that only hesitantly does so */
+    getHesitatinglyWillingOfWillingFraction(): number {
+        const unwillingFraction = this.getUnwillingFraction();
+        const ratherUnwillingFraction = this.getHesitatinglyWillingFraction();
+        return ratherUnwillingFraction / (1 - unwillingFraction);
     }
 
     getUnwillingPartition(): PopulationPartition[] {
