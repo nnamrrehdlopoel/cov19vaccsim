@@ -70,11 +70,84 @@ export interface DeliveriesData {
  */
 export interface PopulationData {
     description: string;
-    source: string;
+    source: string | string[];
     data: {
         total: number;
         by_age: {
-            [index: string]: number
+            [age: string]: number
+        }
+    };
+}
+
+/**
+ * Interface of Vaccination Willingness Data from data folder
+ */
+export interface CosmoWillingnessData {
+    description: string;
+    source: string | string[];
+    detail: string;
+    data: {
+        [date: string]: {
+            'prozente': {
+                '7': number;
+                '6': number;
+                '5': number;
+                '4': number;
+                '3': number;
+                '2': number;
+                '1': number;
+            },
+            'mittel_nach_alter': {
+                '18-29': number;
+                '30-49': number;
+                '50-64': number;
+                '65-74': number;
+            }
+        }
+    };
+}
+
+
+export interface PriorityGroup {
+    description: string;
+    source: string | string[];
+    'gruppen': {
+        [group: string]: number
+    };
+    'impfbereitschaft': {
+        description: string;
+        source: string | string[];
+        'gruppen': {
+            [group: string]: number
+        }
+    };
+}
+
+/**
+ * Interface of Priority Group Data from data folder
+ */
+export interface PriorityGroupsData {
+    description: string;
+    source: string | string[];
+    data: {
+        [grouping: string]: PriorityGroup
+    };
+}
+
+/**
+ * Interface of Vaccine Usage Data from data folder
+ */
+export interface VaccineUsageData {
+    description: string;
+    source: string | string[];
+    data: {
+        [vaccine: string]: {
+            [date: string]: {
+                ages: string;
+                '2nd_dose_weeks': string;
+                description: string;
+                source: string | string[];
+            }
         }
     };
 }

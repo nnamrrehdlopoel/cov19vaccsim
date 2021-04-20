@@ -2,9 +2,10 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import * as d3 from 'd3';
 import {
+    CosmoWillingnessData,
     DeliveriesData,
-    PopulationData,
-    VaccinationsData,
+    PopulationData, PriorityGroupsData,
+    VaccinationsData, VaccineUsageData,
     ZislabImpfsimlieferungenDataRow
 } from '../simulation/data-interfaces/raw-data.interfaces';
 import {Observable} from 'rxjs';
@@ -26,9 +27,9 @@ export class DataloaderService {
     deliveries: d3.DSVParsedArray<DeliveriesData>;
     zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[];
     population: PopulationData;
-    priorities: any;
-    vaccineUsage: any;
-    vaccinationWillingness: any;
+    priorities: PriorityGroupsData;
+    vaccineUsage: VaccineUsageData;
+    vaccinationWillingness: CosmoWillingnessData;
 
     loadData(): Observable<any> {
         return new Observable<any>((obs) => {
@@ -52,7 +53,7 @@ export class DataloaderService {
                     });
             }
             if (!this.vaccinationWillingness) {
-                this.http.get('data/cosmo-impfbereitschaft.json')
+                this.http.get<CosmoWillingnessData>('data/cosmo-impfbereitschaft.json')
                     .subscribe(data => {
                         this.vaccinationWillingness = data;
                         console.log(this.vaccinationWillingness, 'Vaccination Willingness Data');
@@ -68,7 +69,7 @@ export class DataloaderService {
                     });
             }
             if (!this.priorities) {
-                this.http.get('data/prioritaetsgruppen_deutschland.json')
+                this.http.get<PriorityGroupsData>('data/prioritaetsgruppen_deutschland.json')
                     .subscribe(data => {
                         this.priorities = data;
                         console.log(this.priorities, 'Priority Data');
@@ -76,7 +77,7 @@ export class DataloaderService {
                     });
             }
             if (!this.vaccineUsage) {
-                this.http.get('data/impfstoffeinsatz_deutschland.json')
+                this.http.get<VaccineUsageData>('data/impfstoffeinsatz_deutschland.json')
                     .subscribe(data => {
                         this.vaccineUsage = data;
                         console.log(this.vaccineUsage, 'Vaccine Usage Data');
@@ -91,17 +92,18 @@ export class DataloaderService {
                         obs.next();
                     });
             }
+            obs.next();
         }).pipe(filter(value => this.allLoaded()));
     }
 
     allLoaded(): boolean {
-        return this.vaccinations
-            && this.deliveries
-            && this.zislabImpfsimLieferungenData
-            && this.vaccinationWillingness
-            && this.vaccineUsage
-            && this.population
-            && this.priorities;
+        return !!this.vaccinations
+            && !!this.deliveries
+            && !!this.zislabImpfsimLieferungenData
+            && !!this.vaccinationWillingness
+            && !!this.vaccineUsage
+            && !!this.population
+            && !!this.priorities;
     }
 
 }

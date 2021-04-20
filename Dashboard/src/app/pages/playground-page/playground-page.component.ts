@@ -26,12 +26,24 @@ export class PlaygroundPageComponent implements OnInit {
 
     constructor(
         private http: HttpClient,
-        private dataloader: DataloaderService,
+        public dataloader: DataloaderService,
         private route: ActivatedRoute,
         private csv: CsvexportService) {
     }
 
     simulation = new BasicSimulation(this.dataloader);
+
+    populationPartitionPalette = [
+        '#a2d9ac',
+        '#69b164',
+        '#468b43',
+        '#186a10',
+        '#073a55',
+    ];
+    populationPartitionSpecialColors = {
+        unwilling: '#ddd',
+        contraindicated: '#aaa',
+    };
 
     data: DummyChartData = {
         yMin: 0,
@@ -80,6 +92,7 @@ export class PlaygroundPageComponent implements OnInit {
         window.scrollTo(0, 0);
         this.dataloader.loadData().subscribe(value => {
             this.simulationStartWeek = getYearWeekOfDate(this.dataloader.lastRefreshVaccinations);
+            this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();
             this.runSimulation();
         });
     }
@@ -168,6 +181,26 @@ export class PlaygroundPageComponent implements OnInit {
                     value: data.cumFullyImmunized
                 });
             }
+
+            const parts = [];
+            let colorI = 0;
+            for (const p of this.simulation.partitionings.vaccinationWillingness) {
+                let c;
+                if (p.id in this.populationPartitionSpecialColors){
+                    c = this.populationPartitionSpecialColors[p.id];
+                }
+                else{
+                    c = this.populationPartitionPalette[colorI++];
+                }
+                parts.unshift({
+                    size: p.size,
+                    fillColor: c
+                    });
+            }
+            console.log('partitioning');
+            console.log(this.simulation.partitionings.vaccinationWillingness);
+            console.log(parts);
+            newData.partitions = parts;
         }
 
         newData.series = [

@@ -14,6 +14,7 @@ import {
     extractDeliveriesInfo,
     mergeWeeklyDeliveryScenario
 } from './weekly-data-converter';
+import {VaccinationWillingnessPartitioner, PopulationPartition, sum} from './populationPartitionings';
 
 
 export interface ISimulationParameters {
@@ -57,6 +58,12 @@ export class BasicSimulation implements VaccinationSimulation {
         fractionWilling: 0.80,
     };
 
+    willingness = new VaccinationWillingnessPartitioner(this.dataloader);
+
+    partitionings = {
+        vaccinationWillingness: []
+    };
+
     simulationStartWeek: YearWeek = cw.yws([2021, 10]);
 
     private ensureWeeklyData(): boolean {
@@ -77,12 +84,38 @@ export class BasicSimulation implements VaccinationSimulation {
         return true;
     }
 
+    private getContraIndicated(): number {
+        return wu(Object.entries(this.dataloader.population.data.by_age))
+            .filter(x => parseInt(x[0], 10) < 18)
+            .map(x => x[1])
+            .reduce(sum);
+    }
+    private addContraindicatedPartition(partitions: PopulationPartition[]): PopulationPartition[] {
+        return [
+            ...partitions,
+            {
+                id: 'contraindicated',
+                description: 'Kontraindiziert',
+                size: this.getContraIndicated()
+            }];
+    }
+
     runSimulation(): ISimulationResults {
         if (!this.ensureWeeklyData()){
             return null;
         }
 
         console.log('### Running simulation ###');
+
+        let partitioning = [];
+        if (this.params.considerContraindicated) {
+            partitioning = this.addContraindicatedPartition(partitioning);
+        }
+        if (this.params.considerNotWilling) {
+            partitioning = this.willingness.addUnwillingPartition(partitioning);
+        }
+
+        this.partitionings.vaccinationWillingness = this.willingness.addWillingnessPartitions(partitioning);
 
         // Anfang: Berechnung der aktuellen Lagerbestände
         // (Nicht in der ersten banalen Version)
@@ -107,7 +140,6 @@ export class BasicSimulation implements VaccinationSimulation {
         let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
         let cumVaccineDoses = dataBeforeSim.cumVaccineDoses;
 
-        const sum = (x: number, y: number): number => x + y;
         const vaccineDeliveryDelayWeeks = 1;
 
         const cumulativeDeliveredVaccines = wu(this.weeklyDeliveriesScenario.entries())
@@ -166,10 +198,7 @@ export class BasicSimulation implements VaccinationSimulation {
             console.log([...waitingFor2ndDose], 'waiting list at beginning of sim', waitingFor2ndDose.reduce(sum), pplNeeding2ndShot);
         }
 
-        const numContraindicated = wu(Object.entries(this.dataloader.population.data.by_age))
-            .filter(x => parseInt(x[0], 10) < 18)
-            .map(x => x[1])
-            .reduce(sum);
+        const numContraindicated = this.getContraIndicated();
         console.log('Contraindicated', numContraindicated);
 
         console.log('Vaccine Stockpile at beginning of sim', vaccineStockPile);
