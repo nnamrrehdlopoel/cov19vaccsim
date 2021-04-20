@@ -67,9 +67,9 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     updateChart(): void {
-        const margin = {top: 20, right: 10, bottom: 50, left: 30};
-        const rightBarWidth = 30;
-        const rightBarGap = 10;
+        const margin = {top: 20, right: 2, bottom: 50, left: 30};
+        const rightBarWidth = 80;
+        const rightBarGap = 20;
         const rightBarX = this.chartSize.width - margin.right - rightBarWidth;
         const series = this.data.series;
         const maxValue = d3.max(series.map(s => d3.max(s.data.map(point => point.value))));
@@ -191,6 +191,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             });
             min = max;
         }
+        console.log(partitions, result, 'Mapped');
         return result;
     }
 
