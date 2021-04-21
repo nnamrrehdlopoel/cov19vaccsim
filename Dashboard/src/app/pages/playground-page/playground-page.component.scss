@@ -11,6 +11,40 @@ p {
     margin: 8px 0 0;
 }
 
+.textbadge {
+    display: inline;
+    font-size: 0.7em;
+    font-weight: bold;
+    vertical-align: middle;
+    padding: 0.1em 0.5em;
+    margin: 0 0.5em;
+    background: rgba(144, 238, 144, 0.6);
+    border-radius: 5em;
+}
+/*
+.textbadge {
+    display: inline-block;
+    position: relative;
+    font-size: 0.7em;
+    font-weight: bold;
+    vertical-align: middle;
+    padding: 0 0.5em;
+    margin: 0 0.5em;
+    z-index: 1;
+
+    &:before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 10%;
+        bottom: 12%;
+        right: 0;
+        left: 0;
+        background: lightgray;
+        border-radius: 5em;
+    }
+}*/
+
 
 .settings_card {
     /* Make lines between the setting areas space nicely */

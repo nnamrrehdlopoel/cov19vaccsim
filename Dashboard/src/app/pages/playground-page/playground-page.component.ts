@@ -16,6 +16,7 @@ import {
 import {DataloaderService} from '../../services/dataloader.service';
 import {ISimulationResults} from '../../simulation/data-interfaces/simulation-data.interfaces';
 import {BasicSimulation} from '../../simulation/simulation';
+import {KeyValue} from "@angular/common";
 
 @Component({
     selector: 'app-playground-page',
@@ -91,6 +92,7 @@ export class PlaygroundPageComponent implements OnInit {
     ngOnInit(): void {
         window.scrollTo(0, 0);
         this.dataloader.loadData().subscribe(value => {
+            this.simulation.prepareData();
             this.simulationStartWeek = getYearWeekOfDate(this.dataloader.lastRefreshVaccinations);
             this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();
             this.runSimulation();
@@ -211,5 +213,10 @@ export class PlaygroundPageComponent implements OnInit {
         ];
 
         this.data = newData;
+    }
+
+    // Preserve original property order
+    originalOrder = (a: KeyValue<any, any>, b: KeyValue<any, any>): number => {
+        return 0;
     }
 }

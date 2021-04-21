@@ -10,7 +10,8 @@ export const vaccineNames = {
     az: [
         'AZ',
         'astra',
-        'astrazeneca'
+        'astrazeneca',
+        'astra-zeneca',
     ],
     'j&j': [
         'J&J',

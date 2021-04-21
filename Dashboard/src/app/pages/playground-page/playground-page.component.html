@@ -36,20 +36,16 @@
                     </div>
                     <div class="settings_row">
                         <p>Ausfall / Zulassung simulieren:</p>
-                        <!--<p
-                            *ngFor="let hersteller of hersteller_zugelassen_details">
-                            <ng-container *ngIf="!hersteller.checked">
-                                <mat-checkbox [(ngModel)]="hersteller.checked" (change)="addremovehst(hersteller.hersteller,false);update_kapazitaet();" >
-                                    {{hersteller.hersteller}}
+                        <div style="margin-left: 1.5rem;">
+                            <p
+                                *ngFor="let vacc of simulation.params.vaccinesUsed | keyvalue: originalOrder">
+                                <mat-checkbox [(ngModel)]="vacc.value.used"
+                                              (change)="runSimulation();" labelPosition="before">
+                                    {{simulation.vaccineUsage.getVaccineDisplayName(vacc.key)}}
+                                    <span *ngIf="simulation.vaccineUsage.isVaccineUsed(simulationStartWeek, vacc.key)" class="textbadge">Zugelassen</span>
                                 </mat-checkbox>
-                            </ng-container>
-                            <ng-container *ngIf="hersteller.checked">
-                                <mat-checkbox [(ngModel)]="hersteller.checked" (change)="addremovehst(hersteller.hersteller,true);update_kapazitaet();" >
-                                    {{hersteller.hersteller}}
-                                </mat-checkbox>
-                            </ng-container>
-
-                        </p>-->
+                            </p>
+                        </div>
                         <!--<p
                             *ngFor="let hersteller of hersteller_nicht_zugelassen">
                             <mat-checkbox [(ngModel)]="hersteller.checked"

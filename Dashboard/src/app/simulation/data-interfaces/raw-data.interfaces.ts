@@ -140,14 +140,32 @@ export interface PriorityGroupsData {
 export interface VaccineUsageData {
     description: string;
     source: string | string[];
-    data: {
-        [vaccine: string]: {
-            [date: string]: {
-                ages: string;
-                '2nd_dose_weeks': string;
-                description: string;
-                source: string | string[];
-            }
+    data: [
+        IVaccineUsageData
+    ];
+}
+
+export interface IVaccineUsageData {
+    name?: string
+    displayName: string,
+    efficiacy?: {
+        disease: {
+            "source": string | string[];
+            "2w_after_1"?: number,
+            "2w_after_2"?: number
+        },
+        infection?: {
+            "source": string | string[];
+            "2w_after_1"?: number,
+            "2w_after_2"?: number
         }
-    };
+    }
+    timeline: {
+        [date: string]: {
+            ages: string;
+            '2nd_dose_weeks': string;
+            description: string;
+            source: string | string[];
+        }
+    }
 }

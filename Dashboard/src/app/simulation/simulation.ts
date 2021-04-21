@@ -28,6 +28,9 @@ export interface ISimulationParameters {
     keep2ndDosesBack: number;
     extraIntervalWeeks: number;
     fractionWilling: number;
+    vaccinesUsed: Map<string, {
+        used: boolean
+    }>;
 }
 
 
@@ -62,6 +65,7 @@ export class BasicSimulation implements VaccinationSimulation {
         keep2ndDosesBack: 0,
         extraIntervalWeeks: 0,
         fractionWilling: 0.80,
+        vaccinesUsed: new Map(),
     };
 
     willingness = new CosmoVaccinationWillingnessPartitioner(this.dataloader);
@@ -74,14 +78,31 @@ export class BasicSimulation implements VaccinationSimulation {
     simulationStartWeek: YearWeek = cw.yws([2021, 10]);
     simulationEndWeek: YearWeek = cw.yws([2021, 50]);
 
+    /** Prepare data: Call when Dataloade is ready */
+    prepareData(): boolean {
+        if (!this.dataloader.allLoaded()){
+            return false;
+        }
+        this.vaccineUsage.calculateData();
+
+        let used = new Map();
+        for (const vName of this.vaccineUsage.getVaccinesPriorityList()){
+            used.set(vName, {
+                used: this.vaccineUsage.isVaccineUsed(this.simulationStartWeek, vName)
+            });
+        }
+        this.params.vaccinesUsed = used;
+        console.log(used, "Vaccine Usage Params");
+        return true;
+    }
+
     runSimulation(): ISimulationResults {
         if (!this.ensureWeeklyData()){
             return null;
         }
 
-        this.vaccineUsage.calculateData();
-
         console.log('### Running simulation ###');
+        console.log(this.params.vaccinesUsed, "Vaccine Usage Params");
 
         let partitioning = [];
         if (this.params.considerContraindicated) {
@@ -273,7 +294,7 @@ export class BasicSimulation implements VaccinationSimulation {
                 Math.max, 0);*/
             const given1stShots = new Map();
             for (const vName of this.vaccineUsage.getVaccinesPriorityList()){
-                if (availableVaccineStockPile.has(vName)){
+                if (availableVaccineStockPile.has(vName) && this.params.vaccinesUsed.get(vName).used){
                     const shots = Math.max(0, Math.min(availableVaccineStockPile.get(vName), availablePeople));
                     given1stShots.set(vName, shots);
                     availablePeople -= shots;
