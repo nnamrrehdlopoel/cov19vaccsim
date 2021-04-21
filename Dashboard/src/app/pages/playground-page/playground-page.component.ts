@@ -11,7 +11,7 @@ import {
     DeliveriesData,
     PopulationData,
     VaccinationsData,
-    ZislabImpfsimlieferungenDataRow, zislabImpfsimVerteilungszenarien
+    ZilabImpfsimlieferungenDataRow, zilabImpfsimVerteilungszenarien
 } from '../../simulation/data-interfaces/raw-data.interfaces';
 import {DataloaderService} from '../../services/dataloader.service';
 import {ISimulationResults} from '../../simulation/data-interfaces/simulation-data.interfaces';
@@ -85,7 +85,7 @@ export class PlaygroundPageComponent implements OnInit {
         partitions: []
     };
     simulationStartWeek: YearWeek = cw.yws([2021, 10]);
-    availableDeliveryScenarios = zislabImpfsimVerteilungszenarien;
+    availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
 
     simulationResults: ISimulationResults;
 
@@ -199,9 +199,6 @@ export class PlaygroundPageComponent implements OnInit {
                     fillColor: c
                     });
             }
-            console.log('partitioning');
-            console.log(this.simulation.partitionings.vaccinationWillingness);
-            console.log(parts);
             newData.partitions = parts;
         }
 

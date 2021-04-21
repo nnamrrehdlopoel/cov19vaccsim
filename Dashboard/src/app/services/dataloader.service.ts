@@ -6,7 +6,7 @@ import {
     DeliveriesData,
     PopulationData, PriorityGroupsData,
     VaccinationsData, VaccineUsageData,
-    ZislabImpfsimlieferungenDataRow
+    ZilabImpfsimlieferungenDataRow
 } from '../simulation/data-interfaces/raw-data.interfaces';
 import {Observable} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -25,7 +25,7 @@ export class DataloaderService {
 
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
-    zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[];
+    zilabImpfsimLieferungenData: ZilabImpfsimlieferungenDataRow[];
     population: PopulationData;
     priorities: PriorityGroupsData;
     vaccineUsage: VaccineUsageData;
@@ -84,11 +84,11 @@ export class DataloaderService {
                         obs.next();
                     });
             }
-            if (!this.zislabImpfsimLieferungenData) {
-                this.http.get<ZislabImpfsimlieferungenDataRow[]>('https://raw.githubusercontent.com/zidatalab/covid19dashboard/master/data/tabledata/impfsim_lieferungen.json')
+            if (!this.zilabImpfsimLieferungenData) {
+                this.http.get<ZilabImpfsimlieferungenDataRow[]>('https://raw.githubusercontent.com/zidatalab/covid19dashboard/master/data/tabledata/impfsim_lieferungen.json')
                     .subscribe(data => {
-                        this.zislabImpfsimLieferungenData = data;
-                        console.log(this.zislabImpfsimLieferungenData, 'ZisLab Vaccine Delivery Data');
+                        this.zilabImpfsimLieferungenData = data;
+                        console.log(this.zilabImpfsimLieferungenData, 'ZiLab Vaccine Delivery Data');
                         obs.next();
                     });
             }
@@ -99,7 +99,7 @@ export class DataloaderService {
     allLoaded(): boolean {
         return !!this.vaccinations
             && !!this.deliveries
-            && !!this.zislabImpfsimLieferungenData
+            && !!this.zilabImpfsimLieferungenData
             && !!this.vaccinationWillingness
             && !!this.vaccineUsage
             && !!this.population

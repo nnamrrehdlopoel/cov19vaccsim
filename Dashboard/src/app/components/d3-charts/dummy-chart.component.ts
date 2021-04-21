@@ -191,7 +191,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             });
             min = max;
         }
-        console.log(partitions, result, 'Mapped');
         return result;
     }
 

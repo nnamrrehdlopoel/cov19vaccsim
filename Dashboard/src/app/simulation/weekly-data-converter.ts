@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import {DeliveriesData, VaccinationsData, ZislabImpfsimlieferungenDataRow} from './data-interfaces/raw-data.interfaces';
+import {DeliveriesData, VaccinationsData, ZilabImpfsimlieferungenDataRow} from './data-interfaces/raw-data.interfaces';
 import {
     emptyDeliveryWeek,
     IVaccinationWeek,
@@ -112,11 +112,11 @@ export function calculateWeeklyVaccinations(vaccinations: d3.DSVParsedArray<Vacc
 
 
 export function extractDeliveriesInfo(
-        zislabImpfsimLieferungenData: ZislabImpfsimlieferungenDataRow[],
+        zilabImpfsimLieferungenData: ZilabImpfsimlieferungenDataRow[],
         verteilungszenario: string): WeeklyDeliveryData {
 
     const transformedData: WeeklyDeliveryData = new Map();
-    for (const row of zislabImpfsimLieferungenData) {
+    for (const row of zilabImpfsimLieferungenData) {
         if (row.Verteilungsszenario === verteilungszenario && row.Bundesland === 'Gesamt') {
             const vName = normalizeVaccineName(row.hersteller);
             const yWeek: YearWeek = yws([2021, row.kw]);

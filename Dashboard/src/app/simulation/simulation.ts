@@ -1,7 +1,7 @@
 import {YearWeek} from './calendarweek/calendarweek';
 import * as cw from './calendarweek/calendarweek';
 import * as wu from 'wu';
-import {zislabImpfsimVerteilungszenarien} from './data-interfaces/raw-data.interfaces';
+import {zilabImpfsimVerteilungszenarien} from './data-interfaces/raw-data.interfaces';
 import {
     ISimulationResults, IVaccinationWeek, VaccineNumbers,
     WeeklyDeliveryData,
@@ -61,7 +61,7 @@ export class BasicSimulation implements VaccinationSimulation {
         considerNotWilling: true,
         considerHesitating: true,
         deliveryAmountFactor: 1,
-        deliveryScenario: zislabImpfsimVerteilungszenarien[1],
+        deliveryScenario: zilabImpfsimVerteilungszenarien[1],
         keep2ndDosesBack: 0,
         extraIntervalWeeks: 0,
         fractionWilling: 0.80,
@@ -92,7 +92,6 @@ export class BasicSimulation implements VaccinationSimulation {
             });
         }
         this.params.vaccinesUsed = used;
-        console.log(used, "Vaccine Usage Params");
         return true;
     }
 
@@ -102,7 +101,6 @@ export class BasicSimulation implements VaccinationSimulation {
         }
 
         console.log('### Running simulation ###');
-        console.log(this.params.vaccinesUsed, "Vaccine Usage Params");
 
         let partitioning = [];
         if (this.params.considerContraindicated) {
@@ -362,7 +360,7 @@ export class BasicSimulation implements VaccinationSimulation {
             this.weeklyDeliveries = calculateWeeklyDeliveries(this.dataloader.deliveries);
         }
         if (!this.plannedDeliveries || this.params.deliveryScenario !== this.currentDeliveryScenario){
-            this.plannedDeliveries = extractDeliveriesInfo(this.dataloader.zislabImpfsimLieferungenData, this.params.deliveryScenario);
+            this.plannedDeliveries = extractDeliveriesInfo(this.dataloader.zilabImpfsimLieferungenData, this.params.deliveryScenario);
             this.weeklyDeliveriesScenario = mergeWeeklyDeliveryScenario(this.weeklyDeliveries, this.plannedDeliveries);
             this.currentDeliveryScenario = this.params.deliveryScenario;
         }

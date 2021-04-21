@@ -1,11 +1,11 @@
 
 
-export const zislabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
+export const zilabImpfsimVerteilungszenarien = ['Gleichverteilung', 'Linearer Anstieg der Produktion in Q2'];
 
 /**
- * Interface of Vaccinations Delivery Data from zis data lab
+ * Interface of Vaccinations Delivery Data from zi data lab
  */
-export interface ZislabImpfsimlieferungenDataRow {
+export interface ZilabImpfsimlieferungenDataRow {
     Bundesland: string;
     Verteilungsszenario: string;
     abstand: number;
