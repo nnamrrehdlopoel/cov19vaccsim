@@ -252,7 +252,7 @@ export class BasicSimulation implements VaccinationSimulation {
             }
             if (this.params.considerHesitating) {
                 const fractionHesitating = this.willingness.getHesitatinglyWillingOfWillingFraction();
-                const hesitatingPeople = availablePeople * fractionHesitating;
+                const hesitatingPeople = Math.floor(availablePeople * fractionHesitating);
                 const ppl = availablePeople - cumPartiallyImmunized;
 
                 // People that are definitely willing to be vaccinated
@@ -269,8 +269,8 @@ export class BasicSimulation implements VaccinationSimulation {
                 const minWill = 0.1;
                 const availableHesitatingPeople = Math.min(ppl, hesitatingPeople);
                 const frac = availableHesitatingPeople / hesitatingPeople;
-                availablePeople += availableHesitatingPeople *
-                    ((frac * (maxWill - minWill) / 2) + minWill);
+                availablePeople += Math.floor(availableHesitatingPeople *
+                    ((frac * (maxWill - minWill) / 2) + minWill));
             }else{
                 availablePeople -= cumPartiallyImmunized;
             }
