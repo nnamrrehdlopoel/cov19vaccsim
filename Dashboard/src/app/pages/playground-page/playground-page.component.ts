@@ -3,7 +3,7 @@ import {DataPoint, DataSeries, DummyChartData} from '../../components/d3-charts/
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {CsvexportService} from '../../services/csvexport.service';
-import {getYearWeekOfDate, YearWeek} from '../../simulation/calendarweek/calendarweek';
+import {getWeekdayInYearWeek, getYearWeekOfDate, YearWeek} from '../../simulation/calendarweek/calendarweek';
 import * as cw from '../../simulation/calendarweek/calendarweek';
 import * as d3 from 'd3';
 import * as wu from 'wu';
@@ -17,6 +17,7 @@ import {DataloaderService} from '../../services/dataloader.service';
 import {ISimulationResults} from '../../simulation/data-interfaces/simulation-data.interfaces';
 import {BasicSimulation} from '../../simulation/simulation';
 import {KeyValue} from "@angular/common";
+import {sum} from "../../simulation/vaccine-map-helper";
 
 @Component({
     selector: 'app-playground-page',
@@ -84,7 +85,9 @@ export class PlaygroundPageComponent implements OnInit {
         ],
         partitions: []
     };
-    simulationStartWeek: YearWeek = cw.yws([2021, 10]);
+    data2: DummyChartData = this.data;
+    data3: DummyChartData = this.data;
+    simulationStartWeek: YearWeek = cw.yws([2021, 5]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
 
     simulationResults: ISimulationResults;
@@ -103,6 +106,8 @@ export class PlaygroundPageComponent implements OnInit {
         this.simulation.simulationStartWeek = this.simulationStartWeek;
         this.simulationResults = this.simulation.runSimulation();
         this.buildChart1();
+        this.buildChart2()
+        this.buildChart3()
     }
 
 
@@ -197,7 +202,7 @@ export class PlaygroundPageComponent implements OnInit {
                 parts.unshift({
                     size: p.size,
                     fillColor: c
-                    });
+                });
             }
             newData.partitions = parts;
         }
@@ -210,6 +215,223 @@ export class PlaygroundPageComponent implements OnInit {
         ];
 
         this.data = newData;
+    }
+
+
+    buildChart2(): void {
+        const newData: DummyChartData = {
+            yMin: 0,
+            yMax: 10_000_000,
+            series: [],
+            partitions: [],
+        };
+
+        const vacDeliveries: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+        };
+        const vacDeliveriesSim: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+            strokeDasharray: '5, 5'
+        };
+        const vacFirstDoses: DataSeries = {
+            data: [],
+            fillColor: '#69b8b4',
+            strokeColor: '#46827f',
+        };
+        const vacSecondDoses: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+        };
+        const vacFirstDosesSim: DataSeries = {
+            data: [],
+            fillColor: '#69b8b4',
+            strokeColor: '#46827f',
+            strokeDasharray: '5, 5'
+        };
+        const vacSecondDosesSim: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+            strokeDasharray: '5, 5'
+        };
+
+        /*if (this.dataloader.vaccinations) {
+            for (const vacDay of this.dataloader.vaccinations) {
+                vacFirstDoses.data.push({
+                    date: vacDay.date,
+                    value: vacDay.dosen_erst_differenz_zum_vortag * 7
+                });
+                vacSecondDoses.data.push({
+                    date: vacDay.date,
+                    value: vacDay.dosen_zweit_differenz_zum_vortag * 7
+                });
+            }
+        }*/
+        if (this.simulation.weeklyDeliveries) {
+            for (const [week, del] of this.simulation.weeklyDeliveries.entries()) {
+                vacDeliveries.data.push({
+                    date: getWeekdayInYearWeek(week, 8),
+                    value: wu(del.dosesByVaccine.values()).reduce(sum)
+                });
+            }
+        }
+        if (this.simulation.weeklyVaccinations) {
+            for (const [yWeek, data] of this.simulation.weeklyVaccinations.entries()) {
+                const date = cw.getWeekdayInYearWeek(yWeek, 8);
+                vacFirstDoses.data.push({
+                    date,
+                    value: data.partiallyImmunized
+                });
+                vacSecondDoses.data.push({
+                    date,
+                    value: data.vaccineDoses
+                });
+            }
+            // remove last week because it is not complete yet
+            vacFirstDoses.data.pop();
+            vacSecondDoses.data.pop();
+        }
+
+        if (this.simulationResults) {
+            // Attach line to week before
+            let date = cw.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+            let dataAttach = this.simulation.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
+            vacFirstDosesSim.data.push({
+                date,
+                value: dataAttach.partiallyImmunized
+            });
+            vacSecondDosesSim.data.push({
+                date,
+                value: dataAttach.vaccineDoses
+            });
+            vacDeliveriesSim.data.push({
+                date,
+                value: wu(this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek)).dosesByVaccine.values()).reduce(sum)
+            });
+            for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
+                // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
+                date = cw.getWeekdayInYearWeek(yWeek, 8);
+                vacFirstDosesSim.data.push({
+                    date,
+                    value: data.partiallyImmunized
+                });
+                vacSecondDosesSim.data.push({
+                    date,
+                    value: data.vaccineDoses
+                });
+                vacDeliveriesSim.data.push({
+                    date,
+                    value: wu(this.simulation.weeklyDeliveriesScenario.get(yWeek).dosesByVaccine.values()).reduce(sum)
+                });
+            }
+        }
+
+
+        newData.series = [
+            vacDeliveries,
+            vacDeliveriesSim,
+            vacSecondDoses,
+            vacFirstDoses,
+            vacSecondDosesSim,
+            vacFirstDosesSim,
+        ];
+
+        this.data2 = newData;
+    }
+
+    buildChart3(): void {
+        const newData: DummyChartData = {
+            yMin: 0,
+            yMax: this.dataloader.population ? this.dataloader.population.data.total * 2 : 10000000,
+            series: [],
+            partitions: [],
+        };
+
+        const vacDeliveries: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+        };
+        const vacDoses: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+        };
+        const vacDeliveriesSim: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+            strokeDasharray: '5, 5'
+        };
+        const vacDosesSim: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+            strokeDasharray: '5, 5'
+        };
+
+        if (this.simulation.weeklyDeliveries) {
+            for (const [week, del] of this.simulation.weeklyDeliveries.entries()) {
+                vacDeliveries.data.push({
+                    date: getWeekdayInYearWeek(week, 8),
+                    value: wu(del.cumDosesByVaccine.values()).reduce(sum)
+                });
+            }
+        }
+        if (this.dataloader.vaccinations) {
+            for (const vacDay of this.dataloader.vaccinations) {
+                vacDoses.data.push({
+                    date: vacDay.date,
+                    value: vacDay.dosen_kumulativ
+                });
+            }
+        }
+
+        if (this.simulationResults) {
+            // Attach line to week before
+            let date = cw.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+            const dateWeek = date;
+            let dataAttach = this.simulation.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
+            // If Sim start is the current week, attach line directly to week in progress
+            if (this.simulationStartWeek === cw.getYearWeekOfDate(this.dataloader.lastRefreshVaccinations)){
+                date = this.dataloader.lastRefreshVaccinations;
+                dataAttach = this.simulation.weeklyVaccinations.get(this.simulationStartWeek);
+            }
+            vacDosesSim.data.push({
+                date,
+                value: dataAttach.cumVaccineDoses
+            });
+            vacDeliveriesSim.data.push({
+                date: dateWeek,
+                value: wu(this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek)).cumDosesByVaccine.values()).reduce(sum)
+            });
+            for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
+                // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
+                date = cw.getWeekdayInYearWeek(yWeek, 8);
+                vacDosesSim.data.push({
+                    date,
+                    value: data.cumVaccineDoses
+                });
+                vacDeliveriesSim.data.push({
+                    date,
+                    value: wu(this.simulation.weeklyDeliveriesScenario.get(yWeek).cumDosesByVaccine.values()).reduce(sum)
+                });
+            }
+        }
+
+        newData.series = [
+            vacDeliveries,
+            vacDeliveriesSim,
+            vacDoses,
+            vacDosesSim
+        ];
+
+        this.data3 = newData;
     }
 
     // Preserve original property order

@@ -16,6 +16,16 @@
                     style="width: 100%"
                     [data]="data"
                 ></app-dummy-chart>
+                <app-dummy-chart
+                    class="dummy-chart"
+                    style="width: 100%"
+                    [data]="data2"
+                ></app-dummy-chart>
+                <app-dummy-chart
+                    class="dummy-chart"
+                    style="width: 100%"
+                    [data]="data3"
+                ></app-dummy-chart>
             </mat-card-content>
 
             <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>
