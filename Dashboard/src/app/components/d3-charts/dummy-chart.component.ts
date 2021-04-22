@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { ChartBase } from './chart-base/chart-base.directive';
 
 export interface DummyChartConfig {
-    // nothing so far
+    yAxisLabel: string;
 }
 
 export interface DummyChartData {
@@ -63,7 +63,9 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
-        return {};
+        return {
+            yAxisLabel: 'yAxisLabel'
+        };
     }
 
     initializeChart(): void {
@@ -84,7 +86,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private getCoords(): DummyChartCoords {
-        const margin = {top: 20, right: 2, bottom: 50, left: 2};
+        const margin = {top: 24, right: 2, bottom: 50, left: 2};
         const rightBarWidth = 80;
         const rightBarGap = 20;
         const series = this.data.series;
@@ -189,6 +191,21 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('dx', 7)
             .attr('dy', -4)
             .attr('text-anchor', 'start');
+
+        // y label
+        this.yAxis
+            .selectAll('text.axis-label')
+            .data([this.config.yAxisLabel])
+            .join('text')
+            .classed('axis-label', true)
+            .attr('x', 6)
+            .attr('y', 10)
+            .attr('dx', 0)
+            .attr('dy', 0)
+            .attr('fill', 'black')
+            .attr('text-anchor', 'start')
+            .attr('font-weight', 'bold')
+            .text(d => d);
 
     }
 
