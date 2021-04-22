@@ -84,7 +84,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private getCoords(): DummyChartCoords {
-        const margin = {top: 20, right: 2, bottom: 50, left: 30};
+        const margin = {top: 20, right: 2, bottom: 50, left: 2};
         const rightBarWidth = 80;
         const rightBarGap = 20;
         const series = this.data.series;
@@ -144,7 +144,12 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private renderAxis(coords: DummyChartCoords): void {
         this.yAxis
             .attr('transform', `translate(${coords.margin.left}, 0)`)
-            .call(d3.axisLeft(coords.yScale).tickFormat(d3.format('.0s'))); // .tickPadding(-30));
+
+            .call(d3
+                .axisLeft(coords.yScale)
+                .tickFormat(d3.format('.0s'))
+                .tickSize(-5)
+            ); // .tickPadding(-30));
 
         this.yGrid
             .attr('transform', `translate(${coords.margin.left}, 0)`)
@@ -177,6 +182,13 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     month: 'long',
                 }))
             );
+
+        // y axis: change number positioning
+        this.yAxis
+            .selectAll('text')
+            .attr('dx', 7)
+            .attr('dy', -4)
+            .attr('text-anchor', 'start');
 
     }
 
