@@ -37,6 +37,16 @@ interface PartitionMinMax {
     fillColor: string;
 }
 
+interface DummyChartCoords {
+    margin: {top: number, right: number, bottom: number, left: number};
+    rightBarWidth: number;
+    rightBarGap: number;
+    rightBarX: number;
+    yScale: d3.ScaleLinear<number, number>;
+    xScale: d3.ScaleTime<number, number>;
+    minValue: number;
+}
+
 @Component({
     selector: 'app-dummy-chart',
     templateUrl: 'chart-base/chart-base.directive.html',
@@ -67,32 +77,49 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     updateChart(): void {
+        const coords = this.getCoords();
+        this.renderAreas(coords, this.data.series);
+        this.renderAxis(coords);
+        this.renderRightBar(coords, this.data.partitions);
+    }
+
+    private getCoords(): DummyChartCoords {
         const margin = {top: 20, right: 2, bottom: 50, left: 30};
         const rightBarWidth = 80;
         const rightBarGap = 20;
-        const rightBarX = this.chartSize.width - margin.right - rightBarWidth;
         const series = this.data.series;
-        const maxValue = d3.max(series.map(s => d3.max(s.data.map(point => point.value))));
+        const rightBarX = this.chartSize.width - margin.right - rightBarWidth;
         const minValue = d3.min(series.map(s => d3.min(s.data.map(point => point.value))));
         const maxDate = d3.max(series.map(s => d3.max(s.data.map(point => point.date))));
         const minDate = d3.min(series.map(s => d3.min(s.data.map(point => point.date))));
 
-        const yValue = d3
+        const yScale = d3
             .scaleLinear()
             .domain([this.data.yMin, this.data.yMax])
             .range([this.chartSize.height - margin.bottom, margin.top]);
 
-        const xTime = d3
+        const xScale = d3
             .scaleTime()
             .domain([minDate, maxDate])
             .range([margin.left, rightBarX - rightBarGap]);
-            //.nice();
 
+        return {
+            margin,
+            rightBarWidth,
+            rightBarGap,
+            rightBarX,
+            xScale,
+            yScale,
+            minValue,
+        };
+    }
+
+    private renderAreas(coords: DummyChartCoords, series: DataSeries[]): void {
         const lineGenerator: d3.Line<DataPoint> = d3
             .line<DataPoint>()
             .defined((d) => d != null && d.value != null)
-            .x((d) => xTime(d.date))
-            .y((d) => yValue(d.value));
+            .x((d) => coords.xScale(d.date))
+            .y((d) => coords.yScale(d.value));
 
         this.lines
             .selectAll('path')
@@ -106,31 +133,33 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
         this.fills
             .selectAll('path')
-            .data(series.map(s => this.addFirstAndLastMinPoints(s, minValue)))
+            .data(series.map(s => this.addFirstAndLastMinPoints(s, coords.minValue)))
             .join('path')
             .attr('fill', s => s.fillColor)
             .attr('stroke', 'none')
             .attr('opacity', 0.5)
             .attr('d', (d) => lineGenerator(d.data));
+    }
 
+    private renderAxis(coords: DummyChartCoords): void {
         this.yAxis
-            .attr('transform', `translate(${margin.left}, 0)`)
-            .call(d3.axisLeft(yValue).tickFormat(d3.format('.0s'))); // .tickPadding(-30));
+            .attr('transform', `translate(${coords.margin.left}, 0)`)
+            .call(d3.axisLeft(coords.yScale).tickFormat(d3.format('.0s'))); // .tickPadding(-30));
 
         this.yGrid
-            .attr('transform', `translate(${margin.left}, 0)`)
+            .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
-                .axisLeft(yValue)
+                .axisLeft(coords.yScale)
                 .ticks(5)
-                .tickSize(-(this.chartSize.width - margin.left - margin.right - rightBarWidth))
+                .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
                 .tickFormat(_ => '')
             );
 
         this.xAxis
-            .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom})`)
+            .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
             .call(
                 d3
-                    .axisBottom<Date>(xTime)
+                    .axisBottom<Date>(coords.xScale)
                     .ticks(d3.timeMonday)
                     .tickFormat(date => date.toLocaleString('default', {
                         day: 'numeric'
@@ -138,9 +167,9 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             );
 
         this.xGrid
-            .attr('transform', `translate(0, ${this.chartSize.height - margin.bottom + 30})`)
+            .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom + 30})`)
             .call(d3
-                .axisBottom<Date>(xTime)
+                .axisBottom<Date>(coords.xScale)
                 .ticks(d3.timeMonth)
                 .tickSizeOuter(0)
                 //.tickSize(-this.chartSize.height)
@@ -149,14 +178,17 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 }))
             );
 
+    }
+
+    private renderRightBar(coords: DummyChartCoords, partitions: DataPartition[]): void {
         this.rightBar
             .selectAll('rect')
-            .data(this.mapPartitions(this.data.partitions))
+            .data(this.mapPartitions(partitions))
             .join('rect')
-            .attr('x', rightBarX)
-            .attr('y', p => yValue(p.max))
-            .attr('width', rightBarWidth)
-            .attr('height', p => yValue(p.min) - yValue(p.max))
+            .attr('x', coords.rightBarX)
+            .attr('y', p => coords.yScale(p.max))
+            .attr('width', coords.rightBarWidth)
+            .attr('height', p => coords.yScale(p.min) - coords.yScale(p.max))
             .attr('fill', p => p.fillColor);
     }
 
@@ -179,7 +211,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         };
     }
 
-    private mapPartitions(partitions: DataPartition[]) {
+    private mapPartitions(partitions: DataPartition[]): PartitionMinMax[] {
         const result: PartitionMinMax[] = [];
         let min = 0;
         for (const p of partitions) {
