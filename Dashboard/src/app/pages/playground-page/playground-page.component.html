@@ -7,28 +7,33 @@
 
     <div fxFlex="1 0 600px" fxFlex.lt-md="1 1 0" >
         <mat-card>
-            <mat-card-title>
-                <h1>Impfkampagne in Deutschland</h1>
-            </mat-card-title>
             <mat-card-content>
-                <app-dummy-chart
-                    class="dummy-chart"
-                    style="width: 100%"
-                    [data]="data"
-                    [config]="{yAxisLabel: 'Geimpfte Bevölkerung'}"
-                ></app-dummy-chart>
-                <app-dummy-chart
-                    class="dummy-chart"
-                    style="width: 100%"
-                    [data]="data2"
-                    [config]="{yAxisLabel: 'Wöchentliche Impfungen'}"
-                ></app-dummy-chart>
-                <app-dummy-chart
-                    class="dummy-chart"
-                    style="width: 100%"
-                    [data]="data3"
-                    [config]="{yAxisLabel: 'Impfdosen insgesamt'}"
-                ></app-dummy-chart>
+                <mat-tab-group animationDuration="0">
+                    <mat-tab label="Geimpfte Bevölkerung">
+                        <app-dummy-chart
+                            class="dummy-chart"
+                            style="width: 100%"
+                            [data]="data"
+                            [config]="{yAxisLabel: 'Bevölkerung'}"
+                        ></app-dummy-chart>
+                    </mat-tab>
+                    <mat-tab label="Wöchentliche Impfungen">
+                        <app-dummy-chart
+                            class="dummy-chart"
+                            style="width: 100%"
+                            [data]="data2"
+                            [config]="{yAxisLabel: 'Impfdosen'}"
+                        ></app-dummy-chart>
+                    </mat-tab>
+                    <mat-tab label="Impfdosen insgesamt">
+                        <app-dummy-chart
+                            class="dummy-chart"
+                            style="width: 100%"
+                            [data]="data3"
+                            [config]="{yAxisLabel: 'Impfdosen'}"
+                        ></app-dummy-chart>
+                    </mat-tab>
+                </mat-tab-group>
             </mat-card-content>
 
             <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>

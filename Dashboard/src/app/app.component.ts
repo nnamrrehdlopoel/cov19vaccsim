@@ -11,7 +11,7 @@ import {DomSanitizer} from '@angular/platform-browser';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'COVID-19 Impfkampagne';
+  title = 'COVID-19 Impfkampagne in Deutschland';
 
   constructor(
     iconRegistry: MatIconRegistry,
