@@ -102,15 +102,20 @@ export class BasicSimulation implements VaccinationSimulation {
 
         console.log('### Running simulation ###');
 
-        let partitioning = [];
-        if (this.params.considerContraindicated) {
-            partitioning = this.addContraindicatedPartition(partitioning);
-        }
-        if (this.params.considerNotWilling) {
-            partitioning = this.addUnwillingPartition(partitioning);
-        }
+        this.simulateDeliveries();
 
-        this.partitionings.vaccinationWillingness = this.willingness.addWillingnessPartitions(partitioning);
+        // Partitionings
+        {
+            let partitioning = [];
+            if (this.params.considerContraindicated) {
+                partitioning = this.addContraindicatedPartition(partitioning);
+            }
+            if (this.params.considerNotWilling) {
+                partitioning = this.addUnwillingPartition(partitioning);
+            }
+
+            this.partitionings.vaccinationWillingness = this.willingness.addWillingnessPartitions(partitioning);
+        }
 
         // Anfang: Berechnung der aktuellen Lagerbestände
         // (Nicht in der ersten banalen Version)
@@ -227,7 +232,7 @@ export class BasicSimulation implements VaccinationSimulation {
 
             // Add delayed delivery to available vaccines
             vaccineStockPile = vNM(vaccineStockPile, delayedDeliveryData.dosesByVaccine,
-                (stock, del) => stock + del * this.params.deliveryAmountFactor);
+                (stock, del) => stock + del);
 
             // Give as many 2nd shots as needed
             const required2ndShots = waitingFor2ndDose.shift();
@@ -347,6 +352,35 @@ export class BasicSimulation implements VaccinationSimulation {
     }
 
 
+    private simulateDeliveries() {
+        this.weeklyDeliveriesScenario = mergeWeeklyDeliveryScenario(this.weeklyDeliveries, this.plannedDeliveries);
+
+        // Apply delivery factors & remove deactivated vaccines
+        let curWeek = this.simulationStartWeek;
+        while (curWeek < this.simulationEndWeek){
+            if (this.weeklyDeliveriesScenario.has(curWeek)){
+                const deliveryData = this.weeklyDeliveriesScenario.get(curWeek);
+                // copy data so we don't overwrite anything
+                const newDeliveryData = {
+                    dosesByVaccine: new Map(),
+                    cumDosesByVaccine: new Map(),
+                };
+
+                for (let [vName, amount] of deliveryData.dosesByVaccine.entries()){
+                    if (!this.params.vaccinesUsed.get(vName).used){
+                        amount *= 0;
+                    }
+                    amount *= this.params.deliveryAmountFactor;
+                    newDeliveryData.dosesByVaccine.set(vName, amount);
+                }
+                this.weeklyDeliveriesScenario.set(curWeek, newDeliveryData);
+            }
+            curWeek = cw.weekAfter(curWeek);
+        }
+        recalculateCumulativeWeeklyDeliveries(this.weeklyDeliveriesScenario);
+    }
+
+
 
     private ensureWeeklyData(): boolean {
         if (!this.dataloader.allLoaded()) {
@@ -361,7 +395,6 @@ export class BasicSimulation implements VaccinationSimulation {
         }
         if (!this.plannedDeliveries || this.params.deliveryScenario !== this.currentDeliveryScenario){
             this.plannedDeliveries = extractDeliveriesInfo(this.dataloader.zilabImpfsimLieferungenData, this.params.deliveryScenario);
-            this.weeklyDeliveriesScenario = mergeWeeklyDeliveryScenario(this.weeklyDeliveries, this.plannedDeliveries);
             this.currentDeliveryScenario = this.params.deliveryScenario;
         }
         return true;
