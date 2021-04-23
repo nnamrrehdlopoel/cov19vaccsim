@@ -60,6 +60,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private fills: d3.Selection<SVGGElement, unknown, null, undefined>;
     private xGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private yGridMinor: d3.Selection<SVGGElement, unknown, null, undefined>;
     private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
@@ -75,6 +76,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.lines = this.svg.append('g').classed('lines', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
+        this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
         this.rightBar = this.svg.append('g').classed('right-bar', true);
     }
 
@@ -149,8 +151,10 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
             .call(d3
                 .axisLeft(coords.yScale)
-                .tickFormat(d3.format('.0s'))
+                .ticks(5)
+                .tickFormat(d3.format('.2s'))
                 .tickSize(-5)
+                .tickSizeOuter(0)
             ); // .tickPadding(-30));
 
         this.yGrid
@@ -159,6 +163,15 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .axisLeft(coords.yScale)
                 .ticks(5)
                 .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
+                .tickSizeOuter(0)
+                .tickFormat(_ => '')
+            );
+        this.yGridMinor
+            .attr('transform', `translate(${coords.margin.left}, 0)`)
+            .call(d3
+                .axisLeft(coords.yScale)
+                .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
+                .tickSizeOuter(0)
                 .tickFormat(_ => '')
             );
 
@@ -168,22 +181,33 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 d3
                     .axisBottom<Date>(coords.xScale)
                     .ticks(d3.timeMonday)
+                    .tickSizeOuter(0)
                     .tickFormat(date => date.toLocaleString('default', {
                         day: 'numeric'
                     }))
             );
 
         this.xGrid
-            .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom + 30})`)
+            .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
             .call(d3
                 .axisBottom<Date>(coords.xScale)
                 .ticks(d3.timeMonth)
+                .tickSize(-(this.chartSize.height - coords.margin.top - coords.margin.bottom))
                 .tickSizeOuter(0)
+                .tickPadding(30)
                 //.tickSize(-this.chartSize.height)
                 .tickFormat(date => date.toLocaleString('default', {
                     month: 'long',
                 }))
             );
+
+        this.xGrid.selectAll('.domain').remove();
+
+        // Month labels alignment
+        this.xGrid
+            .selectAll('text')
+            .attr('dx', 5)
+            .attr('text-anchor', 'start');
 
         // y axis: change number positioning
         this.yAxis

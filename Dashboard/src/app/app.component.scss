@@ -83,6 +83,12 @@
   color: white;
 }
 
+mat-toolbar > * {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .userinfo {
   padding-left: 10px;
   padding-right: 10px;
