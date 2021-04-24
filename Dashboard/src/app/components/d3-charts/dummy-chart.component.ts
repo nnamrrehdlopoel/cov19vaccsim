@@ -70,27 +70,32 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     initializeChart(): void {
-        this.xAxis = this.svg.append('g').classed('x-axis', true);
-        this.yAxis = this.svg.append('g').classed('y-axis', true);
         this.fills = this.svg.append('g').classed('fills', true);
         this.lines = this.svg.append('g').classed('lines', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
         this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
         this.rightBar = this.svg.append('g').classed('right-bar', true);
+        this.xAxis = this.svg.append('g').classed('x-axis', true);
+        this.yAxis = this.svg.append('g').classed('y-axis', true);
     }
 
     updateChart(): void {
         const coords = this.getCoords();
         this.renderAreas(coords, this.data.series);
         this.renderAxis(coords);
-        this.renderRightBar(coords, this.data.partitions);
+        if(this.data.partitions){
+            this.renderRightBar(coords, this.data.partitions);
+        }
     }
 
     private getCoords(): DummyChartCoords {
-        const margin = {top: 24, right: 2, bottom: 50, left: 2};
-        const rightBarWidth = 80;
-        const rightBarGap = 20;
+        const margin = {top: 24, right: 2, bottom: 30, left: 2};
+
+        // dynamic rightBarWidth to maintain a nice aspect ratio of the bar
+        // while also not using too much screen estate
+        const rightBarWidth = Math.min(this.chartSize.width / 10, this.chartSize.height / 8);
+        const rightBarGap = 0;
         const series = this.data.series;
         const rightBarX = this.chartSize.width - margin.right - rightBarWidth;
         const minValue = d3.min(series.map(s => d3.min(s.data.map(point => point.value))));
@@ -181,11 +186,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 d3
                     .axisBottom<Date>(coords.xScale)
                     .ticks(d3.timeMonday)
+                    .tickSize(-5)
                     .tickSizeOuter(0)
+                    .tickPadding(5)
                     .tickFormat(date => date.toLocaleString('default', {
                         day: 'numeric'
                     }))
-            );
+            )
+            .attr('font-size', '9');
 
         this.xGrid
             .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
@@ -194,7 +202,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .ticks(d3.timeMonth)
                 .tickSize(-(this.chartSize.height - coords.margin.top - coords.margin.bottom))
                 .tickSizeOuter(0)
-                .tickPadding(30)
+                .tickPadding(15)
                 //.tickSize(-this.chartSize.height)
                 .tickFormat(date => date.toLocaleString('default', {
                     month: 'long',
@@ -243,6 +251,16 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('width', coords.rightBarWidth)
             .attr('height', p => coords.yScale(p.min) - coords.yScale(p.max))
             .attr('fill', p => p.fillColor);
+
+        // No gap => draw line instead
+        if(coords.rightBarGap <= 0) {
+            this.rightBar.selectAll('line')
+                .data([0])
+                .join('line')
+                .attr('transform', `translate(${coords.rightBarX}, ${coords.margin.top})`)
+                .attr('y2', (this.chartSize.height - coords.margin.top - coords.margin.bottom))
+                .attr('stroke', '#333');
+        }
     }
 
     /**
