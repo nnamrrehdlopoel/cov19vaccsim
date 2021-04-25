@@ -439,4 +439,9 @@ export class PlaygroundPageComponent implements OnInit {
     originalOrder = (a: KeyValue<any, any>, b: KeyValue<any, any>): number => {
         return 0;
     }
+
+    resetWillingness(){
+        this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();
+        this.runSimulation();
+    }
 }

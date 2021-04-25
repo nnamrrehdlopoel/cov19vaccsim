@@ -84,6 +84,20 @@ p {
             margin-top: -8px;
             margin-bottom: -3px;
         }
+
+
+        .slider-with-reset{
+            mat-slider {
+                width: 97%;
+                margin-left: 3%;
+                margin-top: -4px;
+                margin-bottom: -4px;
+            }
+
+            .mat-icon-button {
+                color: grey;
+            }
+        }
     }
 }
 

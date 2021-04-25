@@ -83,8 +83,17 @@
                                 <strong>{{simulation.params.deliveryAmountFactor*100 | number:'1.0-0'}} %</strong>
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="simulation.params.deliveryAmountFactor" min=".8" max="1.2" step="0.01"
-                                    (change)="runSimulation();"></mat-slider>
+                        <div class="slider-with-reset" fxLayout="row" fxLayoutAlign="space-between center">
+                            <div fxFlex="1 0 auto" >
+                                <mat-slider [(ngModel)]="simulation.params.deliveryAmountFactor" min=".8" max="1.2" step="0.01"
+                                            (change)="runSimulation();"></mat-slider>
+                            </div>
+                            <div fxFlex="0 0 auto" >
+                                <button mat-icon-button aria-label="Zurücksetzen" (click)="simulation.params.deliveryAmountFactor = 1; runSimulation();">
+                                    <mat-icon>restore</mat-icon>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="settings_row">
                         <p>Verteilung der Lieferungen:</p>
@@ -149,8 +158,17 @@
                                 <strong>{{simulation.params.fractionWilling*100 | number:'1.0-0'}} % </strong>impfbereit
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.01"
-                                    (change)="runSimulation();"></mat-slider>
+                        <div class="slider-with-reset" fxLayout="row" fxLayoutAlign="space-between center">
+                            <div fxFlex="1 0 auto" >
+                                <mat-slider [(ngModel)]="simulation.params.fractionWilling" min=".5" max="1.0" step="0.01"
+                                            (change)="runSimulation();"></mat-slider>
+                            </div>
+                            <div fxFlex="0 0 auto" >
+                                <button mat-icon-button aria-label="Zurücksetzen" (click)="resetWillingness()">
+                                    <mat-icon>restore</mat-icon>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </mat-card-content>
