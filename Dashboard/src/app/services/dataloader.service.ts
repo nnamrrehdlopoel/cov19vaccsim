@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import {
     CosmoWillingnessData,
     DeliveriesData,
-    PopulationData, PriorityGroupsData,
+    PopulationData, PriorityGroupsData, UpdateDatesData,
     VaccinationsData, VaccineUsageData,
     ZilabImpfsimlieferungenDataRow
 } from '../simulation/data-interfaces/raw-data.interfaces';
@@ -25,6 +25,7 @@ export class DataloaderService {
 
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
+    updateDates: UpdateDatesData;
     zilabImpfsimLieferungenData: ZilabImpfsimlieferungenDataRow[];
     population: PopulationData;
     priorities: PriorityGroupsData;
@@ -49,6 +50,17 @@ export class DataloaderService {
                         this.deliveries = d3.tsvParse<DeliveriesData, string>(data, d3.autoType);
                         this.lastRefreshDeliveries = this.deliveries[this.deliveries.length - 1].date;
                         console.log(this.deliveries, 'Impfdashboard.de Deliveries Data');
+                        obs.next();
+                    });
+            }
+            if (!this.updateDates) {
+                this.http.get<UpdateDatesData>('https://impfdashboard.de/static/data/metadata.json')
+                    .subscribe(data => {
+                        this.updateDates = data;
+                        // Make sure string dates are converted to date objects
+                        this.updateDates.vaccinationsLastUpdated = new Date(this.updateDates.vaccinationsLastUpdated)
+                        this.updateDates.deliveryLastUpdated = new Date(this.updateDates.deliveryLastUpdated)
+                        console.log(this.updateDates, 'Impfdashboard last update dates');
                         obs.next();
                     });
             }
@@ -99,6 +111,7 @@ export class DataloaderService {
     allLoaded(): boolean {
         return !!this.vaccinations
             && !!this.deliveries
+            && !!this.updateDates
             && !!this.zilabImpfsimLieferungenData
             && !!this.vaccinationWillingness
             && !!this.vaccineUsage

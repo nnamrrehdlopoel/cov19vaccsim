@@ -64,6 +64,14 @@ export interface DeliveriesData {
     region: string;
 }
 
+/**
+ * Interface of Metadata Data from impfdashboard.de
+ */
+export interface UpdateDatesData {
+    vaccinationsLastUpdated: Date;
+    deliveryLastUpdated: Date;
+}
+
 
 /**
  * Interface of Population Data from data folder

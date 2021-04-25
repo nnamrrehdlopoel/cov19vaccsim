@@ -36,7 +36,12 @@
                 </mat-tab-group>
             </mat-card-content>
 
-            <mat-card-subtitle>Datenbasis: Impfungen lt. RKI (Stand {{dataloader.lastRefreshVaccinations | date:'shortDate'}}), Lieferungen lt. BMG (Stand {{dataloader.lastRefreshDeliveries | date:'shortDate'}})</mat-card-subtitle>
+            <mat-card-subtitle>
+                Datenbasis:
+                Impfungen lt. RKI (Stand {{dataloader.updateDates.vaccinationsLastUpdated | date:'shortDate'}}),
+                Lieferungen lt. BMG (Stand {{dataloader.updateDates.deliveryLastUpdated | date:'shortDate'}}),
+                Lieferpläne lt. BMG (Stand 19.04.21)
+            </mat-card-subtitle>
         </mat-card>
     </div>
 
