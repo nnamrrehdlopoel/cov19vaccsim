@@ -95,6 +95,10 @@ export class BasicSimulation implements VaccinationSimulation {
         return true;
     }
 
+
+    /**
+     * #### THE ACTUAL SIMULATION OF THE VACCINATIONS ####
+     */
     runSimulation(): ISimulationResults {
         if (!this.ensureWeeklyData()){
             return null;
@@ -102,9 +106,10 @@ export class BasicSimulation implements VaccinationSimulation {
 
         console.log('### Running simulation ###');
 
+        // # Simulate deliveries (including parameters like delivery amount factor & approved vaccines)
         this.simulateDeliveries();
 
-        // Partitionings
+        // # Partitionings of the population
         {
             let partitioning = [];
             if (this.params.considerContraindicated) {
@@ -117,9 +122,8 @@ export class BasicSimulation implements VaccinationSimulation {
             this.partitionings.vaccinationWillingness = this.willingness.addWillingnessPartitions(partitioning);
         }
 
-        // Anfang: Berechnung der aktuellen Lagerbestände
-        // (Nicht in der ersten banalen Version)
 
+        // # Initializations
         let curWeek = this.simulationStartWeek;
         const results: ISimulationResults = {
             weeklyData: new Map()
@@ -220,7 +224,7 @@ export class BasicSimulation implements VaccinationSimulation {
 
 
 
-        // Actual Simulation
+        // # Actual Simulation for every week
         while (curWeek < this.simulationEndWeek){
             const delayedDeliveryData = this.weeklyDeliveriesScenario.get(cw.weekBefore(curWeek, this.vaccineDeliveryDelayWeeks));
 
@@ -231,8 +235,7 @@ export class BasicSimulation implements VaccinationSimulation {
             }
 
             // Add delayed delivery to available vaccines
-            vaccineStockPile = vNM(vaccineStockPile, delayedDeliveryData.dosesByVaccine,
-                (stock, del) => stock + del);
+            vaccineStockPile = vNM(vaccineStockPile, delayedDeliveryData.dosesByVaccine, sum);
 
             // Give as many 2nd shots as needed
             const required2ndShots = waitingFor2ndDose.shift();
@@ -281,7 +284,7 @@ export class BasicSimulation implements VaccinationSimulation {
             }
             let availableVaccineStockPile = vaccineStockPile;
             if (this.params.keep2ndDosesBack){
-                // subtract people that are still waiting for their 2nd dosis
+                // subtract people that are still waiting for their 2nd dose
                 availableVaccineStockPile = v(availableVaccineStockPile, sub,
                     v(
                         waitingFor2ndDose.reduce((a, b) => v(a, sum, b)),
