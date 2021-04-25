@@ -305,13 +305,13 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         console.log(mappedParts);
 
         // No gap => draw line instead
-        if(coords.rightBarGap <= 0) {
+        if(mappedParts.length && coords.rightBarGap <= 0) {
             this.rightBar.selectAll('line')
                 .data([0])
                 .join(el => el.insert('line', 'g.labels'))
                 .attr('transform', `translate(${coords.rightBarX}, ${coords.margin.top})`)
                 .attr('y2', (this.chartSize.height - coords.margin.top - coords.margin.bottom))
-                .attr('stroke', '#333')
+                .attr('stroke', '#444')
                 .attr('shape-rendering', 'crispEdges');
         }
     }
