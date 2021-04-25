@@ -76,7 +76,7 @@ export class BasicSimulation implements VaccinationSimulation {
     };
 
     simulationStartWeek: YearWeek = cw.yws([2021, 10]);
-    simulationEndWeek: YearWeek = cw.yws([2021, 50]);
+    simulationEndWeek: YearWeek = cw.yws([2021, 43]);
 
     /** Prepare data: Call when Dataloade is ready */
     prepareData(): boolean {
