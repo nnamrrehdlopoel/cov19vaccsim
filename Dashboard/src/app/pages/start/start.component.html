@@ -401,10 +401,10 @@
                                     später </span>
                                 <span fxHide.lt-md="true"><br></span>
                                 <span *ngIf="group.Stufe!=6">Risikostufe {{group.Stufe}}<span fxHide.lt-md="true"><br>
-                                    {{group['Anteil']*100 | number:'1.0-0'}}%</span>
+                                    ({{group['Anteil']*100 | number:'1.0-0'}}% geimpft)</span>
                                 </span>
                                 <span *ngIf="group.Stufe==6">Risikostufe {{group.Stufe}}<span fxHide.lt-md="true"><br>
-                                    übrige Bevölkerung</span>
+                                    Bevölkerung 18+ geimpft</span>
                                 </span>
 
                             </p>
@@ -425,10 +425,10 @@
                                     später </span>
                                 <span fxHide.lt-md="true"><br></span>
                                 <span *ngIf="group.Stufe!=6">Risikostufe {{group.Stufe}}<span fxHide.lt-md="true"><br>
-                                    {{group['Anteil']*100 | number:'1.0-0'}}%</span>
+                                    ({{group['Anteil']*100 | number:'1.0-0'}}% geimpft)</span>
                                 </span>
                                 <span *ngIf="group.Stufe==6">Risikostufe {{group.Stufe}}<span fxHide.lt-md="true"><br>
-                                    übrige Bevölkerung</span>
+                                    Bevölkerung 18+ geimpft</span>
                                 </span>
 
                             </p>
@@ -437,12 +437,12 @@
 
                     <div fxFlex=100>
                         <p class="mat-caption lightgreycolor">
-                            Die Risikostufen wurden laut STIKO-Empfehlung gebildet. Die dargestellten
+                            Die Risikostufen wurden laut STIKO-Empfehlung gebildet (<strong><a style="color:grey;" href="https://www.rki.de/DE/Content/Infekt/EpidBull/Archiv/2021/Ausgaben/02_21.pdf">RKI 2021, S.55</a></strong>). Die dargestellten
                             Bevölkerungsanteile basieren auf Schätzungen der STIKO und wurden auf die Bevölkerung im
                             Alter ab 18 Jahre angewendet. Die Risikogruppe 1 nach STIKO entspricht § 2 (Höchste
                             Priorität) der Impfverordnung; Risikogruppen 2 und 3 nach STIKO entsprechen § 3 (hohe
                             Priorität) der Impfverordnung; Risikogruppen 4 und 5 nach STIKO entsprechen § 4 (erhöhte
-                            Priorität) der Impfverordnung des Bundesministeriums für Gesundheit.
+                            Priorität) der Impfverordnung des Bundesministeriums für Gesundheit. <span *ngIf="this.current_bl!='Gesamt'"><em>Für die Länder wird mangels Daten vereinfacht angenommen, dass die Anteile der Risikogruppen den Anteilen im Bund entsprechen.</em></span>
                         </p>
                     </div>
                 </div>
@@ -455,7 +455,7 @@
                     </div>
                     <div class="padding lightgreycolor">
                         <p class="mat-caption">
-                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern.
+                            Legende:<br>Projektion auf Basis der aktuellen Verträge mit den Herstellern. Eventuelle Lagerbestände werden zu Beginn mitberücksichtigt, sodass die Anzahl der Impfungen die der neuen Lieferungen übersteigen kann.
                         </p>
                     </div>
 
@@ -508,7 +508,7 @@
                 </div>
 
                 <div *ngIf="this.showdurchimpfung" fxFlex=45 fxFlex.lt-md=100>
-                    <h2>Abgeschlossene Immunisierungen</h2>
+                    <h2>Abgeschlossene Immunisierungen <span *ngIf="this.params.anteil_impfbereit<1.0"> der Impfwilligen </span>ab 18 Jahren</h2>
                     <div>
                         <app-plot [(data)]="this.new_simresult" [custommargins]="{ l: 0, r: 0, b: 45, t: 0 }"
                             xvalue="date" [colorscheme]="['green']" [outcomes]="['patienten_durchgeimpft']"
@@ -525,7 +525,7 @@
                 <div fxFlex fxHide.lt-md=true></div>
 
                 <div *ngIf="this.showdurchimpfung" fxFlex=45 fxFlex.lt-md=100>
-                    <h2>Modellierte Impfquote<span *ngIf="this.params.anteil_impfbereit<1.0"> der Impfwilligen</span> in %</h2>
+                    <h2>Modellierte Impfquote <span *ngIf="this.params.anteil_impfbereit<1.0"> der Impfwilligen </span>ab 18 Jahren in %</h2>
                     <div>
                         <app-plot [(data)]="this.new_simresult" [custommargins]="{ l: 0, r: 0, b: 25, t: 0 }"
                             xvalue="date" [colorscheme]="['#1976d2','green']"

@@ -79,9 +79,9 @@ export class StartComponent implements OnInit {
   verteilungszenarien = ["Gleichverteilung", "Linearer Anstieg der Produktion in Q2"];
   params = {
     n_impfzentren_pat: 321429 ,
-    n_varzt: 50000,
-    n_varzt_pat: 30,
-    varzt_tage: 3,
+    n_varzt: 63000,
+    n_varzt_pat: 50,
+    varzt_tage: 4,
     kapazitaet_pro_tag: 0,
     kapazitaet_pro_woche: 0,
     warten_dosis_2: 5,
@@ -203,8 +203,8 @@ export class StartComponent implements OnInit {
 
   change_simple() {
     if (this.simple_aerzte_impfen) {
-      this.params.varzt_tage = 3;
-      this.params.n_varzt_pat= 30;
+      this.params.varzt_tage = 4;
+      this.params.n_varzt_pat= 50;
     }
     else {
       this.params.varzt_tage = 0;
@@ -671,9 +671,9 @@ export class StartComponent implements OnInit {
     var dow = simple.getDay();
     var ISOweekStart = simple;
     if (dow <= 4)
-      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+      ISOweekStart.setDate(simple.getDate() + 7 - simple.getDay() + 1);
     else
-      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+      ISOweekStart.setDate(simple.getDate() + 8 + 7 - simple.getDay());
     return ISOweekStart.toISOString().substring(0, 10);
   }
 
