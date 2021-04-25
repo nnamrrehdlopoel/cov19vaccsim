@@ -26,6 +26,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatTabsModule} from '@angular/material/tabs';
 import {FormsModule} from '@angular/forms';
+import {MatTooltipModule} from "@angular/material/tooltip";
 
 
 @NgModule({
@@ -58,6 +59,7 @@ import {FormsModule} from '@angular/forms';
         MatStepperModule,
         MatProgressBarModule,
         MatTabsModule,
+        MatTooltipModule,
     ],
     exports: [
         MatSidenavModule,
@@ -86,6 +88,7 @@ import {FormsModule} from '@angular/forms';
         MatStepperModule,
         MatProgressBarModule,
         MatTabsModule,
+        MatTooltipModule,
     ]
 })
 export class MaterialModule {

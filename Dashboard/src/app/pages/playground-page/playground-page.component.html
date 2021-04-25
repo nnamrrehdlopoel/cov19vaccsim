@@ -46,14 +46,14 @@
             <mat-card-content class="settings_card">
                 <div>
                     <h2><strong>Zulassung</strong></h2>
-                    <div class="settings_row">
+                    <div class="settings_row" matTooltip="Personen die keinen der aktuell verfügbaren Impfstoffe erhalten können z.B. weil sie zu jung sind (unter 16 Jahren)">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerContraindicated"
                                           (change)="runSimulation();" labelPosition="before">
                             Kontraindizierte beachten (vor allem Alter)
                         </mat-slide-toggle>
                     </div>
                     <div class="settings_row">
-                        <p>Ausfall / Zulassung simulieren:</p>
+                        <p matTooltip="Welche Impfstoffe für die Simulation beachtet werden sollen" >Ausfall / Zulassung simulieren:</p>
                         <div style="margin-left: 1.5rem;">
                             <p
                                 *ngFor="let vacc of simulation.params.vaccinesUsed | keyvalue: originalOrder">
@@ -96,7 +96,7 @@
                         </div>
                     </div>
                     <div class="settings_row">
-                        <p>Verteilung der Lieferungen:</p>
+                        <p matTooltip="Lieferungsszenarien des ZI-Data Labs basierend auf den Ankündigungen der Hersteller">Verteilung der Lieferungen:</p>
                         <div style="margin-left: 1.5rem;">
                             <mat-radio-group class="my-radio-group" [(ngModel)]="simulation.params.deliveryScenario"
                                              (change)="runSimulation();">
@@ -112,7 +112,7 @@
                 <div>
                     <h2><strong>Impforganisation</strong></h2>
 
-                    <div class="settings_row" >
+                    <div class="settings_row" matTooltip="Anteil Impfdosen die nicht verimpft, sondern zurückgehalten werden für Personen die noch eine Zweitimpfung benötigen">
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Rückstellungen für Zweitimpfungen:</div>
                             <div fxFlex="0 0 auto" >
@@ -122,7 +122,7 @@
                         <mat-slider [(ngModel)]="simulation.params.keep2ndDosesBack" min="0" max="1.0" step="0.05"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
-                    <div class="settings_row">
+                    <div class="settings_row" matTooltip="Extra Abstand zwischen Erst- und Zweitimpfung über die Empfehlung der STIKO hinaus.">
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Abstand Erst- zu Zweitimpfung:</div>
                             <div fxFlex="0 0 auto" >
@@ -139,19 +139,23 @@
                 <div>
                     <h2><strong>Impfbereitschaft</strong></h2>
 
-                    <div class="settings_row">
+                    <div class="settings_row"
+                         matTooltip="Personen für die Impfungen zugelassen wären, die aber nicht bereit sind, sich impfen zu lassen.">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerNotWilling"
                                           (change)="runSimulation();" labelPosition="before">
                             Impfunwillige beachten
                         </mat-slide-toggle>
                     </div>
-                    <div class="settings_row">
+                    <div class="settings_row"
+                         matTooltip="Personen die sich nur zögerlich impfen lassen; Lässt vor allem den Graph schöner aussehen. Details siehe Einschränkungen">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerHesitating"
                                           (change)="runSimulation();" labelPosition="before">
                             Impfzögerliche beachten
                         </mat-slide-toggle>
                     </div>
-                    <div class="settings_row">
+                    <div class="settings_row"
+                        matTooltip="Personen für die Impfungen zugelassen wären, die theoretisch bereit wären sich impfen zu lassen.
+                        Standardwert ist der Anteil der Antworten [7-3] aus der Skala [7-1] der COSMO-Umfragen.">
                         <div fxLayout="row" fxLayoutAlign="space-between center">
                             <div>Impfbereitschaft:</div>
                             <div fxFlex="0 0 auto" >
@@ -282,7 +286,7 @@
                     Dies ist eine statische GitHub Page, dementsprechend gilt auch die <a href="https://docs.github.com/en/github/site-policy/github-privacy-statement">Privacy Policy von GitHub</a>.
                     Es werden keine Cookies verwendet und keine Tracker oder so eingebunden.
                     Allerdings werden die oben genannten Datenquellen teilweise dynamisch (also vom Browser aus) eingebunden (dadurch sind sie automatisch immer auf dem neuesten Stand).<br>
-                    D.h. der browser fragt z.B. direkt die Tabelle vom <a href="https://impfdashboard.de">impfdashboard.de</a> an.
+                    D.h. der Browser fragt z.B. die Tabelle vom <a href="https://impfdashboard.de">impfdashboard.de</a> direkt an.
                 </p>
             </mat-card-content>
 
