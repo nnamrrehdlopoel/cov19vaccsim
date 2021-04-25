@@ -302,7 +302,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .style("fill", "yellow");
             });*/
 
-        console.log(mappedParts);
+        // console.log(mappedParts);
 
         // No gap => draw line instead
         if(mappedParts.length && coords.rightBarGap <= 0) {

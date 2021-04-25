@@ -68,8 +68,8 @@ export interface DeliveriesData {
  * Interface of Metadata Data from impfdashboard.de
  */
 export interface UpdateDatesData {
-    vaccinationsLastUpdated: Date;
-    deliveryLastUpdated: Date;
+    vaccinationsLastUpdated?: Date;
+    deliveryLastUpdated?: Date;
 }
 
 

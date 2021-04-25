@@ -25,7 +25,7 @@ export class DataloaderService {
 
     vaccinations: d3.DSVParsedArray<VaccinationsData>;
     deliveries: d3.DSVParsedArray<DeliveriesData>;
-    updateDates: UpdateDatesData;
+    updateDates: UpdateDatesData = {};
     zilabImpfsimLieferungenData: ZilabImpfsimlieferungenDataRow[];
     population: PopulationData;
     priorities: PriorityGroupsData;
@@ -53,7 +53,7 @@ export class DataloaderService {
                         obs.next();
                     });
             }
-            if (!this.updateDates) {
+            if (!this.updateDates.vaccinationsLastUpdated) {
                 this.http.get<UpdateDatesData>('https://impfdashboard.de/static/data/metadata.json')
                     .subscribe(data => {
                         this.updateDates = data;
@@ -111,7 +111,7 @@ export class DataloaderService {
     allLoaded(): boolean {
         return !!this.vaccinations
             && !!this.deliveries
-            && !!this.updateDates
+            && !!this.updateDates.vaccinationsLastUpdated
             && !!this.zilabImpfsimLieferungenData
             && !!this.vaccinationWillingness
             && !!this.vaccineUsage
