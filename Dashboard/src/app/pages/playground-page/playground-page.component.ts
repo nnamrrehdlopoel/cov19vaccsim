@@ -200,6 +200,7 @@ export class PlaygroundPageComponent implements OnInit {
                     c = this.populationPartitionPalette[colorI++];
                 }
                 parts.unshift({
+                    title: p.description,
                     size: p.size,
                     fillColor: c
                 });

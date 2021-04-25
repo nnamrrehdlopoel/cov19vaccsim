@@ -27,14 +27,17 @@ export interface DataPoint {
 }
 
 export interface DataPartition {
+    title?: string;
     size: number;
     fillColor: string;
 }
 
 interface PartitionMinMax {
+    title?: string;
     min: number;
     max: number;
     fillColor: string;
+    labelBBox?: any;
 }
 
 interface DummyChartCoords {
@@ -62,6 +65,8 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yGridMinor: d3.Selection<SVGGElement, unknown, null, undefined>;
     private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private rightBarBoxes: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private rightBarLabels: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
         return {
@@ -76,6 +81,8 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.yGrid = this.svg.append('g').classed('grid', true);
         this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
         this.rightBar = this.svg.append('g').classed('right-bar', true);
+        this.rightBarBoxes = this.rightBar.append('g').classed('boxes', true);
+        this.rightBarLabels = this.rightBar.append('g').classed('labels', true);
         this.xAxis = this.svg.append('g').classed('x-axis', true);
         this.yAxis = this.svg.append('g').classed('y-axis', true);
     }
@@ -242,9 +249,11 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private renderRightBar(coords: DummyChartCoords, partitions: DataPartition[]): void {
-        this.rightBar
+        const mappedParts = this.mapPartitions(partitions);
+
+        this.rightBarBoxes
             .selectAll('rect')
-            .data(this.mapPartitions(partitions))
+            .data(mappedParts)
             .join('rect')
             .attr('x', coords.rightBarX)
             .attr('y', p => coords.yScale(p.max))
@@ -252,14 +261,58 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('height', p => coords.yScale(p.min) - coords.yScale(p.max))
             .attr('fill', p => p.fillColor);
 
+        this.rightBarLabels.attr('font-size', '12');
+        this.rightBarLabels
+            .selectAll('g')
+            .data(mappedParts)
+            .join(el => el.append('g').call(el => {
+                el.append('rect');
+                el.append('text');
+            })).each(function(p){
+                d3.select(this).select('text')
+                .attr('x', coords.rightBarX)
+                .attr('y', coords.yScale((p.max+p.min)/2))
+                .attr('dy', '0.3em')
+                .attr('dx', coords.rightBarWidth/2 - 3)
+                .attr('text-anchor', 'end')
+                .text(p.max - p.min > 5 ? p.title : '')
+                .call(function(el){
+                    // @ts-ignore
+                    p.labelBBox = el.node().getBBox();
+                })
+            })
+            .each(function(p){
+                d3.select(this).select('rect')
+                    .attr("x", p.labelBBox.x - 3)
+                    .attr("y", p.labelBBox.y)
+                    .attr("width", p.labelBBox.width + 6)
+                    .attr("height", p.labelBBox.height)
+                    .style("fill", "white")
+                    .attr('opacity', 0.8)
+                    .attr('rx', 2)
+                    .attr('ry', 2);
+            })
+            /*.each( p => {
+                d3.select('g')
+                    .insert('rect', 'text')
+                    .attr("x", (d: PartitionMinMax) => d.labelBBox.x)
+                    .attr("y", (d: PartitionMinMax) => d.labelBBox.y)
+                    .attr("width", (d: PartitionMinMax) => d.labelBBox.width)
+                    .attr("height", (d: PartitionMinMax) => d.labelBBox.height)
+                    .style("fill", "yellow");
+            });*/
+
+        console.log(mappedParts);
+
         // No gap => draw line instead
         if(coords.rightBarGap <= 0) {
             this.rightBar.selectAll('line')
                 .data([0])
-                .join('line')
+                .join(el => el.insert('line', 'g.labels'))
                 .attr('transform', `translate(${coords.rightBarX}, ${coords.margin.top})`)
                 .attr('y2', (this.chartSize.height - coords.margin.top - coords.margin.bottom))
-                .attr('stroke', '#333');
+                .attr('stroke', '#333')
+                .attr('shape-rendering', 'crispEdges');
         }
     }
 
@@ -291,6 +344,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 min,
                 max,
                 fillColor: p.fillColor,
+                title: p.title
             });
             min = max;
         }
