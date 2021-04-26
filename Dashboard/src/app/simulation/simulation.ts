@@ -14,7 +14,12 @@ import {
     extractDeliveriesInfo,
     mergeWeeklyDeliveryScenario, recalculateCumulativeWeeklyDeliveries
 } from './weekly-data-converter';
-import {CosmoVaccinationWillingnessPartitioner, PopulationPartition} from './populationPartitionings';
+import {
+    AgePartitioner,
+    CosmoVaccinationWillingnessPartitioner, DecreePriorityPartitioner,
+    PopulationPartition,
+    RKIPriorityPartitioner
+} from './populationPartitionings';
 import {sum, sub, vNM, v, mul} from './vaccine-map-helper';
 import {VaccineUsage} from './vaccine-usage';
 
@@ -72,7 +77,26 @@ export class BasicSimulation implements VaccinationSimulation {
     vaccineUsage = new VaccineUsage(this.dataloader);
 
     partitionings = {
-        vaccinationWillingness: []
+        vaccinationWillingness: {
+            title: "Impfwilligkeit nach COSMO-Umfragen",
+            partitioner: this.willingness,
+            partitions: []
+        },
+        prioritiesDecree: {
+            title: "Prioritätsgruppen nach Verordnung (geschätzt)",
+            partitioner: new DecreePriorityPartitioner(this.dataloader),
+            partitions: []
+        },
+        prioritiesRki: {
+            title: "Prioritätsgruppen nach RKI (geschätzt)",
+            partitioner: new RKIPriorityPartitioner(this.dataloader),
+            partitions: []
+        },
+        prioritiesAge: {
+            title: "Bevölkerung nach Alter",
+            partitioner: new AgePartitioner(this.dataloader),
+            partitions: []
+        },
     };
 
     simulationStartWeek: YearWeek = cw.yws([2021, 10]);
@@ -118,8 +142,9 @@ export class BasicSimulation implements VaccinationSimulation {
             if (this.params.considerNotWilling) {
                 partitioning = this.addUnwillingPartition(partitioning);
             }
-
-            this.partitionings.vaccinationWillingness = this.willingness.addWillingnessPartitions(partitioning);
+            for (const part of Object.values(this.partitionings)) {
+               part.partitions = part.partitioner.addPartitions(partitioning);
+            }
         }
 
 

@@ -10,6 +10,16 @@
             <mat-card-content>
                 <mat-tab-group animationDuration="0">
                     <mat-tab label="Geimpfte Bevölkerung">
+                        <div class="top-bar">
+                            <mat-form-field color="accent" appearance="outline" class="slim" style="position: absolute; right: 0; width: 25em;">
+                                <mat-label>Aufteilung im rechten Balken</mat-label>
+                                <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChart1()" >
+                                    <ng-container *ngFor="let p of simulation.partitionings | keyvalue: originalOrder">
+                                        <mat-option [value]="p.key">{{p.value.title}}</mat-option>
+                                    </ng-container>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"
@@ -18,6 +28,9 @@
                         ></app-dummy-chart>
                     </mat-tab>
                     <mat-tab label="Wöchentliche Impfungen">
+                        <div class="top-bar">
+
+                        </div>
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"
@@ -26,6 +39,9 @@
                         ></app-dummy-chart>
                     </mat-tab>
                     <mat-tab label="Impfdosen insgesamt">
+                        <div class="top-bar">
+
+                        </div>
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"

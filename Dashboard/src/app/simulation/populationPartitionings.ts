@@ -11,15 +11,16 @@ export interface PopulationPartition {
 }
 
 // tslint:disable-next-line:no-empty-interface
-export interface PopulationPartitioner {}
+export interface PopulationPartitioner {
+    addPartitions(partitions: PopulationPartition[]): PopulationPartition[];
+}
 
-export interface VaccinationWillingnessPartitioner {
+export interface VaccinationWillingnessPartitioner extends PopulationPartitioner {
     getUnwillingFraction(): number;
     getHesitatinglyWillingFraction(): number;
     getHesitatinglyWillingOfWillingFraction(): number;
     getUnwillingPartition(): PopulationPartition[];
     addUnwillingPartition(partitions: PopulationPartition[]): PopulationPartition[];
-    addWillingnessPartitions(partitions: PopulationPartition[], excludingUnwilling): PopulationPartition[];
 }
 
 export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillingnessPartitioner {
@@ -67,7 +68,7 @@ export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillin
             }];
     }
 
-    addWillingnessPartitions(partitions: PopulationPartition[], excludingUnwilling = true): PopulationPartition[] {
+    addPartitions(partitions: PopulationPartition[], excludingUnwilling = true): PopulationPartition[] {
         if (!excludingUnwilling){
             partitions = this.addUnwillingPartition(partitions);
         }
@@ -115,26 +116,94 @@ export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillin
 }
 
 
-export class PriorityPartitioner implements PopulationPartitioner {
+export abstract class PriorityPartitioner implements PopulationPartitioner {
     constructor(
         private dataloader: DataloaderService) {
     }
 
-    addPriorityPartitions(partitions: PopulationPartition[], priorityType): PopulationPartition[] {
+    protected priorityType = '';
+
+    addPartitions(partitions: PopulationPartition[]): PopulationPartition[] {
         const population = this.dataloader.population.data.total;
-        const restPopulation = population - partitions.map(x => x.size).reduce(sum, 0);
+        let restPopulation = population - partitions.map(x => x.size).reduce(sum, 0);
 
-        // partition based on the latest data of COSMO
-        const prioGroups = this.dataloader.priorities.data[priorityType].gruppen;
+        const parts = [];
+        const prioGroups = this.dataloader.priorities.data[this.priorityType].gruppen;
 
-        // TODO: implement
+        for (const [name, group] of Object.entries(prioGroups)){
+            const num = Math.min(restPopulation, group);
+            parts.unshift({
+                id: 'prio_'+name,
+                description: name,
+                size: num,
+            });
+            restPopulation -= num;
+        }
+
+        console.log('Prio '+this.priorityType+' rest', restPopulation);
 
         return [
-            ...partitions];
+            ...partitions,
+            {
+                id: 'rest',
+                description: 'Rest',
+                size: restPopulation,
+            },
+            ...parts];
     }
 }
 
+export class RKIPriorityPartitioner extends PriorityPartitioner {
+    priorityType = 'rki';
+}
+
+export class DecreePriorityPartitioner extends PriorityPartitioner {
+    priorityType = 'verordnung';
+}
+
 export class AgePartitioner implements PopulationPartitioner {
-    constructor(private params: ISimulationParameters) {
+    constructor(
+        private dataloader: DataloaderService) {
     }
+
+    protected groupEveryYears = 10;
+
+    addPartitions(partitions: PopulationPartition[]): PopulationPartition[] {
+        const population = this.dataloader.population.data.total;
+        let restPopulation = population - partitions.map(x => x.size).reduce(sum, 0);
+
+        // Assume equal distribution of unwilling on all population groups
+        // (not correct, but first approximation)
+        const unwilling = partitions.filter(x => x.id == 'unwilling').map(x => x.size).reduce(sum, 0);
+        const willingnessFactor = 1 - (unwilling / (restPopulation + unwilling));
+
+        const parts = [];
+        let group = 0;
+        let groupStart = '';
+        const ages = Object.entries(this.dataloader.population.data.by_age);
+        for (const [age, n] of ages.reverse()){
+            group += n;
+            if (parseInt(age, 10) % this.groupEveryYears == 0){
+                const num = Math.min(restPopulation, Math.floor(group * willingnessFactor));
+                parts.unshift({
+                    id: age,
+                    description: (groupStart ? age+' - '+groupStart : age),
+                    size: num,
+                });
+                restPopulation -= num;
+
+                // reset accumulators
+                group = 0;
+                groupStart = '';
+            }
+            else if(!groupStart) {
+                groupStart = age;
+            }
+        }
+
+        return [
+            ...partitions,
+            ...parts];
+    }
+
 }

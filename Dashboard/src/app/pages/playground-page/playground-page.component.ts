@@ -40,7 +40,15 @@ export class PlaygroundPageComponent implements OnInit {
         '#69b164',
         '#468b43',
         '#186a10',
-        '#073a55',
+        '#12520d',
+        '#0c3d07',
+    ];
+    populationPartitionPaletteLarge = [
+        '#e9fcec',
+        '#c2eac8',
+        ...this.populationPartitionPalette,
+        '#0a2f05',
+        '#061d02',
     ];
     populationPartitionSpecialColors = {
         unwilling: '#ddd',
@@ -89,6 +97,8 @@ export class PlaygroundPageComponent implements OnInit {
     data3: DummyChartData = this.data;
     simulationStartWeek: YearWeek = cw.yws([2021, 5]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
+
+    displayPartitioning = Object.keys(this.simulation.partitionings)[0];
 
     simulationResults: ISimulationResults;
 
@@ -191,13 +201,17 @@ export class PlaygroundPageComponent implements OnInit {
 
             const parts = [];
             let colorI = 0;
-            for (const p of this.simulation.partitionings.vaccinationWillingness) {
+            const partitions = this.simulation.partitionings[this.displayPartitioning].partitions;
+            const palette = partitions.filter(p => !(p.id in this.populationPartitionSpecialColors)).length > this.populationPartitionPalette.length ?
+                this.populationPartitionPaletteLarge
+                : this.populationPartitionPalette;
+            for (const p of partitions) {
                 let c;
                 if (p.id in this.populationPartitionSpecialColors){
                     c = this.populationPartitionSpecialColors[p.id];
                 }
                 else{
-                    c = this.populationPartitionPalette[colorI++];
+                    c = palette[colorI++];
                 }
                 parts.unshift({
                     title: p.description,
