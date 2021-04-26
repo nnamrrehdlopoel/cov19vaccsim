@@ -8,7 +8,12 @@
     <div fxFlex="1 0 600px" fxFlex.lt-md="1 1 0" >
         <mat-card class="chart_card">
             <mat-card-content>
-                <mat-tab-group animationDuration="0">
+                <mat-progress-spinner
+                    *ngIf="!loaded"
+                    mode="indeterminate"
+                    color="accent">
+                </mat-progress-spinner>
+                <mat-tab-group *ngIf="loaded" animationDuration="0">
                     <mat-tab label="Geimpfte Bevölkerung">
                         <div class="top-bar">
                             <mat-form-field color="accent" appearance="outline" class="slim" style="position: absolute; right: 0; width: 25em;">
@@ -52,7 +57,7 @@
                 </mat-tab-group>
             </mat-card-content>
 
-            <mat-card-subtitle>
+            <mat-card-subtitle *ngIf="loaded">
                 Datenbasis:
                 <span class="line">Impfungen lt. RKI (Stand {{dataloader.updateDates.vaccinationsLastUpdated | date:'shortDate'}}),&nbsp;</span>
                 <span class="line">Lieferungen lt. BMG (Stand {{dataloader.updateDates.deliveryLastUpdated | date:'shortDate'}}),&nbsp;</span>
