@@ -256,25 +256,32 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
     private renderLegend(coords: DummyChartCoords, series: DataSeries[]): void {
         const labeledSeries = series.filter(s => !!s.label);
+        const padding = 10;
 
         // legend in general (position, visibility)
         this.legend
             .attr('transform', 'translate(40, 20)')
             .attr('opacity', labeledSeries.length > 0 ? 1 : 0);
 
-        // background box, width currently hardcoded
+        // 0.5 movements are to make sure that the border lies exactly on a pixel and can be rendered nicely
+
+        // background box
         this.legend
             .selectAll('rect.legend-background')
             .data([0])
             .join('rect')
             .classed('legend-background', true)
+            .attr('x', -0.5)
+            .attr('y', -0.5)
             .attr('width', 200)
-            .attr('height', labeledSeries.length * 20 + 15)
+            .attr('height', labeledSeries.length * 20 + padding + padding - 8)
             .attr('rx', 3)
             .attr('fill', 'white')
-            .attr('stroke', 'black')
+            .attr('stroke', '#777')
             .attr('stroke-width', 1);
+            //.attr('shape-rendering', 'crispEdges');
 
+        let maxTextWidth = -1;
         // legend entries
         this.legend
             .selectAll('g.legend-entry')
@@ -283,26 +290,43 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 const lGroup = enter.append('g');
                 lGroup
                     .classed('legend-entry', true)
-                    .attr('transform', (d, i) => `translate(5, ${i * 20 + 10})`);
+                    .attr('transform', (d, i) => `translate(${padding}, ${i * 20 + padding})`);
                 lGroup
                     .append('rect')
+                    .attr('x', -0.5)
+                    .attr('y', -0.5)
                     .attr('width', 10)
                     .attr('height', 10)
                     .attr('fill', d => d.fillColor)
-                    .attr('opacity', this.config.fillOpacity);
+                    .attr('stroke', d => d.strokeColor)
+                    .attr('fill-opacity', this.config.fillOpacity);
                 // todo set font size etc
-                lGroup
+                const text_els = lGroup
                     .append('text')
                     .attr('x', 20)
                     .attr('y', 10)
                     .attr('fill', 'black')
-                    .text( d => d.label);
+                    //.attr('text-rendering', 'optimizeLegibility')
+                    .text( d => d.label).nodes();
+                for(const el of text_els){
+                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 20);
+                }
                 return lGroup;
             }, update => {
+                const text_els = update.select('text').nodes();
+                for(const el of text_els){
+                    // @ts-ignore
+                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 20);
+                }
                 return update;
             }, exit => {
                 exit.remove();
             });
+        if(maxTextWidth > 0) {
+            this.legend
+                .selectAll('rect.legend-background')
+                .attr('width', maxTextWidth + padding*2);
+        }
     }
 
     private renderRightBar(coords: DummyChartCoords, partitions: DataPartition[]): void {
