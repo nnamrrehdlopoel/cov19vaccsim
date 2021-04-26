@@ -260,7 +260,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
         // legend in general (position, visibility)
         this.legend
-            .attr('transform', 'translate(40, 20)')
+            .attr('transform', 'translate(35, 35)')
             .attr('opacity', labeledSeries.length > 0 ? 1 : 0);
 
         // 0.5 movements are to make sure that the border lies exactly on a pixel and can be rendered nicely
@@ -303,20 +303,21 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 // todo set font size etc
                 const text_els = lGroup
                     .append('text')
-                    .attr('x', 20)
+                    .attr('x', 15)
                     .attr('y', 10)
                     .attr('fill', 'black')
+                    .attr('font-size', '14')
                     //.attr('text-rendering', 'optimizeLegibility')
                     .text( d => d.label).nodes();
                 for(const el of text_els){
-                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 20);
+                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 15);
                 }
                 return lGroup;
             }, update => {
                 const text_els = update.select('text').nodes();
                 for(const el of text_els){
                     // @ts-ignore
-                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 20);
+                    maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 15);
                 }
                 return update;
             }, exit => {
