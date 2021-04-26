@@ -34,6 +34,7 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     simulation = new BasicSimulation(this.dataloader);
+    loaded = false;
 
     populationPartitionPalette = [
         '#a2d9ac',
@@ -99,12 +100,15 @@ export class PlaygroundPageComponent implements OnInit {
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
 
     displayPartitioning = Object.keys(this.simulation.partitionings)[0];
+    featureFlagYAxisScale = false;
+    displayYAxisScale = 'num';
 
     simulationResults: ISimulationResults;
 
     ngOnInit(): void {
         window.scrollTo(0, 0);
         this.dataloader.loadData().subscribe(value => {
+            this.loaded = true;
             this.simulation.prepareData();
             this.simulationStartWeek = getYearWeekOfDate(this.dataloader.lastRefreshVaccinations);
             this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();

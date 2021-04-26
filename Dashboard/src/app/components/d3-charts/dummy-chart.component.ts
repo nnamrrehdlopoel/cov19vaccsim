@@ -103,7 +103,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private getCoords(): DummyChartCoords {
-        const margin = {top: 5, right: 2, bottom: 30, left: 2};
+        const margin = {top: 10, right: 2, bottom: 30, left: 2};
 
         // dynamic rightBarWidth to maintain a nice aspect ratio of the bar
         // while also not using too much screen estate
