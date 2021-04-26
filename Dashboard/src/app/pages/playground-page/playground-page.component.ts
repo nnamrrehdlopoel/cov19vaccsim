@@ -100,6 +100,8 @@ export class PlaygroundPageComponent implements OnInit {
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
 
     displayPartitioning = Object.keys(this.simulation.partitionings)[0];
+    featureFlagYAxisScale = false;
+    displayYAxisScale = 'num';
 
     simulationResults: ISimulationResults;
 

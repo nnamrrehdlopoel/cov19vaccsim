@@ -35,6 +35,10 @@ p {
     }
 }
 
+:host ::ng-deep mat-button-toggle-group.slim .mat-button-toggle-label-content {
+    line-height: 36px;
+}
+
 .chart_card {
     min-height: 60vh;
 
@@ -48,6 +52,10 @@ p {
         height: 2.5em;
         max-height: 2.5em;
         overflow: visible;
+
+        mat-button-toggle-group {
+            margin-top: 3px;
+        }
     }
 
     .dummy-chart {

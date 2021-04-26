@@ -16,6 +16,11 @@
                 <mat-tab-group *ngIf="loaded" animationDuration="0">
                     <mat-tab label="Geimpfte Bevölkerung">
                         <div class="top-bar">
+                            <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" aria-label="Font Style">
+                                <mat-button-toggle value="num">Personen</mat-button-toggle>
+                                <mat-button-toggle value="percent">Prozent</mat-button-toggle>
+                            </mat-button-toggle-group>
+
                             <mat-form-field color="accent" appearance="outline" class="slim" style="position: absolute; right: 0; width: 25em;">
                                 <mat-label>Aufteilung im rechten Balken</mat-label>
                                 <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChart1()" >
@@ -34,7 +39,10 @@
                     </mat-tab>
                     <mat-tab label="Wöchentliche Impfungen">
                         <div class="top-bar">
-
+                            <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" aria-label="Font Style">
+                                <mat-button-toggle value="num">Anzahl Impfdosen</mat-button-toggle>
+                                <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
+                            </mat-button-toggle-group>
                         </div>
                         <app-dummy-chart
                             class="dummy-chart"
@@ -45,7 +53,10 @@
                     </mat-tab>
                     <mat-tab label="Impfdosen insgesamt">
                         <div class="top-bar">
-
+                            <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" aria-label="Font Style">
+                                <mat-button-toggle value="num">Anzahl Impfdosen</mat-button-toggle>
+                                <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
+                            </mat-button-toggle-group>
                         </div>
                         <app-dummy-chart
                             class="dummy-chart"
