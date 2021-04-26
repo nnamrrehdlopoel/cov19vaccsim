@@ -5,6 +5,7 @@ import { ChartBase } from './chart-base/chart-base.directive';
 
 export interface DummyChartConfig {
     yAxisLabel: string;
+    fillOpacity: number;
 }
 
 export interface DummyChartData {
@@ -19,6 +20,7 @@ export interface DataSeries {
     strokeColor: string;
     strokeDasharray?: string;
     fillColor: string;
+    legendLabel?: string;
 }
 
 export interface DataPoint {
@@ -67,10 +69,12 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
     private rightBarBoxes: d3.Selection<SVGGElement, unknown, null, undefined>;
     private rightBarLabels: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private legend: d3.Selection<SVGGElement, unknown, null, undefined>;
 
     initialChartConfig(): DummyChartConfig {
         return {
-            yAxisLabel: 'yAxisLabel'
+            yAxisLabel: 'yAxisLabel',
+            fillOpacity: 0.5,
         };
     }
 
@@ -85,6 +89,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.rightBarLabels = this.rightBar.append('g').classed('labels', true);
         this.xAxis = this.svg.append('g').classed('x-axis', true);
         this.yAxis = this.svg.append('g').classed('y-axis', true);
+        this.legend = this.svg.append('g').classed('legend', true);
     }
 
     updateChart(): void {
@@ -94,6 +99,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         if(this.data.partitions){
             this.renderRightBar(coords, this.data.partitions);
         }
+        this.renderLegend(coords, this.data.series);
     }
 
     private getCoords(): DummyChartCoords {
@@ -153,7 +159,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .join('path')
             .attr('fill', s => s.fillColor)
             .attr('stroke', 'none')
-            .attr('opacity', 0.5)
+            .attr('opacity', this.config.fillOpacity)
             .attr('d', (d) => lineGenerator(d.data));
     }
 
@@ -246,6 +252,57 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('font-weight', 'bold')
             .text(d => d);
 
+    }
+
+    private renderLegend(coords: DummyChartCoords, series: DataSeries[]): void {
+        const labeledSeries = series.filter(s => !!s.legendLabel);
+
+        // legend in general (position, visibility)
+        this.legend
+            .attr('transform', 'translate(40, 20)')
+            .attr('opacity', labeledSeries.length > 0 ? 1 : 0);
+
+        // background box, width currently hardcoded
+        this.legend
+            .selectAll('rect.legend-background')
+            .data([0])
+            .join('rect')
+            .classed('legend-background', true)
+            .attr('width', 200)
+            .attr('height', labeledSeries.length * 20 + 15)
+            .attr('rx', 3)
+            .attr('fill', 'white')
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1);
+
+        // legend entries
+        this.legend
+            .selectAll('g.legend-entry')
+            .data(labeledSeries)
+            .join(enter => {
+                const lGroup = enter.append('g');
+                lGroup
+                    .classed('legend-entry', true)
+                    .attr('transform', (d, i) => `translate(5, ${i * 20 + 10})`);
+                lGroup
+                    .append('rect')
+                    .attr('width', 10)
+                    .attr('height', 10)
+                    .attr('fill', d => d.fillColor)
+                    .attr('opacity', this.config.fillOpacity);
+                // todo set font size etc
+                lGroup
+                    .append('text')
+                    .attr('x', 20)
+                    .attr('y', 10)
+                    .attr('fill', 'black')
+                    .text( d => d.legendLabel);
+                return lGroup;
+            }, update => {
+                return update;
+            }, exit => {
+                exit.remove();
+            });
     }
 
     private renderRightBar(coords: DummyChartCoords, partitions: DataPartition[]): void {

@@ -137,11 +137,13 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#69b8b4',
             strokeColor: '#46827f',
+            legendLabel: 'vacAtLeastOnce'
         };
         const vacFully: DataSeries = {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
+            legendLabel: 'vacFully'
         };
         const vacAtLeastOnceSim: DataSeries = {
             data: [],
