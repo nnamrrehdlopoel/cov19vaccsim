@@ -141,13 +141,13 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#69b8b4',
             strokeColor: '#46827f',
-            legendLabel: 'vacAtLeastOnce'
+            label: 'vacAtLeastOnce'
         };
         const vacFully: DataSeries = {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
-            legendLabel: 'vacFully'
+            label: 'vacFully'
         };
         const vacAtLeastOnceSim: DataSeries = {
             data: [],
@@ -220,7 +220,7 @@ export class PlaygroundPageComponent implements OnInit {
                     c = palette[colorI++];
                 }
                 parts.unshift({
-                    title: p.description,
+                    label: p.description,
                     size: p.size,
                     fillColor: c
                 });

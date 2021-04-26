@@ -20,7 +20,7 @@ export interface DataSeries {
     strokeColor: string;
     strokeDasharray?: string;
     fillColor: string;
-    legendLabel?: string;
+    label?: string;
 }
 
 export interface DataPoint {
@@ -29,13 +29,13 @@ export interface DataPoint {
 }
 
 export interface DataPartition {
-    title?: string;
+    label?: string;
     size: number;
     fillColor: string;
 }
 
 interface PartitionMinMax {
-    title?: string;
+    label?: string;
     min: number;
     max: number;
     fillColor: string;
@@ -255,7 +255,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private renderLegend(coords: DummyChartCoords, series: DataSeries[]): void {
-        const labeledSeries = series.filter(s => !!s.legendLabel);
+        const labeledSeries = series.filter(s => !!s.label);
 
         // legend in general (position, visibility)
         this.legend
@@ -296,7 +296,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .attr('x', 20)
                     .attr('y', 10)
                     .attr('fill', 'black')
-                    .text( d => d.legendLabel);
+                    .text( d => d.label);
                 return lGroup;
             }, update => {
                 return update;
@@ -332,7 +332,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .attr('dy', '0.3em')
                 .attr('dx', coords.rightBarWidth/2 - 3)
                 .attr('text-anchor', 'end')
-                .text(p.max - p.min > 5 ? p.title : '')
+                .text(p.max - p.min > 5 ? p.label : '')
                 .call(function(el){
                     // @ts-ignore
                     p.labelBBox = el.node().getBBox();
@@ -401,7 +401,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 min,
                 max,
                 fillColor: p.fillColor,
-                title: p.title
+                label: p.label
             });
             min = max;
         }
