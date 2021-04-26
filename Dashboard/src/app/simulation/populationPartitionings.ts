@@ -51,7 +51,7 @@ export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillin
         return [{
             id: 'unwilling',
             description: 'Impfunwillige ()',
-            size: population * this.getUnwillingFraction()
+            size: Math.floor(population * this.getUnwillingFraction())
         }];
     }
 
@@ -64,7 +64,7 @@ export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillin
             {
                 id: 'unwilling',
                 description: 'Impfunwillig (1,2)',
-                size: restPopulation * this.getUnwillingFraction()
+                size: Math.floor(restPopulation * this.getUnwillingFraction())
             }];
     }
 
@@ -86,17 +86,17 @@ export class CosmoVaccinationWillingnessPartitioner implements VaccinationWillin
             {
                 id: 'willing_3',
                 description: 'Eher impfunwillig (3,4)',
-                size: restPopulation * (cosmoData['4'] + cosmoData['3']) * factor,
+                size: Math.floor(restPopulation * (cosmoData['4'] + cosmoData['3']) * factor),
             },
             {
                 id: 'willing_2',
                 description: 'Eher impfwillig (5,6)',
-                size: restPopulation * (cosmoData['6'] + cosmoData['5']) * factor,
+                size: Math.floor(restPopulation * (cosmoData['6'] + cosmoData['5']) * factor),
             },
             {
                 id: 'willing',
                 description: 'Impfwillig (7)',
-                size: restPopulation * (cosmoData['7']) * factor,
+                size: Math.floor(restPopulation * (cosmoData['7']) * factor),
             }];
     }
 

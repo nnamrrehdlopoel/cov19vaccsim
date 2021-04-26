@@ -462,7 +462,7 @@ export class BasicSimulation implements VaccinationSimulation {
             {
                 id: 'unwilling',
                 description: 'Impfunwillig',
-                size: restPopulation * (1 - this.params.fractionWilling)
+                size: Math.floor(restPopulation * (1 - this.params.fractionWilling))
             }];
     }
 }
