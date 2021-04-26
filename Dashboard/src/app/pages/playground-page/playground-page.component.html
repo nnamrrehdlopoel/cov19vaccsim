@@ -21,7 +21,12 @@
                                 <mat-button-toggle value="percent">Prozent</mat-button-toggle>
                             </mat-button-toggle-group>
 
-                            <mat-form-field color="accent" appearance="outline" class="slim" style="position: absolute; right: 0; width: 25em;">
+                            <mat-form-field color="accent" appearance="outline" class="slim"
+                                            style="position: absolute; right: 0; width: 25em;"
+                                            matTooltip="Aufteilung der Bevölkerung im rechten Balken der Grafik.
+                                            Hat keinen Einfluss auf die Simulation die nur von der Impfbereitschaft abhängt,
+                                            daher entspricht die Reihenfolge der Blöcke auch nicht automatisch der logischen Impfreihenfolge
+                                            (Insb. beim Alter da ja nicht strikt nach Alter geimpft wird)">
                                 <mat-label>Aufteilung im rechten Balken</mat-label>
                                 <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChart1()" >
                                     <ng-container *ngFor="let p of simulation.partitionings | keyvalue: originalOrder">
@@ -231,7 +236,9 @@
             <mat-card-content class="mat-padding">
                 <h2>Was wie wo</h2>
                 <p>
-                    Ein kleines Bastelprojekt um historische Daten, Simulationen für die Zukunft und Infos zur Impfkampagne gegen Covid-19 in Deutschland in einem Dashboard anzuzeigen.<br>
+                    Ein kleines Amateur-Bastelprojekt um historische Daten, Simulationen für die Zukunft
+                    und weitere Infos zur Impfkampagne gegen Covid-19 in Deutschland in einem Dashboard zusammenzuführen.<br>
+                    Alles ist mit einer gewissen Skepsis zu betrachten, das hier ist schließlich keine offizielle Vorhersage.<br>
                     Wenn ihr etwas beitragen oder selbst mit dem Code rumspielen wollt, findet ihr alles auf <a href="https://github.com/Cov19-Impfvorhersage/cov19vaccsim">GitHub</a>.
                 </p>
 
@@ -265,33 +272,35 @@
                 </h3>
                 <ul>
                     <li>
-                        Keine Simulation der Kapazitäten:<br>
+                        <b>Keine Simulation der Kapazitäten:</b><br>
                         Die Annahme ist dass für jede verfügbare Impfdosis für die sich eine impfwillige Person findet sich auch ein Weg in den Arm auftut.
                         Hausärzte impfen bereits mit und wenn genug da ist tun das sicher gerne auch Betriebsärzte, Tierärzte, etc; zur Not auch in 24h-Schicht.<br>
                         Eine Kapazitätssimulation findet sich auf dem <a href="https://www.zidatasciencelab.de/cov19vaccsim">Impfdashboards des Zi Datascience Lab</a>
                     </li>
                     <li>
-                        Verzögertes Verfügbarwerden der Impfdosen:<br>
+                        <b>Verzögertes Verfügbarwerden der Impfdosen:</b><br>
                         Auch wenn Impfdosen offiziell geliefert wurden so müssen sie immer noch an die Einsatzorte verteilt werden.
                         Daraus ergibt sich seit Beginn der Kampagne eine 1 - 2-wöchige Verzögerung von Lieferung => Arm.
                         Dies gilt für ziemlich alle Länder und Staaten und wird hier simuliert indem die gelieferten Dosen einfach erst in der darauffolgenden Woche verfügbar werden.
+                        Sollte diese Annahme nicht stimmen (z.B. teilweise aktuell für BioNtech),
+                        wird das durch die Nichtbehandlung negativer Lagerbestände teilweise ausgeglichen (siehe nächster Punkt).
                     </li>
                     <li>
-                        Lagerbestand an Impfdosen:<br>
+                        <b>Lagerbestand an Impfdosen:</b><br>
                         Für den Beginn der Simulation wird der aktuelle Lagerbestand (mit verzögerter Verfügbarwerdung) der Impfdosen berechnet.
                         Dieser fließt dann in die Simulation mit ein. Allerdings werden negative Lagerbestände
                         (aka. Lieferungen die entgegen der Annahme im Absatz darüber noch in der selben Woche verimpft wurden) einfach ignoriert.
-                        Dadurch wird die Vorhersage für die nächsten Wochen besser, aber die Zahlen sind theoretisch nicht mehr ganz korrekt.
+                        Dadurch wird die Vorhersage für die nächsten Wochen besser, aber die Zahlen sind in der Summe am Ende theoretisch nicht mehr ganz korrekt.
                     </li>
                     <li>
-                        Zweitimpfungen:<br>
+                        <b>Zweitimpfungen:</b><br>
                         Zweitimpfungen werden entsprechend der RKI-Empfehlung angesetzt, allerdings ist die Warteschlange aus den historischen Daten nicht ganz berechenbar:<br>
                         Während für jede Woche die insgesamt Erstgeimpften bekannt sind, sind diese Zahlen für die einzelnen Impfstoffe,
                         die ja unterschiedliche Abstände zur Zweitimpfung haben, nicht verfügbar.
                         Hier wird einfach das identische Verhältnis für alle Impfstoffe angesetzt was sicher nicht ganz korrekt ist.
                     </li>
                     <li>
-                        Aufteilung der Bevölkerung:<br>
+                        <b>Aufteilung der Bevölkerung:</b><br>
                         Um den Teil der Bevölkerung zu simulieren, der die Impfung erhalten wird, werden zunächst die Kontraindizierten abgezogen.
                         Dies sind vor allem alle unter 16 jährigen da bisher keiner der Impfstoffe für diese Altersgruppe zugelassen wurde.
                         Anschließend wird vom Rest der Bevölkerung der Anteil Impfunwilliger abgezogen.
@@ -299,7 +308,15 @@
                         auf die volljährige Bevölkerung beziehen und dies auch diejenigen sind für die die Impfstoffe aktuell zugelassen sind.
                     </li>
                     <li>
-                        Impfzögerliche:<br>
+                        <b>Impfbereitschaft:</b><br>
+                        Die Impfwilligkeitsdaten aus den <a href="https://projekte.uni-erfurt.de/cosmo2020/">COSMO-Umfragen</a> werden wie folgt interpretiert:<br>
+                        Die Antworten zur Impfbereitschaft zwischen 7 (auf jeden Fall impfen) und 1 (auf keinen Fall impfen) in die Gruppen:<br>
+                        [7]: Impfwillig; [6,5]: Eher impfwillig; [4,3]: Eher impfunwillig (Impfzögerlich); [2,1]: Impfunwillig<br>
+                        Der Anteil Impfunwilliger wird dabei als Standardeinstellung für die Impfwilligkeit verwendet, die Impfzögerlichen wie unten beschrieben.
+                        Der restliche Teil wird homogen als impfbereit betrachtet.
+                    </li>
+                    <li>
+                        <b>Impfzögerliche:</b><br>
                         Gegen Ende der Impfkampagne wird diese deutlich langsamer, da sich immer weniger impfwillige Leute finden.
                         Dies wird hier wie folgt simuliert:<br>
                         Während von den Impfwilligen jede Woche 100% bereit wären und von den Impfunwilligen 0%,
