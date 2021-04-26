@@ -140,7 +140,13 @@ export class BasicSimulation implements VaccinationSimulation {
         ).cumDosesByVaccine;
 
         // Berechne die Impfdosen auf Lager für jeden Impfstoff
-        let vaccineStockPile = vNM(cumulativeDeliveredVaccines, cumDosesByVaccine, sub);
+        let vaccineStockPile = v(cumulativeDeliveredVaccines, sub, cumDosesByVaccine);
+        console.log('Raw vaccine Stockpile at beginning of sim', vaccineStockPile);
+        // Ignore negative Vaccine stock pile
+        // Negative stock pile means that the vaccine has been given faster than this.vaccineDeliveryDelayWeeks would allow
+        // => as this will presumably be the same in the future, we just simply ignore negative stock pile effectively
+        // adding an 'offset' to the simulation making it a bit more accurate
+        vaccineStockPile = v(vaccineStockPile, Math.max, 0);
         console.log('Vaccine Stockpile at beginning of sim', vaccineStockPile);
 
         /** Waiting list of people to get their second shot; [0] = next week */

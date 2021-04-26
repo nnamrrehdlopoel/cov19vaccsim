@@ -245,6 +245,13 @@
                         Dies gilt für ziemlich alle Länder und Staaten und wird hier simuliert indem die gelieferten Dosen einfach erst in der darauffolgenden Woche verfügbar werden.
                     </li>
                     <li>
+                        Lagerbestand an Impfdosen:<br>
+                        Für den Beginn der Simulation wird der aktuelle Lagerbestand (mit verzögerter Verfügbarwerdung) der Impfdosen berechnet.
+                        Dieser fließt dann in die Simulation mit ein. Allerdings werden negative Lagerbestände
+                        (aka. Lieferungen die entgegen der Annahme im Absatz darüber noch in der selben Woche verimpft wurden) einfach ignoriert.
+                        Dadurch wird die Vorhersage für die nächsten Wochen besser, aber die Zahlen sind theoretisch nicht mehr ganz korrekt.
+                    </li>
+                    <li>
                         Zweitimpfungen:<br>
                         Zweitimpfungen werden entsprechend der RKI-Empfehlung angesetzt, allerdings ist die Warteschlange aus den historischen Daten nicht ganz berechenbar:<br>
                         Während für jede Woche die insgesamt Erstgeimpften bekannt sind, sind diese Zahlen für die einzelnen Impfstoffe,
