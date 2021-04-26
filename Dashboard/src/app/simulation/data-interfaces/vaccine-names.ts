@@ -15,7 +15,8 @@ export const vaccineNames = {
     ],
     'j&j': [
         'J&J',
-        'janssen'
+        'janssen',
+        'johnson'
     ],
     curevac: [
         'Curevac'

@@ -370,6 +370,10 @@ export class BasicSimulation implements VaccinationSimulation {
                 };
 
                 for (let [vName, amount] of deliveryData.dosesByVaccine.entries()){
+                    if (!this.params.vaccinesUsed.get(vName)){
+                        console.warn('Unknown Vaccine; ignoring:', vName);
+                        continue;
+                    }
                     if (!this.params.vaccinesUsed.get(vName).used){
                         amount *= 0;
                     }
