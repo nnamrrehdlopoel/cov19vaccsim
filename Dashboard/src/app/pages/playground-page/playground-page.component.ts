@@ -141,13 +141,13 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#69b8b4',
             strokeColor: '#46827f',
-            label: 'vacAtLeastOnce'
+            label: 'Mindestens Erstgeimpft'
         };
         const vacFully: DataSeries = {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
-            label: 'vacFully'
+            label: 'Vollständig Immunisiert'
         };
         const vacAtLeastOnceSim: DataSeries = {
             data: [],
@@ -229,10 +229,10 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
         newData.series = [
-            vacFully,
             vacAtLeastOnce,
-            vacFullySim,
-            vacAtLeastOnceSim
+            vacFully,
+            vacAtLeastOnceSim,
+            vacFullySim
         ];
 
         this.data = newData;
@@ -251,6 +251,7 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#b8ad69',
             strokeColor: '#827a46',
+            label: 'Lieferungen',
         };
         const vacDeliveriesSim: DataSeries = {
             data: [],
@@ -262,11 +263,13 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#69b8b4',
             strokeColor: '#46827f',
+            label: 'Erste Impfungen',
         };
         const vacSecondDoses: DataSeries = {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
+            label: 'Zweite Impfungen',
         };
         const vacFirstDosesSim: DataSeries = {
             data: [],
@@ -377,11 +380,13 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#b8ad69',
             strokeColor: '#827a46',
+            label: 'Lieferungen',
         };
         const vacDoses: DataSeries = {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
+            label: 'Impfdosen',
         };
         const vacDeliveriesSim: DataSeries = {
             data: [],
