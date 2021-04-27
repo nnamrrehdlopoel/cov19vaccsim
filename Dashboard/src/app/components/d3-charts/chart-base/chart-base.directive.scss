@@ -12,8 +12,12 @@
     height: 100%;
 
     ::ng-deep {
-        .grid line{
-            color: rgba(0, 0, 0, 0.2);
+        .grid line, .grid-minor line {
+            shape-rendering: crispEdges;
+        }
+
+        .grid line {
+            color: rgba(0, 0, 0, 0.25);
         }
         .grid-minor line {
             color: rgba(0, 0, 0, 0.1);

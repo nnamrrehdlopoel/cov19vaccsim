@@ -164,7 +164,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     private renderAxis(coords: DummyChartCoords): void {
-        this.yAxis
+        /*this.yAxis
             .attr('transform', `translate(${coords.margin.left}, 0)`)
 
             .call(d3
@@ -175,6 +175,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .tickSizeOuter(0)
             ); // .tickPadding(-30));
 
+        // y axis: change number positioning
+        this.yAxis
+            .selectAll('text')
+            .attr('dx', 7)
+            .attr('dy', -4)
+            .attr('text-anchor', 'start');
+        this.yAxis.selectAll('.domain').remove();*/
+
         this.yGrid
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
@@ -182,8 +190,16 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .ticks(5)
                 .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
                 .tickSizeOuter(0)
-                .tickFormat(_ => '')
+                .tickFormat(d3.format('.2s'))
             );
+        this.yGrid.selectAll('.domain').remove();
+        // y axis: change number positioning
+        this.yGrid
+            .selectAll('text')
+            .attr('dx', 7)
+            .attr('dy', -4)
+            .attr('text-anchor', 'start');
+
         this.yGridMinor
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
@@ -192,6 +208,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .tickSizeOuter(0)
                 .tickFormat(_ => '')
             );
+        this.yGridMinor.selectAll('.domain').remove();
 
         this.xAxis
             .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
@@ -230,21 +247,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('dx', 5)
             .attr('text-anchor', 'start');
 
-        // y axis: change number positioning
-        this.yAxis
-            .selectAll('text')
-            .attr('dx', 7)
-            .attr('dy', -4)
-            .attr('text-anchor', 'start');
-
         // y label
         this.yAxis
             .selectAll('text.axis-label')
             .data([this.config.yAxisLabel])
             .join('text')
             .classed('axis-label', true)
-            .attr('x', 6)
-            .attr('y', 10)
+            .attr('x', 35)
+            .attr('y', 15)
             .attr('dx', 0)
             .attr('dy', 0)
             .attr('fill', 'black')
