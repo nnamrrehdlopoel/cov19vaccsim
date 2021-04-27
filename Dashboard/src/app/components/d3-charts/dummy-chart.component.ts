@@ -210,6 +210,11 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             );
         this.yGridMinor.selectAll('.domain').remove();
 
+
+        // Not enough space => shorten labels
+        const smallXAxis = this.chartSize.width < 550;
+        console.log('X axis is ', smallXAxis, this.chartSize.width);
+
         this.xAxis
             .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
             .call(
@@ -219,8 +224,8 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .tickSize(-5)
                     .tickSizeOuter(0)
                     .tickPadding(5)
-                    .tickFormat(date => date.toLocaleString('default', {
-                        day: 'numeric'
+                    .tickFormat(date => smallXAxis ? '' : date.toLocaleString('default', {
+                        day: 'numeric',
                     }))
             )
             .attr('font-size', '9');
@@ -232,10 +237,10 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .ticks(d3.timeMonth)
                 .tickSize(-(this.chartSize.height - coords.margin.top - coords.margin.bottom))
                 .tickSizeOuter(0)
-                .tickPadding(15)
+                .tickPadding(smallXAxis ? 5 : 15)
                 //.tickSize(-this.chartSize.height)
                 .tickFormat(date => date.toLocaleString('default', {
-                    month: 'long',
+                    month: smallXAxis ? 'short' : 'long',
                 }))
             );
 
