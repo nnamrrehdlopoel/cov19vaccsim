@@ -33,7 +33,10 @@ export interface VaccinationsData {
     dosen_astrazeneca_kumulativ: number;
     dosen_biontech_kumulativ: number;
     dosen_differenz_zum_vortag: number;
+    dosen_dim_kumulativ: number;
     dosen_erst_differenz_zum_vortag: number;
+    dosen_johnson_kumulativ: number;
+    dosen_kbv_kumulativ: number;
     dosen_moderna_kumulativ: number;
     dosen_zweit_differenz_zum_vortag: number;
     impf_quote_erst: number;
