@@ -433,7 +433,8 @@ export class PlaygroundPageComponent implements OnInit {
         }*/
         if (this.simulation.weeklyDeliveries) {
             for (const [week, del] of this.simulation.weeklyDeliveries.entries()) {
-                for (const [vName, value] of del.dosesByVaccine.entries()){
+                for (const vName of del.cumDosesByVaccine.keys()){ // iterate over cum doses because the weekly one doesn't list 0-dose-deliveries...
+                    const value = del.dosesByVaccine.get(vName) ?? 0;
                     vacDeliveries.has(vName) || vacDeliveries.set(vName, []);
                     const datapoints = vacDeliveries.get(vName);
                     datapoints.push({
@@ -466,8 +467,10 @@ export class PlaygroundPageComponent implements OnInit {
                 date,
                 value: dataAttach.vaccineDoses
             });
-            for (const [vName, value] of
-                this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek)).dosesByVaccine.entries()){
+
+            const vacDeliveryData = this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek));
+            for (const vName of vacDeliveryData.cumDosesByVaccine.keys()){ // iterate over cum doses because the weekly one doesn't list 0-dose-deliveries...
+                const value = vacDeliveryData.dosesByVaccine.get(vName) ?? 0;
                 vacDeliveriesSim.has(vName) || vacDeliveriesSim.set(vName, []);
                 const datapoints = vacDeliveriesSim.get(vName);
                 datapoints.push({
@@ -482,7 +485,10 @@ export class PlaygroundPageComponent implements OnInit {
                     date,
                     value: data.vaccineDoses
                 });
-                for (const [vName, value] of this.simulation.weeklyDeliveriesScenario.get(yWeek).dosesByVaccine.entries()){
+
+                const vacDeliveryData = this.simulation.weeklyDeliveriesScenario.get(yWeek);
+                for (const vName of vacDeliveryData.cumDosesByVaccine.keys()){ // iterate over cum doses because the weekly one doesn't list 0-dose-deliveries...
+                    const value = vacDeliveryData.dosesByVaccine.get(vName) ?? 0;
                     vacDeliveriesSim.has(vName) || vacDeliveriesSim.set(vName, []);
                     const datapoints = vacDeliveriesSim.get(vName);
                     datapoints.push({
@@ -499,19 +505,18 @@ export class PlaygroundPageComponent implements OnInit {
         const vacDeliveriesDataSeries: DataSeries[] = [];
         const vacDeliveriesSimDataSeries: DataSeries[] = [];
 
-        const vacColorMap: Map<string, string> = new Map();
         let colorI = 0;
         for (const [vName, hasDeliveries] of vaccinesWithDeliveries){
             if(hasDeliveries) {
                 const color = this.vaccinePalette[colorI++];
                 vacDeliveriesDataSeries.push({
-                    data: vacDeliveries.get(vName) || [],
+                    data: vacDeliveries.get(vName) ?? [],
                     fillColor: color,
                     strokeColor: color,
                     label: this.simulation.vaccineUsage.getVaccineDisplayName(vName),
                 });
                 vacDeliveriesSimDataSeries.push({
-                    data: vacDeliveriesSim.get(vName) || [],
+                    data: vacDeliveriesSim.get(vName) ?? [],
                     fillColor: color,
                     strokeColor: color,
                     strokeDasharray: '5, 5'
