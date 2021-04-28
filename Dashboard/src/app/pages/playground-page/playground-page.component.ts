@@ -14,7 +14,7 @@ import {
     ZilabImpfsimlieferungenDataRow, zilabImpfsimVerteilungszenarien
 } from '../../simulation/data-interfaces/raw-data.interfaces';
 import {DataloaderService} from '../../services/dataloader.service';
-import {ISimulationResults} from '../../simulation/data-interfaces/simulation-data.interfaces';
+import {emptyDeliveryWeek, ISimulationResults} from '../../simulation/data-interfaces/simulation-data.interfaces';
 import {BasicSimulation} from '../../simulation/simulation';
 import {KeyValue} from "@angular/common";
 import {sum} from "../../simulation/vaccine-map-helper";
@@ -56,7 +56,18 @@ export class PlaygroundPageComponent implements OnInit {
         contraindicated: '#aaa',
     };
 
-    data: DummyChartData = {
+    vaccinePalette = [
+        '#4477AA',
+        '#CC3311',
+        '#CCBB44',
+        '#228833',
+        '#EE6677',
+        '#66CCEE',
+        '#AA3377',
+        '#BBBBBB',
+    ];
+
+    chartPopulation: DummyChartData = {
         yMin: 0,
         yMax: 10,
         series: [
@@ -94,8 +105,9 @@ export class PlaygroundPageComponent implements OnInit {
         ],
         partitions: []
     };
-    data2: DummyChartData = this.data;
-    data3: DummyChartData = this.data;
+    chartWeeklyVaccinations: DummyChartData = this.chartPopulation;
+    chartWeeklyDeliveries: DummyChartData = this.chartPopulation;
+    chartCumulativeDeliveries: DummyChartData = this.chartPopulation;
     simulationStartWeek: YearWeek = cw.yws([2021, 5]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
 
@@ -119,13 +131,14 @@ export class PlaygroundPageComponent implements OnInit {
     runSimulation(): void {
         this.simulation.simulationStartWeek = this.simulationStartWeek;
         this.simulationResults = this.simulation.runSimulation();
-        this.buildChart1();
-        this.buildChart2()
-        this.buildChart3()
+        this.buildChartPopulation();
+        this.buildChartWeeklyVaccinations();
+        this.buildChartWeeklyDeliveries();
+        this.buildChartCumulativeDeliveries();
     }
 
 
-    buildChart1(): void {
+    buildChartPopulation(): void {
         const newData: DummyChartData = {
             yMin: 0,
             yMax: this.dataloader.population ? this.dataloader.population.data.total : 10000000,
@@ -235,11 +248,11 @@ export class PlaygroundPageComponent implements OnInit {
             vacFullySim
         ];
 
-        this.data = newData;
+        this.chartPopulation = newData;
     }
 
 
-    buildChart2(): void {
+    buildChartWeeklyVaccinations(): void {
         const newData: DummyChartData = {
             yMin: 0,
             yMax: 10_000_000,
@@ -365,10 +378,159 @@ export class PlaygroundPageComponent implements OnInit {
             vacFirstDosesSim,
         ];
 
-        this.data2 = newData;
+        this.chartWeeklyVaccinations = newData;
     }
 
-    buildChart3(): void {
+    buildChartWeeklyDeliveries(): void {
+        const newData: DummyChartData = {
+            yMin: 0,
+            yMax: 10_000_000,
+            series: [],
+            partitions: [],
+        };
+
+        const vacDeliveries: Map<string, DataPoint[]> = new Map();
+        const vacDeliveriesSim: Map<string, DataPoint[]> = new Map();
+        const vaccinesWithDeliveries: Map<string, boolean> = new Map();
+        for (const vName of this.simulation.vaccineUsage.getVaccinesPriorityList()){
+            vaccinesWithDeliveries.set(vName, false);
+        }
+
+        /*const vacDeliveries: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+            label: 'Lieferungen',
+        };
+        const vacDeliveriesSim: DataSeries = {
+            data: [],
+            fillColor: '#b8ad69',
+            strokeColor: '#827a46',
+            strokeDasharray: '5, 5'
+        };*/
+        const vacDoses: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+            fillOpacity: 0,
+            label: 'Impfdosen',
+        };
+        const vacDosesSim: DataSeries = {
+            data: [],
+            fillColor: '#2d876a',
+            strokeColor: '#265538',
+            fillOpacity: 0,
+            strokeDasharray: '5, 5'
+        };
+
+        /*if (this.dataloader.vaccinations) {
+            for (const vacDay of this.dataloader.vaccinations) {
+                vacDoses.data.push({
+                    date: vacDay.date,
+                    value: vacDay.dosen_differenz_zum_vortag * 7
+                });
+            }
+        }*/
+        if (this.simulation.weeklyDeliveries) {
+            for (const [week, del] of this.simulation.weeklyDeliveries.entries()) {
+                for (const [vName, value] of del.dosesByVaccine.entries()){
+                    vacDeliveries.has(vName) || vacDeliveries.set(vName, []);
+                    const datapoints = vacDeliveries.get(vName);
+                    datapoints.push({
+                        date: getWeekdayInYearWeek(week, 8),
+                        value
+                    });
+                    if(value > 0) {
+                        vaccinesWithDeliveries.set(vName, true);
+                    }
+                }
+            }
+        }
+        if (this.simulation.weeklyVaccinations) {
+            for (const [yWeek, data] of this.simulation.weeklyVaccinations.entries()) {
+                const date = cw.getWeekdayInYearWeek(yWeek, 8);
+                vacDoses.data.push({
+                    date,
+                    value: data.vaccineDoses
+                });
+            }
+            // remove last week because it is not complete yet
+            vacDoses.data.pop();
+        }
+
+        if (this.simulationResults) {
+            // Attach line to week before
+            let date = cw.getWeekdayInYearWeek(this.simulationStartWeek, 1);
+            let dataAttach = this.simulation.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
+            vacDosesSim.data.push({
+                date,
+                value: dataAttach.vaccineDoses
+            });
+            for (const [vName, value] of
+                this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek)).dosesByVaccine.entries()){
+                vacDeliveriesSim.has(vName) || vacDeliveriesSim.set(vName, []);
+                const datapoints = vacDeliveriesSim.get(vName);
+                datapoints.push({
+                    date,
+                    value
+                });
+            }
+            for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
+                // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
+                date = cw.getWeekdayInYearWeek(yWeek, 8);
+                vacDosesSim.data.push({
+                    date,
+                    value: data.vaccineDoses
+                });
+                for (const [vName, value] of this.simulation.weeklyDeliveriesScenario.get(yWeek).dosesByVaccine.entries()){
+                    vacDeliveriesSim.has(vName) || vacDeliveriesSim.set(vName, []);
+                    const datapoints = vacDeliveriesSim.get(vName);
+                    datapoints.push({
+                        date,
+                        value
+                    });
+                    if(value > 0) {
+                        vaccinesWithDeliveries.set(vName, true);
+                    }
+                }
+            }
+        }
+
+        const vacDeliveriesDataSeries: DataSeries[] = [];
+        const vacDeliveriesSimDataSeries: DataSeries[] = [];
+
+        const vacColorMap: Map<string, string> = new Map();
+        let colorI = 0;
+        for (const [vName, hasDeliveries] of vaccinesWithDeliveries){
+            if(hasDeliveries) {
+                const color = this.vaccinePalette[colorI++];
+                vacDeliveriesDataSeries.push({
+                    data: vacDeliveries.get(vName) || [],
+                    fillColor: color,
+                    strokeColor: color,
+                    label: this.simulation.vaccineUsage.getVaccineDisplayName(vName),
+                });
+                vacDeliveriesSimDataSeries.push({
+                    data: vacDeliveriesSim.get(vName) || [],
+                    fillColor: color,
+                    strokeColor: color,
+                    strokeDasharray: '5, 5'
+                });
+            }
+        }
+
+
+        newData.series = [
+            ...vacDeliveriesDataSeries,
+            ...vacDeliveriesSimDataSeries,
+            vacDoses,
+            vacDosesSim,
+        ];
+
+        this.chartWeeklyDeliveries = newData;
+    }
+
+    buildChartCumulativeDeliveries(): void {
         const newData: DummyChartData = {
             yMin: 0,
             yMax: this.dataloader.population ? this.dataloader.population.data.total * 2 : 10000000,
@@ -457,7 +619,7 @@ export class PlaygroundPageComponent implements OnInit {
             vacDosesSim
         ];
 
-        this.data3 = newData;
+        this.chartCumulativeDeliveries = newData;
     }
 
     // Preserve original property order

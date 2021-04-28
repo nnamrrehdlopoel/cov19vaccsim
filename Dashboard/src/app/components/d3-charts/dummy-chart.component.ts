@@ -5,7 +5,7 @@ import { ChartBase } from './chart-base/chart-base.directive';
 
 export interface DummyChartConfig {
     yAxisLabel: string;
-    fillOpacity: number;
+    fillOpacity?: number;
 }
 
 export interface DummyChartData {
@@ -20,6 +20,7 @@ export interface DataSeries {
     strokeColor: string;
     strokeDasharray?: string;
     fillColor: string;
+    fillOpacity?: number;
     label?: string;
 }
 
@@ -159,7 +160,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .join('path')
             .attr('fill', s => s.fillColor)
             .attr('stroke', 'none')
-            .attr('opacity', this.config.fillOpacity)
+            .attr('opacity', s => s.fillOpacity ?? this.config.fillOpacity)
             .attr('d', (d) => lineGenerator(d.data));
     }
 
@@ -329,7 +330,11 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 }
                 return lGroup;
             }, update => {
-                const text_els = update.select('text').nodes();
+                update.select('rect')
+                    .attr('fill', d => d.fillColor)
+                    .attr('stroke', d => d.strokeColor);
+                const text_els = update.select('text')
+                    .text( d => d.label).nodes();
                 for(const el of text_els){
                     // @ts-ignore
                     maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 15);

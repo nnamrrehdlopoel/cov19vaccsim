@@ -28,7 +28,7 @@
                                             daher entspricht die Reihenfolge der Blöcke auch nicht automatisch der logischen Impfreihenfolge
                                             (Insb. beim Alter da ja nicht strikt nach Alter geimpft wird)">
                                 <mat-label>Aufteilung im rechten Balken</mat-label>
-                                <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChart1()" >
+                                <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChartPopulation()" >
                                     <ng-container *ngFor="let p of simulation.partitionings | keyvalue: originalOrder">
                                         <mat-option [value]="p.key">{{p.value.title}}</mat-option>
                                     </ng-container>
@@ -38,7 +38,7 @@
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"
-                            [data]="data"
+                            [data]="chartPopulation"
                             [config]="{yAxisLabel: 'Bevölkerung'}"
                         ></app-dummy-chart>
                     </mat-tab>
@@ -52,7 +52,21 @@
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"
-                            [data]="data2"
+                            [data]="chartWeeklyVaccinations"
+                            [config]="{yAxisLabel: 'Impfdosen'}"
+                        ></app-dummy-chart>
+                    </mat-tab>
+                    <mat-tab label="Wöchentliche Lieferungen">
+                        <div class="top-bar">
+                            <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" aria-label="Font Style">
+                                <mat-button-toggle value="num">Anzahl Impfdosen</mat-button-toggle>
+                                <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
+                            </mat-button-toggle-group>
+                        </div>
+                        <app-dummy-chart
+                            class="dummy-chart"
+                            style="width: 100%"
+                            [data]="chartWeeklyDeliveries"
                             [config]="{yAxisLabel: 'Impfdosen'}"
                         ></app-dummy-chart>
                     </mat-tab>
@@ -66,7 +80,7 @@
                         <app-dummy-chart
                             class="dummy-chart"
                             style="width: 100%"
-                            [data]="data3"
+                            [data]="chartCumulativeDeliveries"
                             [config]="{yAxisLabel: 'Impfdosen'}"
                         ></app-dummy-chart>
                     </mat-tab>
