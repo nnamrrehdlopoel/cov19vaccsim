@@ -32,6 +32,7 @@ export interface ISimulationParameters {
     deliveryScenario: string;
     keep2ndDosesBack: number;
     extraIntervalWeeks: number;
+    extraIntervalWeeksOnlyFuture: boolean;
     fractionWilling: number;
     vaccinesUsed: Map<string, {
         used: boolean
@@ -69,6 +70,7 @@ export class BasicSimulation implements VaccinationSimulation {
         deliveryScenario: zilabImpfsimVerteilungszenarien[1],
         keep2ndDosesBack: 0,
         extraIntervalWeeks: 0,
+        extraIntervalWeeksOnlyFuture: false,
         fractionWilling: 0.80,
         vaccinesUsed: new Map(),
     };
@@ -215,6 +217,12 @@ export class BasicSimulation implements VaccinationSimulation {
                     }
                 }
                 i++;
+            }
+            // Push second vaccinations some weeks into the future
+            if(!this.params.extraIntervalWeeksOnlyFuture){
+                for (let i = 0; i < this.params.extraIntervalWeeks; i++) {
+                    waitingFor2ndDose.unshift(new Map());
+                }
             }
             /* */
 

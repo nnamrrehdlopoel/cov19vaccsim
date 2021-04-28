@@ -191,6 +191,13 @@
                         <mat-slider [(ngModel)]="simulation.params.extraIntervalWeeks" min="0" max="12" step="1"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
+                    <div class="settings_row"
+                         matTooltip="Extra Abstand zwischen Erst- und Zweitimpfung nicht auf Personen anwenden, die bereits erstgeimpft wurden.">
+                        <mat-slide-toggle [(ngModel)]="simulation.params.extraIntervalWeeksOnlyFuture"
+                                          (change)="runSimulation();" labelPosition="before">
+                            Extra Abstand nur Neuimpfungen
+                        </mat-slide-toggle>
+                    </div>
                 </div>
                 <mat-divider></mat-divider>
                 <div>
