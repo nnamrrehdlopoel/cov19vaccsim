@@ -214,7 +214,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
         // Not enough space => shorten labels
         const smallXAxis = this.chartSize.width < 550;
-        console.log('X axis is ', smallXAxis, this.chartSize.width);
 
         this.xAxis
             .attr('transform', `translate(0, ${this.chartSize.height - coords.margin.bottom})`)
