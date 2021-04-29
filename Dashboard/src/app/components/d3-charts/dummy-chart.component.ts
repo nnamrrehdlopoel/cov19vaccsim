@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
+import {config} from "rxjs";
 
 export interface DummyChartConfig {
     yAxisLabel: string;
@@ -377,13 +378,14 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .attr('transform', (d, i) => `translate(${padding}, ${i * 20 + padding})`);
                 lGroup
                     .append('rect')
-                    .attr('x', -0.5)
-                    .attr('y', -0.5)
-                    .attr('width', 10)
-                    .attr('height', 10)
+                    .attr('x', d => d.fillOpacity === 0 ? 0 : -0.5)
+                    .attr('y', d => d.fillOpacity === 0 ? 0 : -0.5)
+                    .attr('width', d => d.fillOpacity === 0 ? 9 : 10)
+                    .attr('height', d => d.fillOpacity === 0 ? 9 : 10)
                     .attr('fill', d => d.fillColor)
                     .attr('stroke', d => d.strokeColor)
-                    .attr('fill-opacity', this.config.fillOpacity);
+                    .attr('stroke-width', d => d.fillOpacity === 0 ? 2 : 1)
+                    .attr('fill-opacity', d => d.fillOpacity ?? this.config.fillOpacity);
                 // todo set font size etc
                 const text_els = lGroup
                     .append('text')

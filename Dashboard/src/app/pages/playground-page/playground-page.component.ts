@@ -452,7 +452,7 @@ export class PlaygroundPageComponent implements OnInit {
             fillColor: '#2d876a',
             strokeColor: '#265538',
             fillOpacity: 0,
-            label: 'Impfdosen',
+            label: 'Impfungen',
         };
         const vacDosesSim: DataSeries = {
             data: [],
@@ -594,7 +594,7 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#2d876a',
             strokeColor: '#265538',
-            label: 'Impfdosen',
+            label: 'Impfungen',
         };
         const vacDeliveriesSim: DataSeries = {
             data: [],
