@@ -218,19 +218,26 @@ export class BasicSimulation implements VaccinationSimulation {
             }
             /* */
 
-            /*
+
             // Backward distribution approach
-            let wlWeek = this.weekBefore(this.simulationStartWeek);
-            let i = 0;
-            while (pplNeeding2ndShot > 0 && i < 6) {
-                const ppl = Math.min(pplNeeding2ndShot,
-                    this.weeklyVaccinations.get(wlWeek).partiallyImmunized);
-                const pplSplit = Math.floor(ppl * 0.7);
-                waitingFor2ndDose[5 - i] += pplSplit;
-                waitingFor2ndDose[10 - i] += ppl - pplSplit;
-                pplNeeding2ndShot -= ppl;
+            /*let i = 0;
+            while (pplNeeding2ndShot > 0 && i <= 12) {
+                const thatWeek = this.weeklyVaccinations.get(
+                    cw.weekBefore(this.simulationStartWeek, i)
+                );
+                if(thatWeek) {
+                    for (const vName of cumDosesByVaccine.keys()) {
+                        const intervalWeeks = this.vaccineUsage.getVaccineIntervalWeeks(curWeek, vName);
+                        if (intervalWeeks > 0 && intervalWeeks > i) {
+                            const shots1 = thatWeek.firstDosesByVaccine.get(vName) || 0;
+                            const ppl = Math.min(pplNeeding2ndShot, shots1);
+                            const index = intervalWeeks - i - 1;
+                            waitingFor2ndDose[index].set(vName, (waitingFor2ndDose[index].get(vName) || 0) + ppl);
+                            pplNeeding2ndShot -= ppl;
+                        }
+                    }
+                }
                 i++;
-                wlWeek = this.weekBefore(wlWeek);
             }
             /* */
 
