@@ -218,12 +218,6 @@ export class BasicSimulation implements VaccinationSimulation {
                 }
                 i++;
             }
-            // Push second vaccinations some weeks into the future
-            if(!this.params.extraIntervalWeeksOnlyFuture){
-                for (let i = 0; i < this.params.extraIntervalWeeks; i++) {
-                    waitingFor2ndDose.unshift(new Map());
-                }
-            }
             /* */
 
             /*
@@ -252,6 +246,14 @@ export class BasicSimulation implements VaccinationSimulation {
                     pplNeeding2ndShot -= ppl;
                 }
             }
+
+            // Push second vaccinations some weeks into the future
+            if(!this.params.extraIntervalWeeksOnlyFuture){
+                for (let i = 0; i < this.params.extraIntervalWeeks; i++) {
+                    waitingFor2ndDose.unshift(new Map());
+                }
+            }
+
             console.log('waiting list at beginning of sim',
                 waitingFor2ndDose.map(x => wu(x.values()).reduce(sum, 0)).reduce(sum), pplNeeding2ndShot);
             console.log([...waitingFor2ndDose]);

@@ -1,4 +1,6 @@
 @use '~@angular/material/core/style/variables';
+@use '~@angular/material/theming';
+@use '../../../styles';
 
 h2, h3 {
     margin: 16px 0 5px;
@@ -63,6 +65,31 @@ p {
         width: 100%;
         height: 69vh;
         max-height: 105vw;
+    }
+}
+:host ::ng-deep .chart_card mat-slider.simulation-start {
+    padding: 0;
+    margin-top: -15px;
+    margin-bottom: -10px;
+
+
+    // No colors on track
+    /*.mat-slider-track-background {
+        background-color: theming.mat-color(styles.$accent);
+    }*/
+    .mat-slider-track-fill {
+        background-color: rgba(0, 0, 0, 0.26);
+    }
+
+    .mat-slider-thumb {
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-left: 20px solid theming.mat-color(styles.$accent);
+        border-bottom: 10px solid transparent;
+        border-radius: 0;
+        background: transparent;
+        border-right: 0;
     }
 }
 

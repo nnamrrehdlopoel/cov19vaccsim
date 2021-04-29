@@ -108,8 +108,15 @@ export class PlaygroundPageComponent implements OnInit {
     chartWeeklyVaccinations: DummyChartData = this.chartPopulation;
     chartWeeklyDeliveries: DummyChartData = this.chartPopulation;
     chartCumulativeDeliveries: DummyChartData = this.chartPopulation;
-    simulationStartWeek: YearWeek = cw.yws([2021, 5]);
+    simulationStartWeekNum = 5;
+    simulationStartWeek: YearWeek = cw.yws([2021, this.simulationStartWeekNum]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
+    simulationStartSlider = {
+        min: 1,
+        max: 15,
+        startOffset: 0.1,
+        width: 0.5,
+    }
 
     displayPartitioning = Object.keys(this.simulation.partitionings)[0];
     featureFlagYAxisScale = false;
@@ -122,13 +129,40 @@ export class PlaygroundPageComponent implements OnInit {
         this.dataloader.loadData().subscribe(value => {
             this.loaded = true;
             this.simulation.prepareData();
+            this.prepareSimulationStartSlider()
             this.simulationStartWeek = getYearWeekOfDate(this.dataloader.lastRefreshVaccinations);
+            this.simulationStartWeekNum = cw.ywt(this.simulationStartWeek)[1];
             this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();
             this.runSimulation();
         });
     }
 
+    prepareSimulationStartSlider(){
+        const realDataEndYW = getYearWeekOfDate(this.dataloader.lastRefreshVaccinations);
+        const realDataEndYWT = cw.ywt(realDataEndYW);
+        const graphFirstDate = this.dataloader.vaccinations[0].date;
+        const graphLastDate = cw.getWeekdayInYearWeek(this.simulation.simulationEndWeek, 8);
+        const graphWidthTime = graphLastDate.getTime() - graphFirstDate.getTime();
+        const sliderStartDate = cw.getWeekdayInYearWeek(cw.yws([realDataEndYWT[0], 1]),1);
+        const sliderEndDate = cw.getWeekdayInYearWeek(realDataEndYW, 7);
+
+        console.log('Graph start / end date', graphFirstDate, graphLastDate);
+        console.log('Slider start / end date', sliderStartDate, sliderEndDate);
+
+
+        // The bar on the right covers some space so the graph only gets some percentage (guess)
+        const graphWidthOfFull = 0.93;
+
+        // minimum just hardcoded
+        this.simulationStartSlider.min = 1;
+        // maximum is the last week of actual data we have
+        this.simulationStartSlider.max = realDataEndYWT[1];
+        this.simulationStartSlider.startOffset = (sliderStartDate.getTime() - graphFirstDate.getTime()) / graphWidthTime * graphWidthOfFull;
+        this.simulationStartSlider.width = (sliderEndDate.getTime() - sliderStartDate.getTime()) / graphWidthTime * graphWidthOfFull;
+    }
+
     runSimulation(): void {
+        this.simulationStartWeek = cw.yws([cw.ywt(this.simulationStartWeek)[0], this.simulationStartWeekNum]);
         this.simulation.simulationStartWeek = this.simulationStartWeek;
         this.simulationResults = this.simulation.runSimulation();
         this.buildChartPopulation();
