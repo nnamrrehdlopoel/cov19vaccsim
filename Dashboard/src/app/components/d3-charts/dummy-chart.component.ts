@@ -21,6 +21,7 @@ export interface DataSeries {
     strokeDasharray?: string;
     fillColor: string;
     fillOpacity?: number;
+    fillStriped?: boolean;
     label?: string;
 }
 
@@ -60,6 +61,7 @@ interface DummyChartCoords {
 })
 export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartData> {
 
+    private defs: d3.Selection<SVGGElement, unknown, null, undefined>;
     private xAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private yAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
     private lines: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -80,6 +82,72 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     }
 
     initializeChart(): void {
+        this.defs = this.svg.append('defs');
+
+        const stripeWidth = 2.5;
+        this.defs.append('pattern')
+            .attr('id', 'stripes')
+            .attr('width', 2*stripeWidth)
+            .attr('height', 2*stripeWidth)
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr('stroke', 'white')
+            .attr('stroke-linecap', 'square')
+            .attr('stroke-width', stripeWidth*0.8)
+            .call(el => {
+                el.append('line')
+                    .attr('x1', 0)
+                    .attr('y1', stripeWidth)
+                    .attr('x2', stripeWidth)
+                    .attr('y2', 0)
+                el.append('line')
+                    .attr('x1', stripeWidth)
+                    .attr('y1', 2*stripeWidth)
+                    .attr('x2', 2*stripeWidth)
+                    .attr('y2', stripeWidth)
+            });
+        this.defs.append('mask')
+            .attr('id', 'stripes-mask')
+        /*    .attr('width', 6)
+            .attr('height', 6)
+            .style('mask-repeat', 'repeat')
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr('stroke', 'white')
+            .attr('stroke-linecap', 'square')
+            .attr('stroke-width', 2)
+            .call(el => {
+                el.append('line')
+                    .attr('x1', 0)
+                    .attr('y1', 3)
+                    .attr('x2', 3)
+                    .attr('y2', 6)
+                el.append('line')
+                    .attr('x1', 3)
+                    .attr('y1', 0)
+                    .attr('x2', 6)
+                    .attr('y2', 3)
+            });/**/
+            .call(el => {
+                el.append('rect')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('width', '100%')
+                    .attr('height', '100%')
+                    .style('fill', 'url(#stripes)')
+            });/**/
+        this.defs.append('mask')
+            .attr('id', 'test-mask')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', 10)
+            .attr('height', 10)
+            .call(el => {
+                el.append('circle')
+                    .attr('cx', 5)
+                    .attr('cy', 5)
+                    .attr('r', 4)
+                    .style('fill', 'white')
+            });
+
         this.fills = this.svg.append('g').classed('fills', true);
         this.lines = this.svg.append('g').classed('lines', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
@@ -161,6 +229,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('fill', s => s.fillColor)
             .attr('stroke', 'none')
             .attr('opacity', s => s.fillOpacity ?? this.config.fillOpacity)
+            .style("mask", s => (s.fillStriped ?? false) ? 'url(#stripes-mask)' : '')
             .attr('d', (d) => lineGenerator(d.data));
     }
 
