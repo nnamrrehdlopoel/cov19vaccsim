@@ -55,6 +55,12 @@ export interface VaccinationsData {
     indikation_pflegeheim_voll: number;
     personen_erst_kumulativ: number;
     personen_voll_kumulativ: number;
+    dosen_biontech_erst_kumulativ: number;
+    dosen_biontech_zweit_kumulativ: number;
+    dosen_moderna_erst_kumulativ: number;
+    dosen_moderna_zweit_kumulativ: number;
+    dosen_astrazeneca_erst_kumulativ: number;
+    dosen_astrazeneca_zweit_kumulativ: number;
 }
 
 /**

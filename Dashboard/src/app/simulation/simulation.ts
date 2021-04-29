@@ -161,6 +161,7 @@ export class BasicSimulation implements VaccinationSimulation {
         let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
         let cumVaccineDoses = dataBeforeSim.cumVaccineDoses;
         let cumDosesByVaccine = dataBeforeSim.cumDosesByVaccine;
+        let cumFirstDosesByVaccine = dataBeforeSim.cumFirstDosesByVaccine;
 
         const cumulativeDeliveredVaccines = this.weeklyDeliveriesScenario.get(
             cw.weekBefore(this.simulationStartWeek, 1 + this.vaccineDeliveryDelayWeeks)
@@ -206,11 +207,8 @@ export class BasicSimulation implements VaccinationSimulation {
                         );
 
                         if (thatWeek) {
-                            const shots = thatWeek.dosesByVaccine.get(vName) || 0;
-                            // Assume that the distribution 1st shots / 2nd shots that week was the same for all vaccines
-                            // since we do not have that data => get number of people that got their first shot with this vaccine that week
-                            let ppl =  Math.floor(shots * (thatWeek.partiallyImmunized / thatWeek.vaccineDoses));
-                            ppl = Math.min(pplNeeding2ndShot, ppl);
+                            const shots1 = thatWeek.firstDosesByVaccine.get(vName) || 0;
+                            const ppl = Math.min(pplNeeding2ndShot, shots1);
                             waitingFor2ndDose[i].set(vName, (waitingFor2ndDose[i].get(vName) || 0) + ppl);
                             pplNeeding2ndShot -= ppl;
                         }
@@ -238,7 +236,7 @@ export class BasicSimulation implements VaccinationSimulation {
 
             // If anything is left over, distribute it somewhat equally on all vaccines in the first week
             if (pplNeeding2ndShot > 0) {
-                console.log('12 weeks not enough...', pplNeeding2ndShot);
+                console.warn('12 weeks not enough...', pplNeeding2ndShot);
                 const doses = Math.ceil(pplNeeding2ndShot / waitingFor2ndDose[0].size);
                 for (const [vName, num] of waitingFor2ndDose[0]){
                     const ppl = Math.min(pplNeeding2ndShot, doses);
@@ -248,6 +246,7 @@ export class BasicSimulation implements VaccinationSimulation {
             }
 
             // Push second vaccinations some weeks into the future
+            // if the parameter for that is set
             if(!this.params.extraIntervalWeeksOnlyFuture){
                 for (let i = 0; i < this.params.extraIntervalWeeks; i++) {
                     waitingFor2ndDose.unshift(new Map());
@@ -371,6 +370,7 @@ export class BasicSimulation implements VaccinationSimulation {
             const dosesByVaccine = v(given1stShots, sum, given2ndShots);
             const vaccineDoses = wu(dosesByVaccine.values()).reduce(sum);
             cumDosesByVaccine = v(cumDosesByVaccine, sum, dosesByVaccine);
+            cumFirstDosesByVaccine = v(cumFirstDosesByVaccine, sum, given1stShots);
             cumPartiallyImmunized += partiallyImmunized;
             cumFullyImmunized += fullyImmunized;
             cumVaccineDoses += vaccineDoses;
@@ -384,6 +384,8 @@ export class BasicSimulation implements VaccinationSimulation {
                 cumFullyImmunized,
                 dosesByVaccine,
                 cumDosesByVaccine,
+                firstDosesByVaccine: given1stShots,
+                cumFirstDosesByVaccine,
                 vaccineStockPile
             };
             results.weeklyData.set(curWeek, weekData);

@@ -17,6 +17,8 @@ export interface IVaccinationWeek {
     cumFullyImmunized: number;
     dosesByVaccine?: VaccineNumbers;
     cumDosesByVaccine?: VaccineNumbers;
+    firstDosesByVaccine?: VaccineNumbers;
+    cumFirstDosesByVaccine?: VaccineNumbers;
     vaccineStockPile ?: VaccineNumbers;
 }
 
