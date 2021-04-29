@@ -117,8 +117,17 @@
                     <div class="settings_row" matTooltip="Personen die keinen der aktuell verfügbaren Impfstoffe erhalten können z.B. weil sie zu jung sind (unter 16 Jahren)">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerContraindicated"
                                           (change)="runSimulation();" labelPosition="before">
-                            Kontraindizierte beachten (vor allem Alter)
+                            Kontraindizierte beachten
                         </mat-slide-toggle>
+                        <div style="margin-left: 1.5rem;">
+                            <mat-radio-group class="my-radio-group" [(ngModel)]="simulation.params.contraindicationAge"
+                                             (change)="runSimulation();">
+                                <ng-container *ngFor="let age of availableAgeLimits">
+                                    <mat-radio-button class="my-radio-button" [value]="age">Impfungen ab {{age}}
+                                    </mat-radio-button><br/>
+                                </ng-container>
+                            </mat-radio-group>
+                        </div>
                     </div>
                     <div class="settings_row">
                         <p matTooltip="Welche Impfstoffe für die Simulation beachtet werden sollen" >Ausfall / Zulassung simulieren:</p>

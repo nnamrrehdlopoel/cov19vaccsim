@@ -382,6 +382,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .attr('y', d => d.fillOpacity === 0 ? 0 : -0.5)
                     .attr('width', d => d.fillOpacity === 0 ? 9 : 10)
                     .attr('height', d => d.fillOpacity === 0 ? 9 : 10)
+                    //.attr('shape-rendering', 'crispEdges')
                     .attr('fill', d => d.fillColor)
                     .attr('stroke', d => d.strokeColor)
                     .attr('stroke-width', d => d.fillOpacity === 0 ? 2 : 1)

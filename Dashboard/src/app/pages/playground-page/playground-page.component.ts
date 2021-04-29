@@ -111,6 +111,7 @@ export class PlaygroundPageComponent implements OnInit {
     simulationStartWeekNum = 5;
     simulationStartWeek: YearWeek = cw.yws([2021, this.simulationStartWeekNum]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
+    availableAgeLimits = [12, 16];
     simulationStartSlider = {
         min: 1,
         max: 15,

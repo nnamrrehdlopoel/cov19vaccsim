@@ -28,6 +28,7 @@ export interface ISimulationParameters {
     considerContraindicated: boolean;
     considerNotWilling: boolean;
     considerHesitating: boolean;
+    contraindicationAge: number;
     deliveryAmountFactor: number;
     deliveryScenario: string;
     keep2ndDosesBack: number;
@@ -66,6 +67,7 @@ export class BasicSimulation implements VaccinationSimulation {
         considerContraindicated: true,
         considerNotWilling: true,
         considerHesitating: true,
+        contraindicationAge: 16,
         deliveryAmountFactor: 1,
         deliveryScenario: zilabImpfsimVerteilungszenarien[1],
         keep2ndDosesBack: 0,
@@ -459,7 +461,7 @@ export class BasicSimulation implements VaccinationSimulation {
 
     private getContraIndicated(): number {
         return wu(Object.entries(this.dataloader.population.data.by_age))
-            .filter(x => parseInt(x[0], 10) < 18)
+            .filter(x => parseInt(x[0], 10) < this.params.contraindicationAge)
             .map(x => x[1])
             .reduce(sum);
     }
