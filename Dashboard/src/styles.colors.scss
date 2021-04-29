@@ -1,0 +1,8 @@
+
+@import '~@angular/material/theming';
+
+// Define the default theme (same as the example above).
+$primary: mat-palette($mat-blue);
+$primaryultralight: mat-palette($mat-blue, 50);
+$accent:  mat-palette($mat-indigo);
+$apptheme:   mat-light-theme($primary, $accent);

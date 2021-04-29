@@ -10,11 +10,7 @@
 // Be sure that you only ever include this mixin once!
 // @include mat-core();
 
-// Define the default theme (same as the example above).
-$primary: mat-palette($mat-blue);
-$primaryultralight: mat-palette($mat-blue, 50);
-$accent:  mat-palette($mat-indigo);
-$apptheme:   mat-light-theme($primary, $accent);
+@import "styles.colors";
 
 // Include the default theme styles.
 @include angular-material-theme($apptheme);

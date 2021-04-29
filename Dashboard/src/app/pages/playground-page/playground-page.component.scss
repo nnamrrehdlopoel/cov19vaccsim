@@ -1,6 +1,6 @@
 @use '~@angular/material/core/style/variables';
 @use '~@angular/material/theming';
-@use '../../../styles';
+@import '../../../styles.colors';
 
 h2, h3 {
     margin: 16px 0 5px;
@@ -75,7 +75,7 @@ p {
 
     // No colors on track
     /*.mat-slider-track-background {
-        background-color: theming.mat-color(styles.$accent);
+        background-color: theming.mat-color($accent);
     }*/
     .mat-slider-track-fill {
         background-color: rgba(0, 0, 0, 0.26);
@@ -85,7 +85,7 @@ p {
         width: 0;
         height: 0;
         border-top: 10px solid transparent;
-        border-left: 20px solid theming.mat-color(styles.$accent);
+        border-left: 20px solid theming.mat-color($accent);
         border-bottom: 10px solid transparent;
         border-radius: 0;
         background: transparent;
