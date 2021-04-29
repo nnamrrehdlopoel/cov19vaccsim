@@ -114,7 +114,7 @@
             <mat-card-content class="settings_card">
                 <div>
                     <h2><strong>Zulassung</strong></h2>
-                    <div class="settings_row" matTooltip="Personen die keinen der aktuell verfügbaren Impfstoffe erhalten können z.B. weil sie zu jung sind (unter 16 Jahren)">
+                    <div class="settings_row" matTooltip="Personen die keinen der aktuell verfügbaren Impfstoffe erhalten können z.B. weil sie zu jung sind">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerContraindicated"
                                           (change)="runSimulation();" labelPosition="before">
                             Kontraindizierte beachten

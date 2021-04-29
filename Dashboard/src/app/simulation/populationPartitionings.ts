@@ -127,11 +127,16 @@ export abstract class PriorityPartitioner implements PopulationPartitioner {
         const population = this.dataloader.population.data.total;
         let restPopulation = population - partitions.map(x => x.size).reduce(sum, 0);
 
+        // Assume equal distribution of unwilling on all population groups
+        // (not correct, but first approximation)
+        const unwilling = partitions.filter(x => x.id == 'unwilling').map(x => x.size).reduce(sum, 0);
+        const willingnessFactor = 1 - (unwilling / (restPopulation + unwilling));
+
         const parts = [];
         const prioGroups = this.dataloader.priorities.data[this.priorityType].gruppen;
 
         for (const [name, group] of Object.entries(prioGroups)){
-            const num = Math.min(restPopulation, group);
+            const num = Math.min(restPopulation, group) * willingnessFactor;
             parts.unshift({
                 id: 'prio_'+name,
                 description: name,
