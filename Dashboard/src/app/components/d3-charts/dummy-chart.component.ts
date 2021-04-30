@@ -74,7 +74,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private rightBar: SvgGroup;
     private rightBarBoxes: SvgGroup;
     private rightBarLabels: SvgGroup;
-    private rightBarLabels2: SvgGroup;
     private legend: SvgGroup;
 
     initialChartConfig(): DummyChartConfig {
@@ -108,7 +107,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         if (this.data.partitions) {
             this.renderRightBar(coords, this.data.partitions);
         }
-        this.renderLegend(coords, this.data.series);
+        this.renderLegend(this.data.series);
     }
 
     private defineStripedMaskPattern(): void {
@@ -292,7 +291,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
     }
 
-    private renderLegend(coords: DummyChartCoords, series: DataSeries[]): void {
+    private renderLegend(series: DataSeries[]): void {
         const labeledSeries = series.filter(s => !!s.label);
         const padding = 10;
 
@@ -388,32 +387,35 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         this.rightBarLabels
             .selectAll('g')
             .data(mappedParts)
-            .join(el => el.append('g').call(el => {
-                el.append('rect');
-                el.append('text');
-            })).each(function(p) {
-            d3.select(this).select('text')
-                .attr('x', coords.rightBarX)
-                .attr('y', coords.yScale((p.max + p.min) / 2))
-                .attr('dy', '0.3em')
-                .attr('dx', coords.rightBarWidth / 2 - 3)
-                .attr('text-anchor', 'end')
-                .text(p.max - p.min > 5 ? p.label : '')
-                .call(function(el) {
-                    // @ts-ignore
-                    p.labelBBox = el.node().getBBox();
-                });
-        })
-            .each(function(p) {
-                d3.select(this).select('rect')
-                    .attr('x', p.labelBBox.x - 3)
-                    .attr('y', p.labelBBox.y)
-                    .attr('width', p.labelBBox.width + 6)
-                    .attr('height', p.labelBBox.height)
+            .join(enter => {
+                // group with rect behind a text
+                const g = enter.append('g');
+                const rect = g.append('rect');
+                const text = g.append('text');
+                let bBoxes = [];
+                // create labels and save their bounding boxes
+                text
+                    .attr('x', coords.rightBarX)
+                    .attr('y', p => coords.yScale((p.max + p.min) / 2))
+                    .attr('dy', '0.3em')
+                    .attr('dx', coords.rightBarWidth / 2 - 3)
+                    .attr('text-anchor', 'end')
+                    .text(p => p.max - p.min > 5 ? p.label : '')
+                    .call(textSelection => {
+                        // save bounding boxes for rects
+                        bBoxes = textSelection.nodes().map(textNode => textNode.getBBox());
+                    });
+                // position label backgrounds
+                rect
+                    .attr('x', (d, i) => bBoxes[i].x - 3)
+                    .attr('y', (d, i) => bBoxes[i].y)
+                    .attr('width', (d, i) => bBoxes[i].width + 6)
+                    .attr('height', (d, i) => bBoxes[i].height)
                     .style('fill', 'white')
                     .attr('opacity', 0.8)
                     .attr('rx', 2)
                     .attr('ry', 2);
+                return g;
             });
 
         // No gap => draw line instead
