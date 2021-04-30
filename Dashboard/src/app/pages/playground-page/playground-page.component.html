@@ -36,12 +36,12 @@
                                     </mat-select>
                                 </mat-form-field>
                             </div>
-                            <app-dummy-chart
+                            <app-prediction-line-chart
                                 class="dummy-chart"
                                 style="width: 100%"
                                 [data]="chartPopulation"
                                 [config]="{yAxisLabel: 'Bevölkerung'}"
-                            ></app-dummy-chart>
+                            ></app-prediction-line-chart>
                         </mat-tab>
                         <mat-tab label="Wöchentliche Impfungen">
                             <div class="top-bar">
@@ -50,12 +50,12 @@
                                     <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
                                 </mat-button-toggle-group>
                             </div>
-                            <app-dummy-chart
+                            <app-prediction-line-chart
                                 class="dummy-chart"
                                 style="width: 100%"
                                 [data]="chartWeeklyVaccinations"
                                 [config]="{yAxisLabel: 'Impfdosen'}"
-                            ></app-dummy-chart>
+                            ></app-prediction-line-chart>
                         </mat-tab>
                         <mat-tab label="Wöchentliche Lieferungen">
                             <div class="top-bar">
@@ -65,12 +65,12 @@
                                     <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
                                 </mat-button-toggle-group>
                             </div>
-                            <app-dummy-chart
+                            <app-prediction-line-chart
                                 class="dummy-chart"
                                 style="width: 100%"
                                 [data]="chartWeeklyDeliveries"
                                 [config]="{yAxisLabel: 'Impfdosen'}"
-                            ></app-dummy-chart>
+                            ></app-prediction-line-chart>
                         </mat-tab>
                         <mat-tab label="Impfdosen insgesamt">
                             <div class="top-bar">
@@ -79,12 +79,12 @@
                                     <mat-button-toggle value="percent">Prozent der Bevölkerung</mat-button-toggle>
                                 </mat-button-toggle-group>
                             </div>
-                            <app-dummy-chart
+                            <app-prediction-line-chart
                                 class="dummy-chart"
                                 style="width: 100%"
                                 [data]="chartCumulativeDeliveries"
                                 [config]="{yAxisLabel: 'Impfdosen'}"
-                            ></app-dummy-chart>
+                            ></app-prediction-line-chart>
                         </mat-tab>
                     </mat-tab-group>
                     <mat-slider class="simulation-start"

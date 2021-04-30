@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {DataPoint, DataSeries, DummyChartData} from '../../components/d3-charts/dummy-chart.component';
+import {DataPoint, DataSeries, PredictionLineChartData} from '../../components/d3-charts/prediction-line-chart.component';
 import {HttpClient} from '@angular/common/http';
 import {ActivatedRoute} from '@angular/router';
 import {CsvexportService} from '../../services/csvexport.service';
@@ -67,7 +67,7 @@ export class PlaygroundPageComponent implements OnInit {
         '#BBBBBB',
     ];
 
-    chartPopulation: DummyChartData = {
+    chartPopulation: PredictionLineChartData = {
         yMin: 0,
         yMax: 10,
         series: [
@@ -105,9 +105,9 @@ export class PlaygroundPageComponent implements OnInit {
         ],
         partitions: []
     };
-    chartWeeklyVaccinations: DummyChartData = this.chartPopulation;
-    chartWeeklyDeliveries: DummyChartData = this.chartPopulation;
-    chartCumulativeDeliveries: DummyChartData = this.chartPopulation;
+    chartWeeklyVaccinations: PredictionLineChartData = this.chartPopulation;
+    chartWeeklyDeliveries: PredictionLineChartData = this.chartPopulation;
+    chartCumulativeDeliveries: PredictionLineChartData = this.chartPopulation;
     simulationStartWeekNum = 5;
     simulationStartWeek: YearWeek = cw.yws([2021, this.simulationStartWeekNum]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
@@ -174,7 +174,7 @@ export class PlaygroundPageComponent implements OnInit {
 
 
     buildChartPopulation(): void {
-        const newData: DummyChartData = {
+        const newData: PredictionLineChartData = {
             yMin: 0,
             yMax: this.dataloader.population ? this.dataloader.population.data.total : 10000000,
             series: [],
@@ -290,7 +290,7 @@ export class PlaygroundPageComponent implements OnInit {
 
 
     buildChartWeeklyVaccinations(): void {
-        const newData: DummyChartData = {
+        const newData: PredictionLineChartData = {
             yMin: 0,
             yMax: 10_000_000,
             series: [],
@@ -422,7 +422,7 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     buildChartWeeklyDeliveries(): void {
-        const newData: DummyChartData = {
+        const newData: PredictionLineChartData = {
             yMin: 0,
             yMax: 10_000_000,
             series: [],
@@ -578,7 +578,7 @@ export class PlaygroundPageComponent implements OnInit {
     }
 
     buildChartCumulativeDeliveries(): void {
-        const newData: DummyChartData = {
+        const newData: PredictionLineChartData = {
             yMin: 0,
             yMax: this.dataloader.population ? this.dataloader.population.data.total * 2 : 10000000,
             series: [],

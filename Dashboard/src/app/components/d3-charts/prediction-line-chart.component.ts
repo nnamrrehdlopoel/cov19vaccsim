@@ -3,12 +3,12 @@ import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
 
-export interface DummyChartConfig {
+export interface PredictionLineChartConfig {
     yAxisLabel: string;
     fillOpacity?: number;
 }
 
-export interface DummyChartData {
+export interface PredictionLineChartData {
     yMin: number;
     yMax: number;
     series: DataSeries[];
@@ -57,11 +57,11 @@ interface DummyChartCoords {
 type SvgGroup = d3.Selection<SVGGElement, unknown, null, undefined>;
 
 @Component({
-    selector: 'app-dummy-chart',
+    selector: 'app-prediction-line-chart',
     templateUrl: 'chart-base/chart-base.directive.html',
     styleUrls: ['chart-base/chart-base.directive.scss'],
 })
-export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartData> {
+export class PredictionLineChartComponent extends ChartBase<PredictionLineChartConfig, PredictionLineChartData> {
 
     private defs: SvgGroup;
     private xAxis: SvgGroup;
@@ -76,7 +76,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
     private rightBarLabels: SvgGroup;
     private legend: SvgGroup;
 
-    initialChartConfig(): DummyChartConfig {
+    initialChartConfig(): PredictionLineChartConfig {
         return {
             yAxisLabel: 'yAxisLabel',
             fillOpacity: 0.5,

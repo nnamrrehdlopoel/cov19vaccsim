@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { DummyChartComponent } from './dummy-chart.component';
+import { PredictionLineChartComponent } from './prediction-line-chart.component';
 
 @NgModule({
     declarations: [
-        DummyChartComponent
+        PredictionLineChartComponent
     ],
     exports: [
-        DummyChartComponent
+        PredictionLineChartComponent
     ],
     imports: [
         CommonModule
