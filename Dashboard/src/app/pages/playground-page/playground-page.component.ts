@@ -1,14 +1,11 @@
 import { KeyValue } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import * as wu from 'wu';
 import {
     DataPoint,
     DataSeries,
     PredictionLineChartData
 } from '../../components/d3-charts/prediction-line-chart.component';
-import { CsvexportService } from '../../services/csvexport.service';
 import { DataloaderService } from '../../services/dataloader.service';
 import * as cw from '../../simulation/calendarweek/calendarweek';
 import { getWeekdayInYearWeek, getYearWeekOfDate, YearWeek } from '../../simulation/calendarweek/calendarweek';
