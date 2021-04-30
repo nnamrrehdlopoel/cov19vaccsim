@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
-import {config} from "rxjs";
 
 export interface DummyChartConfig {
     yAxisLabel: string;
@@ -46,7 +45,7 @@ interface PartitionMinMax {
 }
 
 interface DummyChartCoords {
-    margin: {top: number, right: number, bottom: number, left: number};
+    margin: { top: number, right: number, bottom: number, left: number };
     rightBarWidth: number;
     rightBarGap: number;
     rightBarX: number;
@@ -88,65 +87,33 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         const stripeWidth = 2.5;
         this.defs.append('pattern')
             .attr('id', 'stripes')
-            .attr('width', 2*stripeWidth)
-            .attr('height', 2*stripeWidth)
+            .attr('width', 2 * stripeWidth)
+            .attr('height', 2 * stripeWidth)
             .attr('patternUnits', 'userSpaceOnUse')
             .attr('stroke', 'white')
             .attr('stroke-linecap', 'square')
-            .attr('stroke-width', stripeWidth*0.8)
+            .attr('stroke-width', stripeWidth * 0.8)
             .call(el => {
                 el.append('line')
                     .attr('x1', 0)
                     .attr('y1', stripeWidth)
                     .attr('x2', stripeWidth)
-                    .attr('y2', 0)
+                    .attr('y2', 0);
                 el.append('line')
                     .attr('x1', stripeWidth)
-                    .attr('y1', 2*stripeWidth)
-                    .attr('x2', 2*stripeWidth)
-                    .attr('y2', stripeWidth)
+                    .attr('y1', 2 * stripeWidth)
+                    .attr('x2', 2 * stripeWidth)
+                    .attr('y2', stripeWidth);
             });
         this.defs.append('mask')
             .attr('id', 'stripes-mask')
-        /*    .attr('width', 6)
-            .attr('height', 6)
-            .style('mask-repeat', 'repeat')
-            .attr('patternUnits', 'userSpaceOnUse')
-            .attr('stroke', 'white')
-            .attr('stroke-linecap', 'square')
-            .attr('stroke-width', 2)
-            .call(el => {
-                el.append('line')
-                    .attr('x1', 0)
-                    .attr('y1', 3)
-                    .attr('x2', 3)
-                    .attr('y2', 6)
-                el.append('line')
-                    .attr('x1', 3)
-                    .attr('y1', 0)
-                    .attr('x2', 6)
-                    .attr('y2', 3)
-            });/**/
             .call(el => {
                 el.append('rect')
                     .attr('x', 0)
                     .attr('y', 0)
                     .attr('width', '100%')
                     .attr('height', '100%')
-                    .style('fill', 'url(#stripes)')
-            });/**/
-        this.defs.append('mask')
-            .attr('id', 'test-mask')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', 10)
-            .attr('height', 10)
-            .call(el => {
-                el.append('circle')
-                    .attr('cx', 5)
-                    .attr('cy', 5)
-                    .attr('r', 4)
-                    .style('fill', 'white')
+                    .style('fill', 'url(#stripes)');
             });
 
         this.fills = this.svg.append('g').classed('fills', true);
@@ -166,7 +133,7 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         const coords = this.getCoords();
         this.renderAreas(coords, this.data.series);
         this.renderAxis(coords);
-        if(this.data.partitions){
+        if (this.data.partitions) {
             this.renderRightBar(coords, this.data.partitions);
         }
         this.renderLegend(coords, this.data.series);
@@ -230,30 +197,11 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('fill', s => s.fillColor)
             .attr('stroke', 'none')
             .attr('opacity', s => s.fillOpacity ?? this.config.fillOpacity)
-            .style("mask", s => (s.fillStriped ?? false) ? 'url(#stripes-mask)' : '')
+            .style('mask', s => (s.fillStriped ?? false) ? 'url(#stripes-mask)' : '')
             .attr('d', (d) => lineGenerator(d.data));
     }
 
     private renderAxis(coords: DummyChartCoords): void {
-        /*this.yAxis
-            .attr('transform', `translate(${coords.margin.left}, 0)`)
-
-            .call(d3
-                .axisLeft(coords.yScale)
-                .ticks(5)
-                .tickFormat(d3.format('.2s'))
-                .tickSize(-5)
-                .tickSizeOuter(0)
-            ); // .tickPadding(-30));
-
-        // y axis: change number positioning
-        this.yAxis
-            .selectAll('text')
-            .attr('dx', 7)
-            .attr('dy', -4)
-            .attr('text-anchor', 'start');
-        this.yAxis.selectAll('.domain').remove();*/
-
         this.yGrid
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
@@ -308,7 +256,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 .tickSize(-(this.chartSize.height - coords.margin.top - coords.margin.bottom))
                 .tickSizeOuter(0)
                 .tickPadding(smallXAxis ? 5 : 15)
-                //.tickSize(-this.chartSize.height)
                 .tickFormat(date => date.toLocaleString('default', {
                     month: smallXAxis ? 'short' : 'long',
                 }))
@@ -364,7 +311,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .attr('fill', 'white')
             .attr('stroke', '#777')
             .attr('stroke-width', 1);
-            //.attr('shape-rendering', 'crispEdges');
 
         let maxTextWidth = -1;
         // legend entries
@@ -382,21 +328,19 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .attr('y', d => d.fillOpacity === 0 ? 0 : -0.5)
                     .attr('width', d => d.fillOpacity === 0 ? 9 : 10)
                     .attr('height', d => d.fillOpacity === 0 ? 9 : 10)
-                    //.attr('shape-rendering', 'crispEdges')
                     .attr('fill', d => d.fillColor)
                     .attr('stroke', d => d.strokeColor)
                     .attr('stroke-width', d => d.fillOpacity === 0 ? 2 : 1)
                     .attr('fill-opacity', d => d.fillOpacity ?? this.config.fillOpacity);
                 // todo set font size etc
-                const text_els = lGroup
+                const textEls = lGroup
                     .append('text')
                     .attr('x', 15)
                     .attr('y', 10)
                     .attr('fill', 'black')
                     .attr('font-size', '14')
-                    //.attr('text-rendering', 'optimizeLegibility')
-                    .text( d => d.label).nodes();
-                for(const el of text_els){
+                    .text(d => d.label).nodes();
+                for (const el of textEls) {
                     maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 15);
                 }
                 return lGroup;
@@ -404,9 +348,9 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                 update.select('rect')
                     .attr('fill', d => d.fillColor)
                     .attr('stroke', d => d.strokeColor);
-                const text_els = update.select('text')
-                    .text( d => d.label).nodes();
-                for(const el of text_els){
+                const textEls = update.select('text')
+                    .text(d => d.label).nodes();
+                for (const el of textEls) {
                     // @ts-ignore
                     maxTextWidth = Math.max(maxTextWidth, el.getBBox().width + 15);
                 }
@@ -414,10 +358,10 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             }, exit => {
                 exit.remove();
             });
-        if(maxTextWidth > 0) {
+        if (maxTextWidth > 0) {
             this.legend
                 .selectAll('rect.legend-background')
-                .attr('width', maxTextWidth + padding*2);
+                .attr('width', maxTextWidth + padding * 2);
         }
     }
 
@@ -441,44 +385,33 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
             .join(el => el.append('g').call(el => {
                 el.append('rect');
                 el.append('text');
-            })).each(function(p){
-                d3.select(this).select('text')
+            })).each(function(p) {
+            d3.select(this).select('text')
                 .attr('x', coords.rightBarX)
-                .attr('y', coords.yScale((p.max+p.min)/2))
+                .attr('y', coords.yScale((p.max + p.min) / 2))
                 .attr('dy', '0.3em')
-                .attr('dx', coords.rightBarWidth/2 - 3)
+                .attr('dx', coords.rightBarWidth / 2 - 3)
                 .attr('text-anchor', 'end')
                 .text(p.max - p.min > 5 ? p.label : '')
-                .call(function(el){
+                .call(function(el) {
                     // @ts-ignore
                     p.labelBBox = el.node().getBBox();
-                })
-            })
-            .each(function(p){
+                });
+        })
+            .each(function(p) {
                 d3.select(this).select('rect')
-                    .attr("x", p.labelBBox.x - 3)
-                    .attr("y", p.labelBBox.y)
-                    .attr("width", p.labelBBox.width + 6)
-                    .attr("height", p.labelBBox.height)
-                    .style("fill", "white")
+                    .attr('x', p.labelBBox.x - 3)
+                    .attr('y', p.labelBBox.y)
+                    .attr('width', p.labelBBox.width + 6)
+                    .attr('height', p.labelBBox.height)
+                    .style('fill', 'white')
                     .attr('opacity', 0.8)
                     .attr('rx', 2)
                     .attr('ry', 2);
-            })
-            /*.each( p => {
-                d3.select('g')
-                    .insert('rect', 'text')
-                    .attr("x", (d: PartitionMinMax) => d.labelBBox.x)
-                    .attr("y", (d: PartitionMinMax) => d.labelBBox.y)
-                    .attr("width", (d: PartitionMinMax) => d.labelBBox.width)
-                    .attr("height", (d: PartitionMinMax) => d.labelBBox.height)
-                    .style("fill", "yellow");
-            });*/
-
-        // console.log(mappedParts);
+            });
 
         // No gap => draw line instead
-        if(mappedParts.length && coords.rightBarGap <= 0) {
+        if (mappedParts.length && coords.rightBarGap <= 0) {
             this.rightBar.selectAll('line')
                 .data([0])
                 .join(el => el.insert('line', 'g.labels'))
@@ -501,9 +434,9 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
         return {
             ...s,
             data: [
-                { ...s.data[0], value: minValue },
+                {...s.data[0], value: minValue},
                 ...s.data,
-                { ...s.data[s.data.length - 1], value: minValue },
+                {...s.data[s.data.length - 1], value: minValue},
             ]
         };
     }
