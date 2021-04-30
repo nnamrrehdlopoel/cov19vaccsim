@@ -54,6 +54,8 @@ interface DummyChartCoords {
     minValue: number;
 }
 
+type SvgGroup = d3.Selection<SVGGElement, unknown, null, undefined>;
+
 @Component({
     selector: 'app-dummy-chart',
     templateUrl: 'chart-base/chart-base.directive.html',
@@ -61,18 +63,19 @@ interface DummyChartCoords {
 })
 export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartData> {
 
-    private defs: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private xAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private yAxis: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private lines: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private fills: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private xGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private yGrid: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private yGridMinor: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private rightBar: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private rightBarBoxes: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private rightBarLabels: d3.Selection<SVGGElement, unknown, null, undefined>;
-    private legend: d3.Selection<SVGGElement, unknown, null, undefined>;
+    private defs: SvgGroup;
+    private xAxis: SvgGroup;
+    private yAxis: SvgGroup;
+    private lines: SvgGroup;
+    private fills: SvgGroup;
+    private xGrid: SvgGroup;
+    private yGrid: SvgGroup;
+    private yGridMinor: SvgGroup;
+    private rightBar: SvgGroup;
+    private rightBarBoxes: SvgGroup;
+    private rightBarLabels: SvgGroup;
+    private rightBarLabels2: SvgGroup;
+    private legend: SvgGroup;
 
     initialChartConfig(): DummyChartConfig {
         return {
