@@ -83,7 +83,32 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
 
     initializeChart(): void {
         this.defs = this.svg.append('defs');
+        this.defineStripedMaskPattern();
 
+        this.fills = this.svg.append('g').classed('fills', true);
+        this.lines = this.svg.append('g').classed('lines', true);
+        this.xGrid = this.svg.append('g').classed('grid', true);
+        this.yGrid = this.svg.append('g').classed('grid', true);
+        this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
+        this.rightBar = this.svg.append('g').classed('right-bar', true);
+        this.rightBarBoxes = this.rightBar.append('g').classed('boxes', true);
+        this.rightBarLabels = this.rightBar.append('g').classed('labels', true);
+        this.xAxis = this.svg.append('g').classed('x-axis', true);
+        this.yAxis = this.svg.append('g').classed('y-axis', true);
+        this.legend = this.svg.append('g').classed('legend', true);
+    }
+
+    updateChart(): void {
+        const coords = this.getCoords();
+        this.renderAreas(coords, this.data.series);
+        this.renderAxis(coords);
+        if (this.data.partitions) {
+            this.renderRightBar(coords, this.data.partitions);
+        }
+        this.renderLegend(coords, this.data.series);
+    }
+
+    private defineStripedMaskPattern(): void {
         const stripeWidth = 2.5;
         this.defs.append('pattern')
             .attr('id', 'stripes')
@@ -115,28 +140,6 @@ export class DummyChartComponent extends ChartBase<DummyChartConfig, DummyChartD
                     .attr('height', '100%')
                     .style('fill', 'url(#stripes)');
             });
-
-        this.fills = this.svg.append('g').classed('fills', true);
-        this.lines = this.svg.append('g').classed('lines', true);
-        this.xGrid = this.svg.append('g').classed('grid', true);
-        this.yGrid = this.svg.append('g').classed('grid', true);
-        this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
-        this.rightBar = this.svg.append('g').classed('right-bar', true);
-        this.rightBarBoxes = this.rightBar.append('g').classed('boxes', true);
-        this.rightBarLabels = this.rightBar.append('g').classed('labels', true);
-        this.xAxis = this.svg.append('g').classed('x-axis', true);
-        this.yAxis = this.svg.append('g').classed('y-axis', true);
-        this.legend = this.svg.append('g').classed('legend', true);
-    }
-
-    updateChart(): void {
-        const coords = this.getCoords();
-        this.renderAreas(coords, this.data.series);
-        this.renderAxis(coords);
-        if (this.data.partitions) {
-            this.renderRightBar(coords, this.data.partitions);
-        }
-        this.renderLegend(coords, this.data.series);
     }
 
     private getCoords(): DummyChartCoords {
