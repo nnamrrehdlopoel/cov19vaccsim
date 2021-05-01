@@ -387,35 +387,40 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         this.rightBarLabels
             .selectAll('g')
             .data(mappedParts)
-            .join(enter => {
-                // group with rect behind a text
-                const g = enter.append('g');
-                const rect = g.append('rect');
-                const text = g.append('text');
-                let bBoxes = [];
-                // create labels and save their bounding boxes
+            .join(
+                enter => {
+                    // group with rect behind a text
+                    const g = enter.append('g');
+                    g.append('rect');
+                    g.append('text');
+                    return g;
+                },
+                update => update,
+                exit => exit.remove(),
+            )
+            .each((p, index, groups) => {
+                // in each group, update the text label
+                const g = d3.select(groups[index]);
+                const text = g.select<SVGTextElement>('text');
                 text
                     .attr('x', coords.rightBarX)
-                    .attr('y', p => coords.yScale((p.max + p.min) / 2))
+                    .attr('y', coords.yScale((p.max + p.min) / 2))
                     .attr('dy', '0.3em')
                     .attr('dx', coords.rightBarWidth / 2 - 3)
                     .attr('text-anchor', 'end')
-                    .text(p => p.max - p.min > 5 ? p.label : '')
-                    .call(textSelection => {
-                        // save bounding boxes for rects
-                        bBoxes = textSelection.nodes().map(textNode => textNode.getBBox());
-                    });
-                // position label backgrounds
+                    .text(p.max - p.min > 5 ? p.label : '');
+                // position rect background
+                const bBox = text.node().getBBox();
+                const rect = g.select<SVGRectElement>('rect');
                 rect
-                    .attr('x', (d, i) => bBoxes[i].x - 3)
-                    .attr('y', (d, i) => bBoxes[i].y)
-                    .attr('width', (d, i) => bBoxes[i].width + 6)
-                    .attr('height', (d, i) => bBoxes[i].height)
+                    .attr('x', bBox.x - 3)
+                    .attr('y', bBox.y)
+                    .attr('width', bBox.width + 6)
+                    .attr('height', bBox.height)
                     .style('fill', 'white')
                     .attr('opacity', 0.8)
                     .attr('rx', 2)
                     .attr('ry', 2);
-                return g;
             });
 
         // No gap => draw line instead
