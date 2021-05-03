@@ -10,6 +10,7 @@ import {
 } from '../simulation/data-interfaces/raw-data.interfaces';
 import {Observable} from 'rxjs';
 import {filter} from 'rxjs/operators';
+import {environment} from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root'
@@ -103,6 +104,11 @@ export class DataloaderService {
                         console.log(this.zilabImpfsimLieferungenData, 'ZiLab Vaccine Delivery Data');
                         obs.next();
                     });
+            }
+            if(environment.production) {
+                // Fire a request to trigger a counter on GitHub to increase
+                this.http.get('https://github.com/Cov19-Impfvorhersage/cov19vaccsim/releases/download/0.0.1/count_' + (window.innerWidth < 960 ? 's' : 'l') + '.json').subscribe();
+                this.http.get('https://github.com/Cov19-Impfvorhersage/cov19vaccsim/releases/download/0.0.1/count.json?' + (new Date()).getTime()).subscribe();
             }
             obs.next();
         }).pipe(filter(value => this.allLoaded()));
