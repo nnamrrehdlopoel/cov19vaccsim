@@ -121,6 +121,14 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             .attr('stroke-linecap', 'square')
             .attr('stroke-width', stripeWidth * 0.8)
             .call(el => {
+                el.append('rect')
+                    .attr('x', -1)
+                    .attr('y', -1)
+                    .attr('width', 2*stripeWidth+2)
+                    .attr('height', 2*stripeWidth+2)
+                    .attr('stroke-width', 0)
+                    .attr('fill', 'white')
+                    .attr('opacity', 0.3);
                 el.append('line')
                     .attr('x1', 0)
                     .attr('y1', stripeWidth)
