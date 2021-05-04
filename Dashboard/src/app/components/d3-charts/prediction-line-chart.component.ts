@@ -63,7 +63,7 @@ type SvgGroup = d3.Selection<SVGGElement, unknown, null, undefined>;
 })
 export class PredictionLineChartComponent extends ChartBase<PredictionLineChartConfig, PredictionLineChartData> {
 
-    private defs: SvgGroup;
+    private defs: d3.Selection<SVGDefsElement, unknown, null, undefined>;
     private xAxis: SvgGroup;
     private yAxis: SvgGroup;
     private lines: SvgGroup;
