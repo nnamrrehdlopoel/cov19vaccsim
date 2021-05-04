@@ -1,9 +1,8 @@
 import { KeyValue } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import * as wu from 'wu';
+import { DataPoint, DataSeries } from '../../components/d3-charts/data.interfaces';
 import {
-    DataPoint,
-    DataSeries,
     PredictionLineChartData
 } from '../../components/d3-charts/prediction-line-chart.component';
 import { DataloaderService } from '../../services/dataloader.service';

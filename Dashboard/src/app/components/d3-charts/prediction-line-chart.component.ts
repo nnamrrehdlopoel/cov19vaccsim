@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
+import { DataPartition, DataPoint, DataSeries } from './data.interfaces';
 
 export interface PredictionLineChartConfig {
     yAxisLabel: string;
@@ -13,27 +14,6 @@ export interface PredictionLineChartData {
     yMax: number;
     series: DataSeries[];
     partitions: DataPartition[];
-}
-
-export interface DataSeries {
-    data: DataPoint[];
-    strokeColor: string;
-    strokeDasharray?: string;
-    fillColor: string;
-    fillOpacity?: number;
-    fillStriped?: boolean;
-    label?: string;
-}
-
-export interface DataPoint {
-    value: number;
-    date: Date;
-}
-
-export interface DataPartition {
-    label?: string;
-    size: number;
-    fillColor: string;
 }
 
 interface PartitionMinMax {
