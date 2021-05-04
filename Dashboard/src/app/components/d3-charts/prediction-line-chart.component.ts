@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
-import { DataPartition, DataPoint, DataSeries } from './data.interfaces';
+import { DataPartition, DataPoint, DataSeries, StackedBar } from './data.interfaces';
 
 export interface PredictionLineChartConfig {
     yAxisLabel: string;
@@ -14,6 +14,7 @@ export interface PredictionLineChartData {
     yMax: number;
     series: DataSeries[];
     partitions: DataPartition[];
+    stackedBars?: StackedBar[];
 }
 
 interface PartitionMinMax {
@@ -22,6 +23,14 @@ interface PartitionMinMax {
     max: number;
     fillColor: string;
     labelBBox?: any;
+}
+
+interface ColorRect {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    fillColor: string;
 }
 
 interface PredictionLineChartCoords {
@@ -46,6 +55,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
     private defs: d3.Selection<SVGDefsElement, unknown, null, undefined>;
     private xAxis: SvgGroup;
     private yAxis: SvgGroup;
+    private stackedBars: SvgGroup;
     private lines: SvgGroup;
     private fills: SvgGroup;
     private xGrid: SvgGroup;
@@ -69,6 +79,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
 
         this.fills = this.svg.append('g').classed('fills', true);
         this.lines = this.svg.append('g').classed('lines', true);
+        this.stackedBars = this.svg.append('g').classed('stacked-bars', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
         this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
@@ -83,6 +94,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
     updateChart(): void {
         const coords = this.getCoords();
         this.renderAreas(coords, this.data.series);
+        this.renderStackedBars(coords, this.data.stackedBars);
         this.renderAxis(coords);
         if (this.data.partitions) {
             this.renderRightBar(coords, this.data.partitions);
@@ -192,6 +204,37 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             .attr('opacity', s => s.fillOpacity ?? this.config.fillOpacity)
             .style('mask', s => (s.fillStriped ?? false) ? 'url(#stripes-mask)' : '')
             .attr('d', (d) => lineGenerator(d.data));
+    }
+
+    private renderStackedBars(coords: PredictionLineChartCoords, bars: StackedBar[]): void {
+        if (!bars) {
+            return;
+        }
+        const rects: ColorRect[] = bars.flatMap(group => {
+            const x = coords.xScale(group.dateStart);
+            const width = coords.xScale(group.dateEnd) - x;
+            const groupRects: ColorRect[] = [];
+            let min = 0;
+            for (const value of group.values) {
+                const max = min + value.value;
+                const y = coords.yScale(max);
+                const height = coords.yScale(min) - y;
+                min = max;
+                groupRects.push({x, y, width, height, fillColor: value.fillColor});
+            }
+            return groupRects;
+        });
+
+        this.stackedBars
+            .selectAll('rect')
+            .data(rects)
+            .join('rect')
+            .attr('x', d => d.x)
+            .attr('y', d => d.y)
+            .attr('width', d => d.width)
+            .attr('height', d => d.height)
+            .attr('fill', d => d.fillColor);
+
     }
 
     private renderAxis(coords: PredictionLineChartCoords): void {

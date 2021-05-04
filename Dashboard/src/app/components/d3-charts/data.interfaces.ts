@@ -21,3 +21,12 @@ export interface DataPartition {
     size: number;
     fillColor: string;
 }
+
+export interface StackedBar {
+    values: {
+        value: number;
+        fillColor: string;
+    }[];
+    dateStart: Date;
+    dateEnd: Date;
+}
