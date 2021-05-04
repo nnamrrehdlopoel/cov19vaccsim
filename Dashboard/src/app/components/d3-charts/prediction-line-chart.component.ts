@@ -124,8 +124,8 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
                 el.append('rect')
                     .attr('x', -1)
                     .attr('y', -1)
-                    .attr('width', 2*stripeWidth+2)
-                    .attr('height', 2*stripeWidth+2)
+                    .attr('width', 2 * stripeWidth + 2)
+                    .attr('height', 2 * stripeWidth + 2)
                     .attr('stroke-width', 0)
                     .attr('fill', 'white')
                     .attr('opacity', 0.3);
