@@ -24,7 +24,7 @@ interface PartitionMinMax {
     labelBBox?: any;
 }
 
-interface DummyChartCoords {
+interface PredictionLineChartCoords {
     margin: { top: number, right: number, bottom: number, left: number };
     rightBarWidth: number;
     rightBarGap: number;
@@ -132,7 +132,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             });
     }
 
-    private getCoords(): DummyChartCoords {
+    private getCoords(): PredictionLineChartCoords {
         const margin = {top: 10, right: 2, bottom: 30, left: 2};
 
         // dynamic rightBarWidth to maintain a nice aspect ratio of the bar
@@ -166,7 +166,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         };
     }
 
-    private renderAreas(coords: DummyChartCoords, series: DataSeries[]): void {
+    private renderAreas(coords: PredictionLineChartCoords, series: DataSeries[]): void {
         const lineGenerator: d3.Line<DataPoint> = d3
             .line<DataPoint>()
             .defined((d) => d != null && d.value != null)
@@ -194,7 +194,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             .attr('d', (d) => lineGenerator(d.data));
     }
 
-    private renderAxis(coords: DummyChartCoords): void {
+    private renderAxis(coords: PredictionLineChartCoords): void {
         this.yGrid
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
@@ -358,7 +358,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         }
     }
 
-    private renderRightBar(coords: DummyChartCoords, partitions: DataPartition[]): void {
+    private renderRightBar(coords: PredictionLineChartCoords, partitions: DataPartition[]): void {
         const mappedParts = this.mapPartitions(partitions);
 
         this.rightBarBoxes
