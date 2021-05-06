@@ -35,6 +35,7 @@ export interface ISimulationParameters {
     keep2ndDosesBack: number;
     extraIntervalWeeks: number;
     extraIntervalWeeksOnlyFuture: boolean;
+    fractionTakingSecondDose: number;
     fractionWilling: number;
     vaccinesUsed: Map<string, {
         used: boolean
@@ -75,6 +76,7 @@ export class BasicSimulation implements VaccinationSimulation {
         keep2ndDosesBack: 0,
         extraIntervalWeeks: 0,
         extraIntervalWeeksOnlyFuture: false,
+        fractionTakingSecondDose: 1.0,
         fractionWilling: 0.80,
         vaccinesUsed: new Map(),
     };
@@ -215,7 +217,7 @@ export class BasicSimulation implements VaccinationSimulation {
                         if (thatWeek) {
                             const shots1 = thatWeek.firstDosesByVaccine.get(vName) || 0;
                             const ppl = Math.min(pplNeeding2ndShot, shots1);
-                            waitingFor2ndDose[i].set(vName, (waitingFor2ndDose[i].get(vName) || 0) + ppl);
+                            waitingFor2ndDose[i].set(vName, (waitingFor2ndDose[i].get(vName) || 0) + ppl * this.params.fractionTakingSecondDose);
                             pplNeeding2ndShot -= ppl;
                         }
                     }
@@ -373,7 +375,7 @@ export class BasicSimulation implements VaccinationSimulation {
                     // -1 as [0] is the next week; so [5] = in 6 weeks
                     intervalWeeks += this.params.extraIntervalWeeks - 1;
                     waitingFor2ndDose[intervalWeeks].set(vName,
-                        (waitingFor2ndDose[intervalWeeks].get(vName) || 0) + num);
+                        (waitingFor2ndDose[intervalWeeks].get(vName) || 0) + num * this.params.fractionTakingSecondDose);
                 }else{
                     // This vaccine doesn't need a 2nd shot so these people are already fully immunized
                     fullyImmunized += num;
