@@ -184,6 +184,15 @@
                             </mat-radio-group>
                         </div>
                     </div>
+
+                    <div class="settings_row">
+                        <mat-slide-toggle [(ngModel)]="simulation.params.considerStockPile"
+                                          matTooltip="Lagerbestand der zu beginn der Simulation besteht in die Simulation mit einfließen lassen.
+                                          Überschätzt dadurch meist die Impfungen der nächsten Woche."
+                                          (change)="runSimulation();" labelPosition="before">
+                            Lagerbestand beachten
+                        </mat-slide-toggle>
+                    </div>
                 </div>
                 <mat-divider></mat-divider>
                 <div>

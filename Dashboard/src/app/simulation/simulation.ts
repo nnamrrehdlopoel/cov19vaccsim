@@ -28,6 +28,7 @@ export interface ISimulationParameters {
     considerContraindicated: boolean;
     considerNotWilling: boolean;
     considerHesitating: boolean;
+    considerStockPile: boolean;
     contraindicationAge: number;
     deliveryAmountFactor: number;
     deliveryScenario: string;
@@ -67,6 +68,7 @@ export class BasicSimulation implements VaccinationSimulation {
         considerContraindicated: true,
         considerNotWilling: true,
         considerHesitating: true,
+        considerStockPile: true,
         contraindicationAge: 16,
         deliveryAmountFactor: 1,
         deliveryScenario: zilabImpfsimVerteilungszenarien[1],
@@ -170,7 +172,9 @@ export class BasicSimulation implements VaccinationSimulation {
         ).cumDosesByVaccine;
 
         // Berechne die Impfdosen auf Lager für jeden Impfstoff
-        let vaccineStockPile = v(cumulativeDeliveredVaccines, sub, cumDosesByVaccine);
+        let vaccineStockPile = this.params.considerStockPile
+            ? v(cumulativeDeliveredVaccines, sub, cumDosesByVaccine)
+            : new Map();
         console.log('Raw vaccine Stockpile at beginning of sim', vaccineStockPile);
         // Ignore negative Vaccine stock pile
         // Negative stock pile means that the vaccine has been given faster than this.vaccineDeliveryDelayWeeks would allow
