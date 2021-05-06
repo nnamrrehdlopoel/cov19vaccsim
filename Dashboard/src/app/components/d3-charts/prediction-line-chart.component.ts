@@ -7,6 +7,8 @@ import { DataPartition, DataPoint, DataSeries, StackedBar } from './data.interfa
 export interface PredictionLineChartConfig {
     yAxisLabel: string;
     fillOpacity?: number;
+    yAxisScaleFactor?: number;
+    yAxisPercent?: boolean;
 }
 
 export interface PredictionLineChartData {
@@ -40,6 +42,7 @@ interface PredictionLineChartCoords {
     rightBarX: number;
     yScale: d3.ScaleLinear<number, number>;
     xScale: d3.ScaleTime<number, number>;
+    scaledYScale: d3.ScaleLinear<number, number>;
     minValue: number;
 }
 
@@ -162,6 +165,12 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             .domain([this.data.yMin, this.data.yMax])
             .range([this.chartSize.height - margin.bottom, margin.top]);
 
+        const scaleFactor = this.config.yAxisScaleFactor ?? 1;
+        const scaledYScale = d3
+            .scaleLinear()
+            .domain([this.data.yMin*scaleFactor, this.data.yMax*scaleFactor])
+            .range([this.chartSize.height - margin.bottom, margin.top]);
+
         const xScale = d3
             .scaleTime()
             .domain([minDate, maxDate])
@@ -174,6 +183,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             rightBarX,
             xScale,
             yScale,
+            scaledYScale,
             minValue,
         };
     }
@@ -241,11 +251,11 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         this.yGrid
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
-                .axisLeft(coords.yScale)
-                .ticks(5)
+                .axisLeft(coords.scaledYScale)
+                .ticks(10)
                 .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
                 .tickSizeOuter(0)
-                .tickFormat(d3.format('.2s'))
+                .tickFormat(d3.format(this.config.yAxisPercent ? '.0%' : '.2s'))
             );
         this.yGrid.selectAll('.domain').remove();
         // y axis: change number positioning
@@ -258,7 +268,8 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         this.yGridMinor
             .attr('transform', `translate(${coords.margin.left}, 0)`)
             .call(d3
-                .axisLeft(coords.yScale)
+                .axisLeft(coords.scaledYScale)
+                .ticks(20)
                 .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
                 .tickSizeOuter(0)
                 .tickFormat(_ => '')

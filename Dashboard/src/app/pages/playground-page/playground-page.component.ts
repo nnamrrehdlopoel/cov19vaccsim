@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import * as wu from 'wu';
 import { DataPoint, DataSeries, StackedBar } from '../../components/d3-charts/data.interfaces';
 import {
+    PredictionLineChartConfig,
     PredictionLineChartData
 } from '../../components/d3-charts/prediction-line-chart.component';
 import { DataloaderService } from '../../services/dataloader.service';
@@ -117,9 +118,29 @@ export class PlaygroundPageComponent implements OnInit {
         ],
         partitions: [],
     };
+    chartPopulationConfig: PredictionLineChartConfig = {
+        yAxisLabel: 'Bevölkerung',
+        yAxisScaleFactor: 1,
+        yAxisPercent: false,
+    };
     chartWeeklyVaccinations: PredictionLineChartData = this.chartPopulation;
+    chartWeeklyVaccinationsConfig: PredictionLineChartConfig = {
+        yAxisLabel: 'Impfdosen',
+        yAxisScaleFactor: 1,
+        yAxisPercent: false,
+    };
     chartWeeklyDeliveries: PredictionLineChartData = this.chartPopulation;
+    chartWeeklyDeliveriesConfig: PredictionLineChartConfig = {
+        yAxisLabel: 'Impfdosen',
+        yAxisScaleFactor: 1,
+        yAxisPercent: false,
+    };
     chartCumulativeDeliveries: PredictionLineChartData = this.chartPopulation;
+    chartCumulativeDeliveriesConfig: PredictionLineChartConfig = {
+        yAxisLabel: 'Impfdosen',
+        yAxisScaleFactor: 1,
+        yAxisPercent: false,
+    };
     simulationStartWeekNum = 5;
     simulationStartWeek: YearWeek = cw.yws([2021, this.simulationStartWeekNum]);
     availableDeliveryScenarios = zilabImpfsimVerteilungszenarien;
@@ -132,8 +153,9 @@ export class PlaygroundPageComponent implements OnInit {
     };
 
     displayPartitioning = Object.keys(this.simulation.partitionings)[0];
-    featureFlagYAxisScale = false;
+    featureFlagYAxisScale = true;
     displayYAxisScale = 'num';
+    displayYAxisScaleTimeframe = 'week';
 
     simulationResults: ISimulationResults;
 
@@ -182,6 +204,34 @@ export class PlaygroundPageComponent implements OnInit {
         this.buildChartWeeklyVaccinations();
         this.buildChartWeeklyDeliveries();
         this.buildChartCumulativeDeliveries();
+        this.buildYScaleConfigurations();
+    }
+
+
+    buildYScaleConfigurations(): void {
+        let scale = 1;
+        let percent = false;
+        if(this.displayYAxisScale === 'percent'){
+            scale = 1 / this.dataloader.population.data.total;
+            percent = true;
+        }
+        let weeklyScale = scale * (this.displayYAxisScaleTimeframe === 'day' ? 1/7 : 1);
+        this.chartPopulationConfig = {... this.chartPopulationConfig,
+            yAxisScaleFactor: scale,
+            yAxisPercent: percent,
+        };
+        this.chartCumulativeDeliveriesConfig = {... this.chartCumulativeDeliveriesConfig,
+            yAxisScaleFactor: scale,
+            yAxisPercent: percent,
+        };
+        this.chartWeeklyVaccinationsConfig = {... this.chartWeeklyVaccinationsConfig,
+            yAxisScaleFactor: weeklyScale,
+            yAxisPercent: percent,
+        };
+        this.chartWeeklyDeliveriesConfig = {... this.chartWeeklyDeliveriesConfig,
+            yAxisScaleFactor: weeklyScale,
+            yAxisPercent: percent,
+        };
     }
 
 
