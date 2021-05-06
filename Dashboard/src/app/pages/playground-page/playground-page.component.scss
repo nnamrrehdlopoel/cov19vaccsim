@@ -139,6 +139,37 @@ span.line {
 }*/
 
 
+.tooltip-info {
+    position: absolute;
+    margin-left: -2.2em;
+    // margin-top: 0.5em;
+    font-size: 1em;
+    color: #bbb;
+}
+
+/*
+.mat-tooltip-trigger:before {
+    content: 'help_outline';
+    font-size: 0.7em;
+    color: grey;
+    position: absolute;
+    margin-left: -12px;
+
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "liga";
+}*/
+
+
 .onlySmall {
     display: none;
 }

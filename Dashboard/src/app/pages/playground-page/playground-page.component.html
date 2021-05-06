@@ -28,6 +28,7 @@
                                                 Hat keinen Einfluss auf die Simulation die nur von der Impfbereitschaft abhängt,
                                                 daher entspricht die Reihenfolge der Blöcke auch nicht automatisch der logischen Impfreihenfolge
                                                 (Insb. beim Alter da ja nicht strikt nach Alter geimpft wird)">
+                                    <mat-icon class="tooltip-info">help</mat-icon>
                                     <mat-label>Aufteilung im rechten Balken</mat-label>
                                     <mat-select [(ngModel)]="displayPartitioning" (selectionChange)="buildChartPopulation()" >
                                         <ng-container *ngFor="let p of simulation.partitionings | keyvalue: originalOrder">
@@ -97,15 +98,17 @@
                             ></app-prediction-line-chart>
                         </mat-tab>
                     </mat-tab-group>
-                    <mat-slider class="simulation-start"
-                                matTooltip="Startwoche der Simulation.
+                    <div matTooltip="Startwoche der Simulation.
                                 Nützlich um die Simulation mit echten Daten zu vergleichen;
-                                allerdings ist zu beachten dass stets die neuesten Lieferdaten & -Ankündigungen verwendet werden."
-                                [(ngModel)]="simulationStartWeekNum"
-                                (change)="runSimulation();"
-                                [min]="simulationStartSlider.min" [max]="simulationStartSlider.max" step="1"
-                                [style]="'width: '+simulationStartSlider.width*100+'%; margin-left: '+simulationStartSlider.startOffset*100+'%;'"
-                    ></mat-slider>
+                                allerdings ist zu beachten dass stets die neuesten Lieferdaten & -Ankündigungen verwendet werden.">
+                        <mat-icon class="tooltip-info" style="margin-left: 0.5em; margin-top: 0.1em;">help</mat-icon>
+                        <mat-slider class="simulation-start"
+                                    [(ngModel)]="simulationStartWeekNum"
+                                    (change)="runSimulation();"
+                                    [min]="simulationStartSlider.min" [max]="simulationStartSlider.max" step="1"
+                                    [style]="'width: '+simulationStartSlider.width*100+'%; margin-left: '+simulationStartSlider.startOffset*100+'%;'"
+                        ></mat-slider>
+                    </div>
                 </div>
             </mat-card-content>
 
