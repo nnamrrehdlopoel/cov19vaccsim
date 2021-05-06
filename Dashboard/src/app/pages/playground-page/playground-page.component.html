@@ -18,7 +18,7 @@
                         <mat-tab label="Geimpfte Bevölkerung">
                             <div class="top-bar">
                                 <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" (change)="buildYScaleConfigurations()">
-                                    <mat-button-toggle value="num"><span class="onlyWide">Personen</span><span class="onlySmall">#</span></mat-button-toggle>
+                                    <mat-button-toggle value="num"><span class="onlyWide">Personen</span><span class="onlySmall"># P.</span></mat-button-toggle>
                                     <mat-button-toggle value="percent"><span class="onlyWide">Prozent</span><span class="onlySmall">% Bev.</span></mat-button-toggle>
                                 </mat-button-toggle-group>
 
@@ -46,7 +46,7 @@
                         <mat-tab label="Wöchentliche Impfungen">
                             <div class="top-bar">
                                 <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" (change)="buildYScaleConfigurations()">
-                                    <mat-button-toggle value="num"><span class="onlyWide">Anzahl Impfdosen</span><span class="onlySmall">#</span></mat-button-toggle>
+                                    <mat-button-toggle value="num"><span class="onlyWide">Anzahl Impfdosen</span><span class="onlySmall"># Dosen</span></mat-button-toggle>
                                     <mat-button-toggle value="percent"><span class="onlyWide">Prozent der Bevölkerung</span><span class="onlySmall">% Bev.</span></mat-button-toggle>
                                 </mat-button-toggle-group>
                                 &nbsp;<span class="onlySmall">pro &nbsp;</span>
@@ -66,7 +66,7 @@
                             <div class="top-bar">
                                 <!--WIP; dieser Graph bekommt noch stacking...-->
                                 <mat-button-toggle-group class="slim" *ngIf="featureFlagYAxisScale" [(ngModel)]="displayYAxisScale" (change)="buildYScaleConfigurations()">
-                                    <mat-button-toggle value="num"><span class="onlyWide">Anzahl Impfdosen</span><span class="onlySmall">#</span></mat-button-toggle>
+                                    <mat-button-toggle value="num"><span class="onlyWide">Anzahl Impfdosen</span><span class="onlySmall"># Dosen</span></mat-button-toggle>
                                     <mat-button-toggle value="percent"><span class="onlyWide">Prozent der Bevölkerung</span><span class="onlySmall">% Bev.</span></mat-button-toggle>
                                 </mat-button-toggle-group>
                                 &nbsp;<span class="onlySmall">pro &nbsp;</span>
