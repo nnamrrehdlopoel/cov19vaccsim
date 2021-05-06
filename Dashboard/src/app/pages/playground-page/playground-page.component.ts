@@ -119,25 +119,25 @@ export class PlaygroundPageComponent implements OnInit {
         partitions: [],
     };
     chartPopulationConfig: PredictionLineChartConfig = {
-        yAxisLabel: 'Bevölkerung',
+        yAxisLabel: '', // 'Bevölkerung',
         yAxisScaleFactor: 1,
         yAxisPercent: false,
     };
     chartWeeklyVaccinations: PredictionLineChartData = this.chartPopulation;
     chartWeeklyVaccinationsConfig: PredictionLineChartConfig = {
-        yAxisLabel: 'Impfdosen',
+        yAxisLabel: '', // 'Impfdosen',
         yAxisScaleFactor: 1,
         yAxisPercent: false,
     };
     chartWeeklyDeliveries: PredictionLineChartData = this.chartPopulation;
     chartWeeklyDeliveriesConfig: PredictionLineChartConfig = {
-        yAxisLabel: 'Impfdosen',
+        yAxisLabel: '', // 'Impfdosen',
         yAxisScaleFactor: 1,
         yAxisPercent: false,
     };
     chartCumulativeDeliveries: PredictionLineChartData = this.chartPopulation;
     chartCumulativeDeliveriesConfig: PredictionLineChartConfig = {
-        yAxisLabel: 'Impfdosen',
+        yAxisLabel: '', // 'Impfdosen',
         yAxisScaleFactor: 1,
         yAxisPercent: false,
     };
