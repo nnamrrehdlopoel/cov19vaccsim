@@ -297,7 +297,7 @@ export class PlaygroundPageComponent implements OnInit {
         ];
 
         this.chartPopulation = newData;
-        this.chartPopulation.stackedBars = this.stackedBars; // TEMP
+        //this.chartPopulation.stackedBars = this.stackedBars; // TEMP
     }
 
 
