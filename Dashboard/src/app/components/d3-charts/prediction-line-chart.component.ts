@@ -102,7 +102,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         if (this.data.partitions) {
             this.renderRightBar(coords, this.data.partitions);
         }
-        this.renderLegend(this.data.series);
+        this.renderLegend(coords, this.data.series);
     }
 
     private defineStripedMaskPattern(): void {
@@ -255,13 +255,13 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
                 .ticks(10)
                 .tickSize(-(this.chartSize.width - coords.margin.left - coords.margin.right - coords.rightBarWidth))
                 .tickSizeOuter(0)
-                .tickFormat(d3.format(this.config.yAxisPercent ? '.0%' : '.2s'))
+                .tickFormat(d3.format(this.config.yAxisPercent ? '~%' : '~s'))
             );
         this.yGrid.selectAll('.domain').remove();
         // y axis: change number positioning
         this.yGrid
             .selectAll('text')
-            .attr('dx', 7)
+            .attr('dx', coords.xScale(Date.UTC(2021, 0, 1)) + 4)
             .attr('dy', -4)
             .attr('text-anchor', 'start');
 
@@ -333,13 +333,13 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
 
     }
 
-    private renderLegend(series: DataSeries[]): void {
+    private renderLegend(coords: PredictionLineChartCoords, series: DataSeries[]): void {
         const labeledSeries = series.filter(s => !!s.label);
         const padding = 10;
 
         // legend in general (position, visibility)
         this.legend
-            .attr('transform', 'translate(35, 35)')
+            .attr('transform', 'translate('+(coords.xScale(Date.UTC(2021, 0, 1))*1.5+30)+', 35)')
             .attr('opacity', labeledSeries.length > 0 ? 1 : 0);
 
         // 0.5 movements are to make sure that the border lies exactly on a pixel and can be rendered nicely
