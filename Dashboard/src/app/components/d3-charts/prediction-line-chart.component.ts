@@ -179,7 +179,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         const scaleFactor = this.config.yAxisScaleFactor ?? 1;
         const scaledYScale = d3
             .scaleLinear()
-            .domain([this.data.yMin*scaleFactor, this.data.yMax*scaleFactor])
+            .domain([this.data.yMin * scaleFactor, this.data.yMax * scaleFactor])
             .range([this.chartSize.height - margin.bottom, margin.top]);
 
         const xScale = d3
@@ -350,7 +350,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
 
         // legend in general (position, visibility)
         this.legend
-            .attr('transform', 'translate('+(coords.xScale(Date.UTC(2021, 0, 1))*1.5+30)+', 35)')
+            .attr('transform', 'translate(' + (coords.xScale(Date.UTC(2021, 0, 1)) * 1.5 + 30) + ', 35)')
             .attr('opacity', labeledSeries.length > 0 ? 1 : 0);
 
         // 0.5 movements are to make sure that the border lies exactly on a pixel and can be rendered nicely
