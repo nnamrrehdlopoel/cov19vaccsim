@@ -4,7 +4,7 @@ import * as wu from 'wu';
 import { DataPoint, DataSeries, StackedBar } from '../../components/d3-charts/data.interfaces';
 import {
     PredictionLineChartConfig,
-    PredictionLineChartData
+    PredictionLineChartData, TooltipUpdate
 } from '../../components/d3-charts/prediction-line-chart.component';
 import { DataloaderService } from '../../services/dataloader.service';
 import * as cw from '../../simulation/calendarweek/calendarweek';
@@ -741,5 +741,16 @@ export class PlaygroundPageComponent implements OnInit {
     resetWillingness(): void {
         this.simulation.params.fractionWilling = 1 - this.simulation.willingness.getUnwillingFraction();
         this.runSimulation();
+    }
+
+    // experimental tooltip things
+    experimentalTooltipUpdate: TooltipUpdate;
+    experimentalTooltipText = '';
+    updateTooltip(upd: TooltipUpdate): void {
+        // the chart provides updates on each mouse movement
+        // use them to decide the content of the tooltip
+        this.experimentalTooltipUpdate = upd;
+        this.experimentalTooltipText = upd.hoveredDate.toISOString();
+        // todo: extract all relevant data for the tooltip here, depending on what you want to show
     }
 }
