@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import * as d3 from 'd3';
 
 import { ChartBase } from './chart-base/chart-base.directive';
@@ -46,6 +46,14 @@ interface PredictionLineChartCoords {
     minValue: number;
 }
 
+interface TooltipUpdate {
+    showTooltip: boolean;
+    mouseEvent: MouseEvent;
+    hoveredDate: Date;
+    coords: PredictionLineChartCoords;
+    svgClientRect: DOMRect;
+}
+
 type SvgGroup = d3.Selection<SVGGElement, unknown, null, undefined>;
 
 @Component({
@@ -54,6 +62,8 @@ type SvgGroup = d3.Selection<SVGGElement, unknown, null, undefined>;
     styleUrls: ['chart-base/chart-base.directive.scss'],
 })
 export class PredictionLineChartComponent extends ChartBase<PredictionLineChartConfig, PredictionLineChartData> {
+
+    @Output() tooltipUpdate: EventEmitter<TooltipUpdate> = new EventEmitter();
 
     private defs: d3.Selection<SVGDefsElement, unknown, null, undefined>;
     private xAxis: SvgGroup;
@@ -103,6 +113,7 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             this.renderRightBar(coords, this.data.partitions);
         }
         this.renderLegend(coords, this.data.series);
+        this.updateMouseEventListeners(coords);
     }
 
     private defineStripedMaskPattern(): void {
@@ -475,6 +486,39 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
                 .attr('stroke', '#444')
                 .attr('shape-rendering', 'crispEdges');
         }
+    }
+
+    private updateMouseEventListeners(coords: PredictionLineChartCoords): void {
+        this.svg
+            .on('mouseenter', (e) => {
+                this.emitTooltipUpdate(coords, e, true);
+            })
+            .on('mousemove', (e) => {
+                this.emitTooltipUpdate(coords, e, true);
+            })
+            .on('mouseleave', (e) => {
+                this.emitTooltipUpdate(coords, e, false);
+            });
+    }
+
+    private emitTooltipUpdate(coords: PredictionLineChartCoords, mouseEvent: MouseEvent, show: boolean): void {
+        const svgClientRect = this.svg.node().getBoundingClientRect();
+        // transform coords
+        const chartX = mouseEvent.clientX - svgClientRect.x;
+        const hoveredDate = coords.xScale.invert(chartX);
+        const domain = coords.xScale.domain();
+        const showTooltip = show && hoveredDate >= domain[0] && hoveredDate <= domain[1];
+        hoveredDate.setHours( hoveredDate.getHours() > 12 ? 24 : 0);
+        hoveredDate.setMinutes(0);
+        hoveredDate.setSeconds(0);
+        hoveredDate.setMilliseconds(0);
+        this.tooltipUpdate.next({
+            showTooltip,
+            mouseEvent,
+            hoveredDate,
+            coords,
+            svgClientRect,
+        });
     }
 
     /**
