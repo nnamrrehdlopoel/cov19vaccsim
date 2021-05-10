@@ -46,7 +46,7 @@ interface PredictionLineChartCoords {
     minValue: number;
 }
 
-interface TooltipUpdate {
+export interface TooltipUpdate {
     showTooltip: boolean;
     mouseEvent: MouseEvent;
     hoveredDate: Date;
@@ -505,13 +505,21 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         const svgClientRect = this.svg.node().getBoundingClientRect();
         // transform coords
         const chartX = mouseEvent.clientX - svgClientRect.x;
+        const chartY = mouseEvent.clientY - svgClientRect.y;
         const hoveredDate = coords.xScale.invert(chartX);
-        const domain = coords.xScale.domain();
-        const showTooltip = show && hoveredDate >= domain[0] && hoveredDate <= domain[1];
+        const hoveredValue = coords.yScale.invert(chartY);
+        const domainX = coords.xScale.domain();
+        const domainY = coords.yScale.domain();
+        const xValid = hoveredDate >= domainX[0] && hoveredDate <= domainX[1];
+        const yValid = hoveredValue >= domainY[0] && hoveredValue <= domainY[1];
+        const showTooltip = show && xValid && yValid;
+        /*
+        // optionally, round date to the nearest day
         hoveredDate.setHours( hoveredDate.getHours() > 12 ? 24 : 0);
         hoveredDate.setMinutes(0);
         hoveredDate.setSeconds(0);
         hoveredDate.setMilliseconds(0);
+        */
         this.tooltipUpdate.next({
             showTooltip,
             mouseEvent,
