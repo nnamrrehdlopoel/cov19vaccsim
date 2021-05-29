@@ -494,8 +494,11 @@ export class PlaygroundPageComponent implements OnInit {
         const vacDeliveries: Map<string, DataPoint[]> = new Map();
         const vacDeliveriesSim: Map<string, DataPoint[]> = new Map();
         const vaccinesWithDeliveries: Map<string, boolean> = new Map();
+        const vaccinesColors: Map<string, string> = new Map();
+        let colorI = 0;
         for (const vName of this.simulation.vaccineUsage.getVaccinesPriorityList()) {
             vaccinesWithDeliveries.set(vName, false);
+            vaccinesColors.set(vName, this.vaccinePalette[colorI++]);
         }
 
         /*const vacDeliveries: DataSeries = {
@@ -581,6 +584,9 @@ export class PlaygroundPageComponent implements OnInit {
                     value
                 });
             }
+
+            // stacked bars (work in progress)
+            const stackedBars: Array<StackedBar> = [];
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
                 date = cw.getWeekdayInYearWeek(yWeek, 8);
@@ -602,13 +608,24 @@ export class PlaygroundPageComponent implements OnInit {
                         vaccinesWithDeliveries.set(vName, true);
                     }
                 }
+
+                stackedBars.push({
+                    dateStart: cw.getWeekdayInYearWeek(yWeek, 1),
+                    dateEnd: cw.getWeekdayInYearWeek(yWeek, 7),
+                    values: [... wu(vaccinesColors.entries()).map(([vName, color]) => ({
+                        value: vacDeliveryData.dosesByVaccine.get(vName) ?? 0,
+                        fillColor: color,
+                        vacName: vName,
+                    }))],
+                });
             }
+            newData.stackedBars = stackedBars;
         }
 
         const vacDeliveriesDataSeries: DataSeries[] = [];
         const vacDeliveriesSimDataSeries: DataSeries[] = [];
 
-        let colorI = 0;
+        colorI = 0;
         for (const [vName, hasDeliveries] of vaccinesWithDeliveries) {
             if (hasDeliveries) {
                 const color = this.vaccinePalette[colorI++];
