@@ -389,13 +389,13 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
                     .attr('transform', (d, i) => `translate(${padding}, ${i * 20 + padding})`);
                 lGroup
                     .append('rect')
-                    .attr('x', d => d.fillOpacity === 0 ? 0 : -0.5)
-                    .attr('y', d => d.fillOpacity === 0 ? 0 : -0.5)
+                    .attr('x', d => d.fillOpacity === 0 ? 0.5 : -0.5)
+                    .attr('y', d => d.fillOpacity === 0 ? 5.5 : -0.5)
                     .attr('width', d => d.fillOpacity === 0 ? 9 : 10)
-                    .attr('height', d => d.fillOpacity === 0 ? 9 : 10)
+                    .attr('height', d => d.fillOpacity === 0 ? 1 : 10)
                     .attr('fill', d => d.fillColor)
                     .attr('stroke', d => d.strokeColor)
-                    .attr('stroke-width', d => d.fillOpacity === 0 ? 2 : 1)
+                    .attr('stroke-width', d => d.fillOpacity === 0 ? 1 : 1)
                     .attr('fill-opacity', d => d.fillOpacity ?? this.config.fillOpacity);
                 // todo set font size etc
                 const textEls = lGroup
