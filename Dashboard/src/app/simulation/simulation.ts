@@ -162,6 +162,14 @@ export class BasicSimulation implements VaccinationSimulation {
             weeklyData: new Map()
         };
 
+
+        // Running week data
+        // (never go below actual data in first week if the first week is the current week)
+        let runningWeekData =
+            (this.simulationStartWeek === cw.getYearWeekOfDate(this.dataloader.lastRefreshVaccinations)) ?
+            this.weeklyVaccinations.get(this.simulationStartWeek) :
+            null;
+
         const dataBeforeSim = this.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
         let cumPartiallyImmunized = dataBeforeSim.cumPartiallyImmunized;
         let cumFullyImmunized = dataBeforeSim.cumFullyImmunized;
@@ -283,8 +291,6 @@ export class BasicSimulation implements VaccinationSimulation {
         console.log('Contraindicated', numContraindicated);
 
 
-
-
         // # Actual Simulation for every week
         while (curWeek < this.simulationEndWeek){
             const delayedDeliveryData = this.weeklyDeliveriesScenario.get(cw.weekBefore(curWeek, this.vaccineDeliveryDelayWeeks));
@@ -300,7 +306,11 @@ export class BasicSimulation implements VaccinationSimulation {
 
             // Give as many 2nd shots as needed
             const required2ndShots = waitingFor2ndDose.shift();
-            const given2ndShots = v(vaccineStockPile, Math.min, required2ndShots);
+            let given2ndShots = v(v(vaccineStockPile, Math.min, required2ndShots), Math.max, 0);
+            if(runningWeekData){ // Never give less than the actual data shows if the first week is the running week
+                given2ndShots = v(given2ndShots, Math.max,
+                    v(runningWeekData.dosesByVaccine, sub, runningWeekData.firstDosesByVaccine))
+            }
             // push to next week if not enough vaccine available
             waitingFor2ndDose[0] = v(
                 waitingFor2ndDose[0],
@@ -359,13 +369,16 @@ export class BasicSimulation implements VaccinationSimulation {
             /*const given1stShots = v(
                 v(availableVaccineStockPile, Math.min, Math.floor(availablePeople / availableVaccineStockPile.size)),
                 Math.max, 0);*/
-            const given1stShots = new Map();
+            let given1stShots = new Map();
             for (const vName of this.vaccineUsage.getVaccinesPriorityList()){
                 if (availableVaccineStockPile.has(vName) && this.params.vaccinesUsed.get(vName).used){
                     const shots = Math.max(0, Math.min(availableVaccineStockPile.get(vName), availablePeople));
                     given1stShots.set(vName, shots);
                     availablePeople -= shots;
                 }
+            }
+            if(runningWeekData){ // Never give less than the actual data shows if the first week is the running week
+                given1stShots = v(given2ndShots, Math.max, runningWeekData.firstDosesByVaccine)
             }
             // Remove given from stock pile
             vaccineStockPile = v(vaccineStockPile, sub, given1stShots);
@@ -411,6 +424,7 @@ export class BasicSimulation implements VaccinationSimulation {
             };
             results.weeklyData.set(curWeek, weekData);
 
+            runningWeekData = null;
             curWeek = cw.weekAfter(curWeek);
         }
 
