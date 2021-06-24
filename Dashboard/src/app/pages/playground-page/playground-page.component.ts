@@ -642,15 +642,15 @@ export class PlaygroundPageComponent implements OnInit {
         colorI = 0;
         for (const [vName, hasDeliveries] of vaccinesWithDeliveries) {
             if (hasDeliveries) {
-                const color = this.vaccinePalette[colorI++];
-                vacDeliveriesDataSeries.push({
-                    data: vacDeliveries.get(vName) ?? [],
+                const color = vaccinesColors.get(vName); //this.vaccinePalette[colorI++];
+                vacDeliveriesDataSeries.unshift({
+                    data: [], // vacDeliveries.get(vName) ?? [],
                     fillColor: color,
                     strokeColor: color,
                     label: this.simulation.vaccineUsage.getVaccineDisplayName(vName),
                 });
-                vacDeliveriesSimDataSeries.push({
-                    data: vacDeliveriesSim.get(vName) ?? [],
+                vacDeliveriesSimDataSeries.unshift({
+                    data: [], // vacDeliveriesSim.get(vName) ?? [],
                     fillColor: color,
                     strokeColor: color,
                     strokeDasharray: '5, 5',
@@ -661,8 +661,8 @@ export class PlaygroundPageComponent implements OnInit {
 
 
         newData.series = [
-            //...vacDeliveriesDataSeries,
-            //...vacDeliveriesSimDataSeries,
+            ...vacDeliveriesDataSeries,
+            ...vacDeliveriesSimDataSeries,
             vacDoses,
             vacDosesSim,
         ];
