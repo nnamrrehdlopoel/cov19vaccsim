@@ -202,10 +202,16 @@ export class BasicSimulation implements VaccinationSimulation {
             // Forward distribution approach
             // i = weeks in the future
             let i = 0;
-            while (pplNeeding2ndShot > 0 && i < 12) {
+            while (pplNeeding2ndShot > 0 && i < 20) {
                 // For every vaccine type given so far
                 for (const vName of cumDosesByVaccine.keys()) {
-                    const intervalWeeks = this.vaccineUsage.getVaccineIntervalWeeks(curWeek, vName);
+                    let intervalWeeks = this.vaccineUsage.getVaccineIntervalWeeks(curWeek, vName);
+
+                    // Handle negative extra interval weeks here
+                    if(intervalWeeks > 0 && !this.params.extraIntervalWeeksOnlyFuture && this.params.extraIntervalWeeks < 0){
+                        intervalWeeks += this.params.extraIntervalWeeks;
+                    }
+
                     if (intervalWeeks > 0 && intervalWeeks > i) {
                         // week when people of this vaccine
                         // that need their second shot in i weeks

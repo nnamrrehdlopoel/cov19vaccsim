@@ -244,9 +244,11 @@
                                 <span *ngIf="simulation.params.extraIntervalWeeks==0"> laut STIKO</span>
                                 <span *ngIf="simulation.params.extraIntervalWeeks>0"><strong>{{simulation.params.extraIntervalWeeks}}
                                     Wochen länger</strong></span>
+                                <span *ngIf="simulation.params.extraIntervalWeeks<0"><strong>{{-simulation.params.extraIntervalWeeks}}
+                                    Wochen kürzer</strong></span>
                             </div>
                         </div>
-                        <mat-slider [(ngModel)]="simulation.params.extraIntervalWeeks" min="0" max="12" step="1"
+                        <mat-slider [(ngModel)]="simulation.params.extraIntervalWeeks" min="-4" max="4" step="1"
                                     (change)="runSimulation();"></mat-slider>
                     </div>
                     <div class="settings_row"
