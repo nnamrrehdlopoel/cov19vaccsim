@@ -132,7 +132,7 @@
                 Datenbasis:
                 <span class="line">Impfungen lt. RKI (Stand {{dataloader.updateDates.vaccinationsLastUpdated | date:'shortDate'}}),&nbsp;</span>
                 <span class="line">Lieferungen lt. BMG (Stand {{dataloader.updateDates.deliveryLastUpdated | date:'shortDate'}}),&nbsp;</span>
-                <span class="line">Lieferpläne lt. BMG (Stand 19.04.21)</span>
+                <span class="line">Lieferpläne lt. BMG (Stand 20.06.21)</span>
             </mat-card-subtitle>
         </mat-card>
     </div>
@@ -216,7 +216,7 @@
 
                     <div class="settings_row">
                         <mat-slide-toggle [(ngModel)]="simulation.params.considerStockPile"
-                                          matTooltip="Lagerbestand der zu beginn der Simulation besteht in die Simulation mit einfließen lassen.
+                                          matTooltip="Lagerbestand der zu Beginn der Simulation besteht in die Simulation mit einfließen lassen.
                                           Überschätzt dadurch meist die Impfungen der nächsten Woche."
                                           (change)="runSimulation();" labelPosition="before">
                             Lagerbestand beachten
@@ -379,7 +379,7 @@
                     <li>
                         <b>Lagerbestand an Impfdosen:</b><br>
                         Für den Beginn der Simulation wird der aktuelle Lagerbestand (mit verzögerter Verfügbarwerdung) der Impfdosen berechnet.
-                        Dieser fließt dann in die Simulation mit ein. Allerdings werden negative Lagerbestände
+                        Dieser fließt wenn der Schalter aktiviert wird in die Simulation mit ein. Allerdings werden negative Lagerbestände
                         (aka. Lieferungen die entgegen der Annahme im Absatz darüber noch in der selben Woche verimpft wurden) einfach ignoriert.
                         Dadurch wird die Vorhersage für die nächsten Wochen besser, aber die Zahlen sind in der Summe am Ende theoretisch nicht mehr ganz korrekt.
                     </li>
