@@ -26,6 +26,8 @@ export interface StackedBar {
     values: {
         value: number;
         fillColor: string;
+        fillOpacity?: number;
+        fillStriped?: boolean;
     }[];
     dateStart: Date;
     dateEnd: Date;

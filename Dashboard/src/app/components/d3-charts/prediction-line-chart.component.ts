@@ -33,6 +33,8 @@ interface ColorRect {
     width: number;
     height: number;
     fillColor: string;
+    fillOpacity?: number;
+    fillStriped?: boolean;
 }
 
 interface PredictionLineChartCoords {
@@ -91,10 +93,10 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
         this.defineStripedMaskPattern();
 
         this.fills = this.svg.append('g').classed('fills', true);
-        this.lines = this.svg.append('g').classed('lines', true);
-        this.stackedBars = this.svg.append('g').classed('stacked-bars', true);
         this.xGrid = this.svg.append('g').classed('grid', true);
         this.yGrid = this.svg.append('g').classed('grid', true);
+        this.stackedBars = this.svg.append('g').classed('stacked-bars', true);
+        this.lines = this.svg.append('g').classed('lines', true);
         this.yGridMinor = this.svg.append('g').classed('grid-minor', true);
         this.rightBar = this.svg.append('g').classed('right-bar', true);
         this.rightBarBoxes = this.rightBar.append('g').classed('boxes', true);
@@ -241,7 +243,10 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
                 const y = coords.yScale(max);
                 const height = coords.yScale(min) - y;
                 min = max;
-                groupRects.push({x, y, width, height, fillColor: value.fillColor});
+                groupRects.push({x, y, width, height,
+                    fillColor: value.fillColor,
+                    fillStriped: value.fillStriped,
+                    fillOpacity: value.fillOpacity});
             }
             return groupRects;
         });
@@ -254,7 +259,9 @@ export class PredictionLineChartComponent extends ChartBase<PredictionLineChartC
             .attr('y', d => d.y)
             .attr('width', d => d.width)
             .attr('height', d => d.height)
-            .attr('fill', d => d.fillColor);
+            .attr('fill', d => d.fillColor)
+            .attr('opacity', d => d.fillOpacity ?? this.config.fillOpacity)
+            .style('mask', d => (d.fillStriped ?? false) ? 'url(#stripes-mask)' : '');
 
     }
 

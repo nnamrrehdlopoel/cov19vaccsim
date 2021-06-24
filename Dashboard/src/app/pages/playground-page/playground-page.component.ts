@@ -528,6 +528,7 @@ export class PlaygroundPageComponent implements OnInit {
             strokeDasharray: '5, 5',
             fillStriped: true,
         };
+        const stackedBars: Array<StackedBar> = [];
 
         /*if (this.dataloader.vaccinations) {
             for (const vacDay of this.dataloader.vaccinations) {
@@ -551,6 +552,18 @@ export class PlaygroundPageComponent implements OnInit {
                         vaccinesWithDeliveries.set(vName, true);
                     }
                 }
+
+                stackedBars.push({
+                    dateStart: cw.getWeekdayInYearWeek(week, 1),
+                    dateEnd: cw.getWeekdayInYearWeek(week, (week < this.simulationStartWeek) ? 7 : 2),
+                    values: [... wu(vaccinesColors.entries()).map(([vName, color]) => ({
+                        value: del.dosesByVaccine.get(vName) ?? 0,
+                        fillColor: color,
+                        fillStriped: false,
+                        fillOpacity: (week < this.simulationStartWeek) ? 0.9 : 0,
+                        vacName: vName,
+                    }))],
+                });
             }
         }
         if (this.simulation.weeklyVaccinations) {
@@ -586,7 +599,6 @@ export class PlaygroundPageComponent implements OnInit {
             }
 
             // stacked bars (work in progress)
-            const stackedBars: Array<StackedBar> = [];
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
                 date = cw.getWeekdayInYearWeek(yWeek, 8);
@@ -610,11 +622,13 @@ export class PlaygroundPageComponent implements OnInit {
                 }
 
                 stackedBars.push({
-                    dateStart: cw.getWeekdayInYearWeek(yWeek, 1),
-                    dateEnd: cw.getWeekdayInYearWeek(yWeek, 7),
+                    dateStart: cw.getWeekdayInYearWeek(yWeek, 2),
+                    dateEnd: cw.getWeekdayInYearWeek(yWeek, 8),
                     values: [... wu(vaccinesColors.entries()).map(([vName, color]) => ({
                         value: vacDeliveryData.dosesByVaccine.get(vName) ?? 0,
                         fillColor: color,
+                        fillStriped: true,
+                        fillOpacity: 0.8,
                         vacName: vName,
                     }))],
                 });
@@ -647,8 +661,8 @@ export class PlaygroundPageComponent implements OnInit {
 
 
         newData.series = [
-            ...vacDeliveriesDataSeries,
-            ...vacDeliveriesSimDataSeries,
+            //...vacDeliveriesDataSeries,
+            //...vacDeliveriesSimDataSeries,
             vacDoses,
             vacDosesSim,
         ];
