@@ -696,10 +696,10 @@ export class PlaygroundPageComponent implements OnInit {
 
         newData.stackedBars = stackedBars;
         newData.series = [
-            ...vacDeliveriesDataSeries,
-            ...vacDeliveriesSimDataSeries,
             vacDoses,
             vacDosesSim,
+            ...vacDeliveriesDataSeries,
+            ...vacDeliveriesSimDataSeries,
         ];
 
         this.chartWeeklyDeliveries = newData;
