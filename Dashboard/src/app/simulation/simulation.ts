@@ -417,7 +417,7 @@ export class BasicSimulation implements VaccinationSimulation {
         this.weeklyDeliveriesScenario = mergeWeeklyDeliveryScenario(this.weeklyDeliveries, this.plannedDeliveries);
 
         // Apply delivery factors & remove deactivated vaccines
-        let curWeek = this.simulationStartWeek;
+        let curWeek = cw.weekBefore(this.simulationStartWeek, this.vaccineDeliveryDelayWeeks);
         while (curWeek < this.simulationEndWeek){
             if (this.weeklyDeliveriesScenario.has(curWeek)){
                 const deliveryData = this.weeklyDeliveriesScenario.get(curWeek);
