@@ -363,6 +363,7 @@ export class PlaygroundPageComponent implements OnInit {
             data: [],
             fillColor: '#b8ad69',
             strokeColor: '#827a46',
+            fillOpacity: 0,
             label: 'Lieferungen',
         };
         const vacDeliveriesSim: DataSeries = {
@@ -370,6 +371,7 @@ export class PlaygroundPageComponent implements OnInit {
             fillColor: '#b8ad69',
             strokeColor: '#827a46',
             strokeDasharray: '5, 5',
+            fillOpacity: 0,
             fillStriped: true,
         };
         const vacFirstDoses: DataSeries = {
@@ -398,6 +400,7 @@ export class PlaygroundPageComponent implements OnInit {
             strokeDasharray: '5, 5',
             fillStriped: true,
         };
+        const stackedBars: Array<StackedBar> = [];
 
         /*if (this.dataloader.vaccinations) {
             for (const vacDay of this.dataloader.vaccinations) {
@@ -422,13 +425,28 @@ export class PlaygroundPageComponent implements OnInit {
         if (this.simulation.weeklyVaccinations) {
             for (const [yWeek, data] of this.simulation.weeklyVaccinations.entries()) {
                 const date = cw.getWeekdayInYearWeek(yWeek, 8);
-                vacFirstDoses.data.push({
+                /*vacFirstDoses.data.push({
                     date,
                     value: data.partiallyImmunized
                 });
                 vacSecondDoses.data.push({
                     date,
                     value: data.vaccineDoses
+                });*/
+                stackedBars.push({
+                    dateStart: cw.getWeekdayInYearWeek(yWeek, 2),
+                    dateEnd: cw.getWeekdayInYearWeek(yWeek, (yWeek < this.simulationStartWeek) ? 8 : 3),
+                    values: [{
+                        value: data.vaccineDoses - data.fullyImmunized,
+                        fillColor: vacFirstDoses.fillColor,
+                        fillStriped: false,
+                        fillOpacity: (yWeek < this.simulationStartWeek) ? 0.9 : 0.9,
+                    },{
+                        value: data.fullyImmunized,
+                        fillColor: vacSecondDoses.fillColor,
+                        fillStriped: false,
+                        fillOpacity: (yWeek < this.simulationStartWeek) ? 0.9 : 0.9,
+                    }],
                 });
             }
             // remove last week because it is not complete yet
@@ -440,14 +458,14 @@ export class PlaygroundPageComponent implements OnInit {
             // Attach line to week before
             let date = cw.getWeekdayInYearWeek(this.simulationStartWeek, 1);
             let dataAttach = this.simulation.weeklyVaccinations.get(cw.weekBefore(this.simulationStartWeek));
-            vacFirstDosesSim.data.push({
+            /*vacFirstDosesSim.data.push({
                 date,
                 value: dataAttach.partiallyImmunized
             });
             vacSecondDosesSim.data.push({
                 date,
                 value: dataAttach.vaccineDoses
-            });
+            });*/
             vacDeliveriesSim.data.push({
                 date,
                 value: wu(this.simulation.weeklyDeliveries.get(cw.weekBefore(this.simulationStartWeek)).dosesByVaccine.values()).reduce(sum)
@@ -455,22 +473,39 @@ export class PlaygroundPageComponent implements OnInit {
             for (const [yWeek, data] of this.simulationResults.weeklyData.entries()) {
                 // Plotpunkt immer am Montag nach der Woche, also wenn Woche vorbei
                 date = cw.getWeekdayInYearWeek(yWeek, 8);
-                vacFirstDosesSim.data.push({
+                /*vacFirstDosesSim.data.push({
                     date,
                     value: data.partiallyImmunized
                 });
                 vacSecondDosesSim.data.push({
                     date,
                     value: data.vaccineDoses
-                });
+                });*/
                 vacDeliveriesSim.data.push({
                     date,
                     value: wu(this.simulation.weeklyDeliveriesScenario.get(yWeek).dosesByVaccine.values()).reduce(sum)
+                });
+
+                stackedBars.push({
+                    dateStart: cw.getWeekdayInYearWeek(yWeek, 3),
+                    dateEnd: cw.getWeekdayInYearWeek(yWeek, 8),
+                    values: [{
+                        value: data.vaccineDoses - data.fullyImmunized,
+                        fillColor: vacFirstDosesSim.fillColor,
+                        fillStriped: true,
+                        fillOpacity: 0.8,
+                    },{
+                        value: data.fullyImmunized,
+                        fillColor: vacSecondDosesSim.fillColor,
+                        fillStriped: true,
+                        fillOpacity: 0.8,
+                    }],
                 });
             }
         }
 
 
+        newData.stackedBars = stackedBars;
         newData.series = [
             vacDeliveries,
             vacDeliveriesSim,
@@ -554,8 +589,8 @@ export class PlaygroundPageComponent implements OnInit {
                 }
 
                 stackedBars.push({
-                    dateStart: cw.getWeekdayInYearWeek(week, 1),
-                    dateEnd: cw.getWeekdayInYearWeek(week, (week < this.simulationStartWeek) ? 7 : 2),
+                    dateStart: cw.getWeekdayInYearWeek(week, 2),
+                    dateEnd: cw.getWeekdayInYearWeek(week, (week < this.simulationStartWeek) ? 8 : 3),
                     values: [... wu(vaccinesColors.entries()).map(([vName, color]) => ({
                         value: del.dosesByVaccine.get(vName) ?? 0,
                         fillColor: color,
@@ -622,7 +657,7 @@ export class PlaygroundPageComponent implements OnInit {
                 }
 
                 stackedBars.push({
-                    dateStart: cw.getWeekdayInYearWeek(yWeek, 2),
+                    dateStart: cw.getWeekdayInYearWeek(yWeek, 3),
                     dateEnd: cw.getWeekdayInYearWeek(yWeek, 8),
                     values: [... wu(vaccinesColors.entries()).map(([vName, color]) => ({
                         value: vacDeliveryData.dosesByVaccine.get(vName) ?? 0,
@@ -633,7 +668,6 @@ export class PlaygroundPageComponent implements OnInit {
                     }))],
                 });
             }
-            newData.stackedBars = stackedBars;
         }
 
         const vacDeliveriesDataSeries: DataSeries[] = [];
@@ -660,6 +694,7 @@ export class PlaygroundPageComponent implements OnInit {
         }
 
 
+        newData.stackedBars = stackedBars;
         newData.series = [
             ...vacDeliveriesDataSeries,
             ...vacDeliveriesSimDataSeries,
