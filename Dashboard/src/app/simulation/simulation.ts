@@ -378,7 +378,7 @@ export class BasicSimulation implements VaccinationSimulation {
                 }
             }
             if(runningWeekData){ // Never give less than the actual data shows if the first week is the running week
-                given1stShots = v(given2ndShots, Math.max, runningWeekData.firstDosesByVaccine)
+                given1stShots = v(given1stShots, Math.max, runningWeekData.firstDosesByVaccine)
             }
             // Remove given from stock pile
             vaccineStockPile = v(vaccineStockPile, sub, given1stShots);
